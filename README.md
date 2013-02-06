@@ -1,4 +1,4 @@
-# Devs
+# DEVS - Discrete Event Specification System
 
 TODO: Write a gem description
 
