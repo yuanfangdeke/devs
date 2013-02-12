@@ -23,7 +23,8 @@ module DEVS
       # tn =t+ta(s)
     #
     def receive(event)
-      puts "#{self.model.name} received event at time #{event.time} of type #{event.type}"
+      puts "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received \
+event at time #{event.time} of type #{event.type}"
       case event.type
       when :i
         @time_last = event.time

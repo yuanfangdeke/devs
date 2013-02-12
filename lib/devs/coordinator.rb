@@ -46,7 +46,8 @@ module DEVS
     #   for each connection [(d∗, y.port), (d, q)]
     #     send x–message ((y.value, q),t) to child d
     def receive(event)
-      puts "#{self.model.name} received event at time #{event.time} of type #{event.type}"
+      puts "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received \
+event at time #{event.time} of type #{event.type}"
       case event.type
       when :i
         children.each { |child| child.dispatch(event) }
