@@ -91,12 +91,14 @@ class Ground < DEVS::AtomicModel
     self.sigma = 0
   end
 
-  delta_int { @ruissellement = 0 }
+  delta_int {
+    @ruissellement = 0
+    self.sigma = INFINITY
+  }
 
   output do
     send(@pluviometrie, output_ports.first)
     send(@ruissellement, output_ports.last)
-    self.sigma = INFINITY
   end
 
   time_advance { self.sigma }
