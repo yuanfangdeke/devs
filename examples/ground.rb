@@ -39,6 +39,9 @@ class PlotGenerator < DEVS::AtomicModel
       Gnuplot.open do |gp|
         Gnuplot::Plot.new(gp) do |plot|
 
+          plot.terminal 'png'
+          plot.output File.expand_path("../#{self.name}.png", __FILE__)
+
           plot.title  self.name
           plot.ylabel "events"
           plot.xlabel "time"

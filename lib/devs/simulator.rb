@@ -24,9 +24,6 @@ module DEVS
     #
     def receive(event)
       puts "#{self.model.name} received event at time #{event.time} of type #{event.type}"
-      unless event.message.nil?
-        puts "    with message #{event.message.payload} from port #{event.message.port.name} of model #{event.message.port.host.name}"
-      end
       case event.type
       when :i
         @time_last = event.time
@@ -39,6 +36,7 @@ module DEVS
         end
         model.output
         model.output_messages.each { |message|
+          puts "    sent #{message.payload} on port #{message.port.name}"
           parent.dispatch(Event.new(:y, event.time, message))
         }
         model.internal_transition
@@ -46,11 +44,13 @@ module DEVS
         model.time = @time_last
         @time_next = event.time + model.time_advance
       when :x
- #        unless @time_last <= event.time && event.time <= @time_next
- #          raise BadSynchronisationError, "time: #{event.time} should be between\
- # time_last: #{@time_last} and time_next: #{@time_next}"
- #        end
+        unless @time_last <= event.time && event.time <= @time_next
+          raise BadSynchronisationError, "time: #{event.time} should be between\
+ time_last: #{@time_last} and time_next: #{@time_next}"
+        end
         model.elapsed = event.time - @time_last
+        puts "    received #{event.message.payload} on port \
+#{event.message.port.name}"
         model.add_input_message(event.message)
         model.external_transition
         @time_last = event.time

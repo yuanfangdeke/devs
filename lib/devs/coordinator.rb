@@ -47,9 +47,6 @@ module DEVS
     #     send x–message ((y.value, q),t) to child d
     def receive(event)
       puts "#{self.model.name} received event at time #{event.time} of type #{event.type}"
-      unless event.message.nil?
-        puts "    with message #{event.message.payload} from port #{event.message.port.name} of model #{event.message.port.host.name}"
-      end
       case event.type
       when :i
         children.each { |child| child.dispatch(event) }
@@ -64,6 +61,8 @@ module DEVS
         children = imminent_children
         children_models = children.map { |processor| processor.model }
         child_model = model.select(children_models)
+        puts "    selected #{child_model.name} in \
+[#{children_models.map { |model| model.name }.join(' ,')}]"
         child = children[children_models.index(child_model)]
 
         child.dispatch(event)
@@ -71,15 +70,18 @@ module DEVS
         @time_last = event.time
         @time_next = child.time_next
       when :x
- #        unless @time_last <= event.time && event.time <= @time_next
- #          raise BadSynchronisationError, "time: #{event.time} should be between\
- # time_last: #{@time_last} and time_next: #{@time_next}"
- #        end
+        unless @time_last <= event.time && event.time <= @time_next
+          raise BadSynchronisationError, "time: #{event.time} should be between\
+ time_last: #{@time_last} and time_next: #{@time_next}"
+        end
 
         payload = event.message.payload
         port = event.message.port
 
         model.eic_with_port_source(port).each do |coupling|
+          puts "    #{self.model.name} found external input coupling \
+[(#{port.host.name}, #{port.name}), (#{coupling.destination.name}, \
+#{coupling.destination_port.name})]"
           child = child_with_model(coupling.destination)
           message = Message.new(payload, coupling.destination_port)
           child.dispatch(Event.new(:x, event.time, message))
@@ -95,11 +97,20 @@ module DEVS
         c = model.first_eoc_with_port_source(port)
 
         unless c.nil?
+          puts "    found external output coupling [(#{port.host.name}, \
+#{port.name}), (#{coupling.destination.name}, \
+#{coupling.destination_port.name})]"
+           puts "    dispatching event of type x with message #{payload} to \
+#{coupling.destination.name} on port #{coupling.destination_port.name}"
           message = Message.new(payload, c.destination_port)
           parent.dispatch(Event.new(:y, event.time, message))
         end
 
         model.ic_with_port_source(port).each do |coupling|
+          puts "    found internal coupling [(#{port.host.name}, #{port.name}),\
+ (#{coupling.destination.name}, #{coupling.destination_port.name})]"
+           puts "    dispatching event of type x with message #{payload} to \
+#{coupling.destination.name} on port #{coupling.destination_port.name}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:x, event.time, message)
           child_with_model(coupling.destination).dispatch(new_event)
