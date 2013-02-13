@@ -1,5 +1,6 @@
 module DEVS
   class Processor
+    include Logging
     attr_accessor :parent
     attr_reader :model, :time_next, :time_last
 

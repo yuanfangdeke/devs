@@ -27,14 +27,21 @@ end
 class PlotGenerator < DEVS::AtomicModel
   def initialize
     super()
-    @results = Hash.new { [] }
-    @events = 0
+    @results = {}
   end
 
   external_transition do
     input_ports.each do |port|
       value = retrieve(port)
-      @results[port] << [self.time, value]
+
+      if @results.has_key?(port.name)
+        ary = @results[port.name]
+      else
+        ary = []
+        @results[port.name] = ary
+      end
+
+      ary << [self.time, value] unless value.nil?
 
       Gnuplot.open do |gp|
         Gnuplot::Plot.new(gp) do |plot|
@@ -46,12 +53,12 @@ class PlotGenerator < DEVS::AtomicModel
           plot.ylabel "events"
           plot.xlabel "time"
 
-          x = @results[port].map { |ary| ary.first }
-          y = @results[port].map { |ary| ary.last }
+          x = @results[port.name].map { |a| a.first }
+          y = @results[port.name].map { |a| a.last }
 
           plot.data << Gnuplot::DataSet.new( [x, y] ) do |ds|
             ds.with = "linespoints"
-            ds.notitle
+            ds.title = self.name
           end
         end
       end
@@ -60,7 +67,7 @@ class PlotGenerator < DEVS::AtomicModel
     self.sigma = 0
   end
 
-  internal_transition { self.sigma = INFINITY }
+  internal_transition { self.sigma = DEVS::INFINITY }
 
   time_advance { self.sigma }
 end
@@ -93,7 +100,7 @@ class Ground < DEVS::AtomicModel
 
   delta_int {
     @ruissellement = 0
-    self.sigma = INFINITY
+    self.sigma = DEVS::INFINITY
   }
 
   output do
@@ -104,14 +111,17 @@ class Ground < DEVS::AtomicModel
   time_advance { self.sigma }
 end
 
+
+# require 'perftools'
+# PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
-  duration 20
+  duration 100
 
   atomic(RandomGenerator, 0, 5) do
     name :random
   end
 
-  atomic(Ground) do
+  atomic(Ground, 40.0, 5.0) do
     name :ground
   end
 
@@ -127,3 +137,5 @@ DEVS.simulate do
   add_internal_coupling(:ground, :pluviometrie)
   add_internal_coupling(:ground, :ruissellement)
 end
+#end
+

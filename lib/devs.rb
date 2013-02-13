@@ -1,3 +1,4 @@
+require 'logger'
 require 'highline/import'
 require 'graphviz'
 require 'gnuplot'
@@ -8,6 +9,7 @@ end
 
 require 'devs/version'
 require 'devs/errors'
+require 'devs/logging'
 
 require 'devs/event'
 require 'devs/message'
