@@ -1,6 +1,8 @@
 $:.push File.expand_path('../../lib', __FILE__)
 
 require 'devs'
+require 'gnuplot'
+require 'csv'
 
 class RandomGenerator < DEVS::AtomicModel
   def initialize(min = 0, max = 10, min_step = 1, max_step = 1)
@@ -24,7 +26,7 @@ class RandomGenerator < DEVS::AtomicModel
   time_advance { self.sigma }
 end
 
-class PlotGenerator < DEVS::AtomicModel
+class Collector < DEVS::AtomicModel
   def initialize
     super()
     @results = {}
@@ -50,7 +52,9 @@ class PlotGenerator < DEVS::AtomicModel
   internal_transition { self.sigma = DEVS::INFINITY }
 
   time_advance { self.sigma }
+end
 
+class PlotCollector < Collector
   post_simulation_hook do
     Gnuplot.open do |gp|
       Gnuplot::Plot.new(gp) do |plot|
@@ -62,22 +66,44 @@ class PlotGenerator < DEVS::AtomicModel
         plot.ylabel "events"
         plot.xlabel "time"
 
-        plots = []
         @results.each { |key, value|
           x = []
           y = []
           @results[key].each { |a| x << a.first; y << a.last }
-          plots << [x, y]
-        }
-
-        plot.data = plots.map { |a|
-          Gnuplot::DataSet.new(a) do |ds|
-            ds.with = "linespoints"
-            ds.notitle
+          plot.data <<  Gnuplot::DataSet.new([x, y]) do |ds|
+            ds.with = "lines"
+            ds.title = key
           end
         }
       end
     end
+  end
+end
+
+class CSVCollector < Collector
+  post_simulation_hook do
+    content = CSV.generate do |csv|
+      columns = []
+      @results.keys.each { |column| columns << "time"; columns << column }
+      csv << columns
+
+      values = []
+      @results.each { |key, value|
+        y = []
+        x = []
+        @results[key].each { |a| x << a.first; y << a.last }
+        values << x
+        values << y
+      }
+
+      max = values.map { |column| column.size }.max
+      0.upto(max) do |i|
+        row = []
+        values.each { |column| row << (column[i].nil? ? 0 : column[i]) }
+        csv << row
+      end
+    end
+    File.open("#{self.name}.csv", 'w') { |file| file.write(content) }
   end
 end
 
@@ -126,25 +152,31 @@ end
 DEVS.simulate do
   duration 100
 
-  atomic(RandomGenerator, 0, 5) do
-    name :random
-  end
+  atomic(RandomGenerator, 0, 5) { name :random }
 
   atomic(Ground, 40.0, 5.0) do
     name :ground
+    add_output_port(:pluviometrie)
+    add_output_port(:ruissellement)
   end
 
-  atomic(PlotGenerator) do
-    name :pluviometrie
+  atomic(PlotCollector) do
+    name :plot_output
+    add_input_port :pluviometrie
+    add_input_port :ruissellement
   end
 
-  atomic(PlotGenerator) do
-    name :ruissellement
+  atomic(CSVCollector) do
+    name :csv_output
+    add_input_port :pluviometrie
+    add_input_port :ruissellement
   end
 
   add_internal_coupling(:random, :ground)
-  add_internal_coupling(:ground, :pluviometrie)
-  add_internal_coupling(:ground, :ruissellement)
+  add_internal_coupling(:ground, :plot_output, :pluviometrie, :pluviometrie)
+  add_internal_coupling(:ground, :plot_output, :ruissellement, :ruissellement)
+  add_internal_coupling(:ground, :csv_output, :pluviometrie, :pluviometrie)
+  add_internal_coupling(:ground, :csv_output, :ruissellement, :ruissellement)
 end
 #end
 

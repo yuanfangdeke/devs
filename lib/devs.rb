@@ -1,7 +1,7 @@
 require 'logger'
-require 'highline/import'
-require 'graphviz'
-require 'gnuplot'
+# require 'highline/import'
+# require 'graphviz'
+
 
 module DEVS
   INFINITY = Float::INFINITY
