@@ -42,26 +42,6 @@ class PlotGenerator < DEVS::AtomicModel
       end
 
       ary << [self.time, value] unless value.nil?
-
-      Gnuplot.open do |gp|
-        Gnuplot::Plot.new(gp) do |plot|
-
-          plot.terminal 'png'
-          plot.output File.expand_path("../#{self.name}.png", __FILE__)
-
-          plot.title  self.name
-          plot.ylabel "events"
-          plot.xlabel "time"
-
-          x = @results[port.name].map { |a| a.first }
-          y = @results[port.name].map { |a| a.last }
-
-          plot.data << Gnuplot::DataSet.new( [x, y] ) do |ds|
-            ds.with = "linespoints"
-            ds.title = self.name
-          end
-        end
-      end
     end
 
     self.sigma = 0
@@ -70,6 +50,35 @@ class PlotGenerator < DEVS::AtomicModel
   internal_transition { self.sigma = DEVS::INFINITY }
 
   time_advance { self.sigma }
+
+  post_simulation_hook do
+    Gnuplot.open do |gp|
+      Gnuplot::Plot.new(gp) do |plot|
+
+        #plot.terminal 'png'
+        #plot.output File.expand_path("../#{self.name}.png", __FILE__)
+
+        plot.title  self.name
+        plot.ylabel "events"
+        plot.xlabel "time"
+
+        plots = []
+        @results.each { |key, value|
+          x = []
+          y = []
+          @results[key].each { |a| x << a.first; y << a.last }
+          plots << [x, y]
+        }
+
+        plot.data = plots.map { |a|
+          Gnuplot::DataSet.new(a) do |ds|
+            ds.with = "linespoints"
+            ds.notitle
+          end
+        }
+      end
+    end
+  end
 end
 
 class Ground < DEVS::AtomicModel

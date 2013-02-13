@@ -8,6 +8,7 @@ module DEVS
     alias_method :e, :elapsed
 
     class << self
+      # DEVS functions
       def external_transition(&block)
         define_method(:external_transition, &block) if block
       end
@@ -30,6 +31,11 @@ module DEVS
       alias_method :delta_int, :internal_transition
       alias_method :ta, :time_advance
       alias_method :lambda, :output
+
+      # Hooks
+      def post_simulation_hook(&block)
+        define_method(:post_simulation_hook, &block) if block
+      end
     end
 
     def initialize
@@ -90,6 +96,7 @@ module DEVS
       port.incoming
     end
 
+    # DEVS functions
     def external_transition; end
 
     def internal_transition; end
@@ -99,6 +106,9 @@ module DEVS
     end
 
     def output; end
+
+    # Hooks
+    def post_simulation_hook; end
 
     protected
     attr_writer :sigma

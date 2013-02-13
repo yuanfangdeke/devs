@@ -26,6 +26,8 @@ module DEVS
         break if @time >= @duration
       end
       info "*** Simulation ended after #{Time.now - @real_start_time} secs."
+      info "* Calling post simulation hooks"
+      child.post_simulation_hook
     end
   end
 end

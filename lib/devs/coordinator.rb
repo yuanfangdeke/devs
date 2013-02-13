@@ -93,6 +93,10 @@ event at time #{event.time} of type #{event.type}"
     end
     alias_method :dispatch, :receive
 
+    def post_simulation_hook
+      @children.each { |child| child.post_simulation_hook }
+    end
+
     protected
     attr_writer :children
 

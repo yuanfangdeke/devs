@@ -41,5 +41,9 @@ event at time #{event.time} of type #{event.type}"
       end
     end
     alias_method :dispatch, :receive
+
+    def post_simulation_hook
+      model.post_simulation_hook
+    end
   end
 end
