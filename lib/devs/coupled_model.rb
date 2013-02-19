@@ -120,6 +120,7 @@ module DEVS
     def add_internal_coupling(a, b, output_port = nil, input_port = nil)
       a = ensure_child(a)
       b = ensure_child(b)
+      raise FeedbackLoopError, "#{a} must be different than #{b}" if a == b
 
       output_port = a.find_or_create_output_port_if_necessary(output_port)
       input_port = b.find_or_create_input_port_if_necessary(input_port)

@@ -4,4 +4,5 @@ module DEVS
   class InvalidPortTypeError < StandardError; end
   class InvalidPortHostError < StandardError; end
   class MessageAlreadySentError < StandardError; end
+  class FeedbackLoopError < StandardError; end
 end
