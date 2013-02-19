@@ -146,6 +146,7 @@ class Ground < DEVS::AtomicModel
   time_advance { self.sigma }
 end
 
+#DEVS.logger = nil
 
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
