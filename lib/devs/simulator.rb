@@ -5,8 +5,7 @@ module DEVS
 event at time #{event.time} of type #{event.type}"
       case event.type
       when :i
-        @time_last = event.time
-        model.time = @time_last
+        @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
         info "    set tl: #{@time_last}; tn: #{@time_next}"
       when :*
@@ -15,13 +14,12 @@ event at time #{event.time} of type #{event.type}"
           time_next: #{@time_next}"
         end
         model.output
-        model.output_messages.each { |message|
+        model.output_messages.each do |message|
           info "    sent #{message.payload} on port #{message.port.name}"
           parent.dispatch(Event.new(:y, event.time, message))
-        }
+        end
         model.internal_transition
-        @time_last = event.time
-        model.time = @time_last
+        @time_last = model.time = event.time
         @time_next = event.time + model.time_advance
         info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       when :x
@@ -34,8 +32,7 @@ event at time #{event.time} of type #{event.type}"
 #{event.message.port.name}"
         model.add_input_message(event.message)
         model.external_transition
-        @time_last = event.time
-        model.time = @time_last
+        @time_last = model.time = event.time
         @time_next = event.time + model.time_advance
         info "    set tl: #{@time_last}; tn: #{@time_next}"
       end
