@@ -37,14 +37,12 @@ module DEVS
 
     def add_input_port(name = "input_port_#{self.input_ports.size}")
       port = Port.new(self, :input, name)
-      yield port if block_given?
       @input_ports << port
       port
     end
 
     def add_output_port(name = "output_port_#{self.output_ports.size}")
       port = Port.new(self, :output, name)
-      yield port if block_given?
       @output_ports << port
       port
     end

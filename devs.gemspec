@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = DEVS::VERSION.dup
   gem.authors       = ["Romain Franceschini"]
   gem.email         = ["franceschini.romain@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{DEVS}
+  gem.summary       = %q{Discrete EVent system Specification}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
