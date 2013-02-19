@@ -53,7 +53,12 @@ module DEVS
     attr_reader :model, :processor
 
     def initialize(klass, *args, &block)
-      @model = klass.new(*args)
+      if klass.nil? || !klass.respond_to?(:new)
+        @model = AtomicModel.new
+      else
+        @model = klass.new(*args)
+      end
+
       @processor = Simulator.new(@model)
       instance_eval(&block) if block
     end
@@ -69,24 +74,79 @@ module DEVS
     def name(name)
       @model.name = name
     end
+
+    def init(&block)
+      @model.instance_eval(&block) if block
+    end
+
+    # DEVS functions
+    def external_transition(&block)
+      @model.define_singleton_method(:external_transition, &block) if block
+    end
+
+    def internal_transition(&block)
+      @model.define_singleton_method(:internal_transition, &block) if block
+    end
+
+    def time_advance(&block)
+      @model.define_singleton_method(:time_advance, &block) if block
+    end
+
+    def output(&block)
+      @model.define_singleton_method(:output, &block) if block
+    end
+
+    alias_method :ext_transition, :external_transition
+    alias_method :delta_ext, :external_transition
+    alias_method :int_transition, :internal_transition
+    alias_method :delta_int, :internal_transition
+    alias_method :ta, :time_advance
+    alias_method :lambda, :output
+
+    # Hooks
+    def post_simulation_hook(&block)
+      @model.define_singleton_method(:post_simulation_hook, &block) if block
+    end
   end
 
   class CoupledBuilder < AtomicBuilder
-    def initialize(&block)
-      @model = CoupledModel.new
+    undef_method :external_transition
+    undef_method :ext_transition
+    undef_method :delta_ext
+    undef_method :internal_transition
+    undef_method :int_transition
+    undef_method :delta_int
+    undef_method :time_advance
+    undef_method :ta
+    undef_method :output
+    undef_method :lambda
+
+    def initialize(klass, *args, &block)
+      if klass.nil? || !klass.respond_to?(:new)
+        @model = CoupledModel.new
+      else
+        @model = klass.new(*args)
+      end
+
       @processor = Coordinator.new(@model)
       instance_eval(&block) if block
     end
 
-    def coupled(&block)
-      coordinator = CoupledBuilder.new(&block).processor
+    def coupled(*args, &block)
+      type = nil
+      type, *args = *args if args.first != nil && args.first.respond_to?(:new)
+
+      coordinator = CoupledBuilder.new(type, *args, &block).processor
       coordinator.parent = @processor
       coordinator.model.parent = @model
       @model.add_child(coordinator.model)
       @processor.add_child(coordinator)
     end
 
-    def atomic(type, *args, &block)
+    def atomic(*args, &block)
+      type = nil
+      type, *args = *args if args.first != nil && args.first.respond_to?(:new)
+
       simulator = AtomicBuilder.new(type, *args, &block).processor
       simulator.parent = @processor
       simulator.model.parent = @model

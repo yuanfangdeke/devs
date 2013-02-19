@@ -107,45 +107,6 @@ class CSVCollector < Collector
   end
 end
 
-class Ground < DEVS::AtomicModel
-  def initialize(cc = 100.0, out_flow = 1.0)
-    super()
-
-    @pluviometrie = 0
-    @cc = cc
-    @out_flow = out_flow
-    @ruissellement = 0
-  end
-
-  delta_ext do
-    input_ports.each do |port|
-      value = retrieve(port)
-      @pluviometrie += value unless value.nil?
-    end
-
-    @pluviometrie = [@pluviometrie - (@pluviometrie * (@out_flow / 100)), 0].max
-
-    if @pluviometrie > @cc
-      @ruissellement = @pluviometrie - @cc
-      @pluviometrie = @cc
-    end
-
-    self.sigma = 0
-  end
-
-  delta_int {
-    @ruissellement = 0
-    self.sigma = DEVS::INFINITY
-  }
-
-  output do
-    send(@pluviometrie, output_ports.first)
-    send(@ruissellement, output_ports.last)
-  end
-
-  time_advance { self.sigma }
-end
-
 #DEVS.logger = nil
 
 # require 'perftools'
@@ -155,8 +116,46 @@ DEVS.simulate do
 
   atomic(RandomGenerator, 0, 5) { name :random }
 
-  atomic(Ground, 40.0, 5.0) do
+  select { |imm| imm.last }
+
+  atomic do
     name :ground
+
+    init do
+      @pluviometrie = 0
+      @cc = 40.0
+      @out_flow = 5.0
+      @ruissellement = 0
+    end
+
+    delta_ext do
+      input_ports.each do |port|
+        value = retrieve(port)
+        @pluviometrie += value unless value.nil?
+      end
+
+      @pluviometrie = [@pluviometrie - (@pluviometrie * (@out_flow / 100)), 0].max
+
+      if @pluviometrie > @cc
+        @ruissellement = @pluviometrie - @cc
+        @pluviometrie = @cc
+      end
+
+      self.sigma = 0
+    end
+
+    delta_int {
+      @ruissellement = 0
+      self.sigma = DEVS::INFINITY
+    }
+
+    output do
+      send(@pluviometrie, output_ports.first)
+      send(@ruissellement, output_ports.last)
+    end
+
+    time_advance { self.sigma }
+
     add_output_port(:pluviometrie)
     add_output_port(:ruissellement)
   end
