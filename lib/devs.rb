@@ -94,6 +94,10 @@ module DEVS
       @processor.add_child(simulator)
     end
 
+    def select(&block)
+      @model.define_singleton_method(:select, &block) if block
+    end
+
     def add_internal_coupling(*args)
       @model.add_internal_coupling(*args)
     end
