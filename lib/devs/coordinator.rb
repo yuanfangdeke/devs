@@ -34,7 +34,7 @@ event at time #{event.time} of type #{event.type}"
         children_models = children.map { |processor| processor.model }
         child_model = model.select(children_models)
         info "    selected #{child_model.name} in \
-[#{children_models.map { |model| model.name }.join(' ,')}]"
+[#{children_models.map { |model| model.name }.join(', ')}]"
         child = children[children_models.index(child_model)]
 
         child.dispatch(event)
