@@ -18,8 +18,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
 
-  gem.add_dependency('highline', '~> 1.6.15')
-  gem.add_dependency('ruby-graphviz', '~> 1.0.8')
+  #gem.add_dependency('highline', '~> 1.6.15')
+  #gem.add_dependency('ruby-graphviz', '~> 1.0.8')
   gem.add_dependency('pqueue', '~> 2.0.2')
 
   gem.add_development_dependency('gnuplot', '~> 2.6.2')

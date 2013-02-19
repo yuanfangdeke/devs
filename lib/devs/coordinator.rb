@@ -40,7 +40,7 @@ event at time #{event.time} of type #{event.type}"
         child.dispatch(event)
 
         @time_last = event.time
-        @time_next = min_time_next #child.time_next
+        @time_next = min_time_next
         info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       when :x
         unless @time_last <= event.time && event.time <= @time_next
