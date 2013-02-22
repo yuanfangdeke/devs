@@ -1,6 +1,7 @@
 module DEVS
   class Event
     include Comparable
+    attr_reader :type, :time, :message
 
     # Represent the list of possible events exchanged between a parent
     # simulation component (either {Simulator} or {Coordinator}) and its
@@ -13,15 +14,18 @@ module DEVS
     #
     # The first three types are sent respectively from a parent to its children.
     # The last one is sent from a child to its parent.
-    TYPES = [:i, :x, :*, :y]
-
-    attr_reader :type, :time, :message
+    #
+    # @return [Array<Symbol>] the message types
+    def self.types
+      [:i, :x, :*, :y]
+    end
 
     def initialize(type, time, message = nil)
-      if TYPES.include?(type)
+      if Event.types.include?(type)
         @type = type
       else
-        raise ArgumentError, "type attribute must be either one in #{TYPES}"
+        raise ArgumentError, "type attribute must be either one in \
+#{Event.types}"
       end
 
       if (0..INFINITY).include?(time)
@@ -33,6 +37,12 @@ module DEVS
       @message = message
     end
 
+    # Comparison - Returns an integer (-1, 0 or +1) if this event is less than,
+    # equal to, or greater than <i>other</i>. The comparison is based on the
+    # time of each event (descending).
+    #
+    # @param other [Event] the event to compare to
+    # @return [Integer]
     def <=>(other)
       other.time <=> @time
     end
