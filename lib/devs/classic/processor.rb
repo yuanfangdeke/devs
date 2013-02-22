@@ -24,7 +24,7 @@ module DEVS
 
       def receive(event)
         @events_count[event.type] += 1
-        info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received \
+        info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received\
   event at time #{event.time} of type #{event.type}"
       end
     end
