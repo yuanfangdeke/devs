@@ -26,7 +26,15 @@ module DEVS
         @events_count[event.type] += 1
         info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received\
   event at time #{event.time} of type #{event.type}"
+
+        case event.type
+        when :i then init_event(event)
+        when :* then star_event(event)
+        when :x then input_event(event)
+        when :y then output_event(event)
+        end
       end
+      alias_method :dispatch, :receive
     end
   end
 end
