@@ -7,6 +7,16 @@ module DEVS
       @children = []
     end
 
+    def stats
+      super
+      hsh = Hash.new(0)
+      hsh.update(@events_count)
+      children.each do |child|
+        child.stats.each { |key, value| hsh[key] += value }
+      end
+      hsh
+    end
+
     def add_child(child)
       unless @children.include?(child)
         @children << child
@@ -16,8 +26,7 @@ module DEVS
     end
 
     def receive(event)
-      info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received \
-event at time #{event.time} of type #{event.type}"
+      super
       case event.type
       when :i
         children.each { |child| child.dispatch(event) }
@@ -53,8 +62,8 @@ event at time #{event.time} of type #{event.type}"
 
         model.eic_with_port_source(port).each do |coupling|
           info "    #{self.model.name} found external input coupling \
-[(#{port.host.name}, #{port.name}), (#{coupling.destination.name}, \
-#{coupling.destination_port.name})]"
+[#{port.host.name}@#{port.name}, #{coupling.destination.name}@\
+#{coupling.destination_port.name}]"
           child = child_with_model(coupling.destination)
           message = Message.new(payload, coupling.destination_port)
           child.dispatch(Event.new(:x, event.time, message))
@@ -71,9 +80,9 @@ event at time #{event.time} of type #{event.type}"
         c = model.first_eoc_with_port_source(port)
 
         unless c.nil?
-          info "    found external output coupling [(#{port.host.name}, \
-#{port.name}), (#{coupling.destination.name}, \
-#{coupling.destination_port.name})]"
+          info "    found external output coupling [#{port.host.name}@\
+#{port.name}, #{coupling.destination.name}@\
+#{coupling.destination_port.name}]"
            info "    dispatching event of type x with message #{payload} to \
 #{coupling.destination.name} on port #{coupling.destination_port.name}"
           message = Message.new(payload, c.destination_port)
@@ -81,8 +90,8 @@ event at time #{event.time} of type #{event.type}"
         end
 
         model.ic_with_port_source(port).each do |coupling|
-          info "    found internal coupling [(#{port.host.name}, #{port.name}),\
- (#{coupling.destination.name}, #{coupling.destination_port.name})]"
+          info "    found internal coupling [#{port.host.name}@#{port.name},\
+ #{coupling.destination.name}@#{coupling.destination_port.name}]"
           info "    dispatching event of type x with message #{payload} to \
 #{coupling.destination.name} on port #{coupling.destination_port.name}"
           message = Message.new(payload, coupling.destination_port)

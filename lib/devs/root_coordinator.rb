@@ -26,6 +26,10 @@ module DEVS
         break if @time >= @duration
       end
       info "*** Simulation ended after #{Time.now - @real_start_time} secs."
+      info "* Events stats :"
+      stats = child.stats
+      stats[:total] = stats.values.reduce(&:+)
+      info "    OVERALL #{stats}"
       info "* Calling post simulation hooks"
       child.post_simulation_hook
     end

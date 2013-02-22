@@ -1,8 +1,7 @@
 module DEVS
   class Simulator < Processor
     def receive(event)
-      info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received \
-event at time #{event.time} of type #{event.type}"
+      super
       case event.type
       when :i
         @time_last = model.time = event.time
