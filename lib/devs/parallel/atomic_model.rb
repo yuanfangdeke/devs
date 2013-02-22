@@ -1,6 +1,6 @@
 module DEVS
   module Parallel
-    class AtomicModel < ::Classic::AtomicModel
+    class AtomicModel < Classic::AtomicModel
       class << self
         def confluent_transition(&block)
           define_method(:confluent_transition, &block) if block

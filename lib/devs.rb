@@ -14,10 +14,9 @@ require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
 require 'devs/port'
-require 'devs/classic'
 require 'devs/root_coordinator'
 
-require 'devs/builders'
+require 'devs/classic'
 
 module DEVS
 
@@ -30,7 +29,8 @@ module DEVS
   #   end
   #
   def self.simulate(&block)
-    root_coordinator = Builders::SimulationBuilder.new(&block).root_coordinator
+    root_coordinator = Classic::Builders::SimulationBuilder.new(&block)
+                       .root_coordinator
 
     # response = ask("Build the graph of the simulation? (yes, no): ") do |q|
     #   q.default = 'yes'
