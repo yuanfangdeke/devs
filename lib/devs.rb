@@ -10,19 +10,12 @@ end
 require 'devs/version'
 require 'devs/errors'
 require 'devs/logging'
-
 require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
 require 'devs/port'
-require 'devs/model'
-require 'devs/atomic_model'
-require 'devs/coupled_model'
-
-require 'devs/processor'
+require 'devs/classic'
 require 'devs/root_coordinator'
-require 'devs/simulator'
-require 'devs/coordinator'
 
 require 'devs/builders'
 

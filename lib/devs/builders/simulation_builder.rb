@@ -5,10 +5,10 @@ module DEVS
       attr_reader :root_coordinator
 
       def initialize(&block)
-        @model = CoupledModel.new
+        @model = Classic::CoupledModel.new
         @model.name = :RootCoupledModel
         @model.parent = self
-        @processor = Coordinator.new(@model)
+        @processor = Classic::Coordinator.new(@model)
         @duration = RootCoordinator::DEFAULT_DURATION
         instance_eval(&block) if block
         @root_coordinator = RootCoordinator.new(@processor, @duration)

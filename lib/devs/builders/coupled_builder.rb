@@ -14,12 +14,12 @@ module DEVS
 
       def initialize(klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
-          @model = CoupledModel.new
+          @model = Classic::CoupledModel.new
         else
           @model = klass.new(*args)
         end
 
-        @processor = Coordinator.new(@model)
+        @processor = Classic::Coordinator.new(@model)
         instance_eval(&block) if block
       end
 
@@ -27,7 +27,7 @@ module DEVS
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
-        coordinator = CoupledBuilder.new(type, *args, &block).processor
+        coordinator = Classic::CoupledBuilder.new(type, *args, &block).processor
         coordinator.parent = @processor
         coordinator.model.parent = @model
         @model.add_child(coordinator.model)

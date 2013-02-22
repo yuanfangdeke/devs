@@ -4,7 +4,7 @@ require 'devs'
 require 'gnuplot'
 require 'csv'
 
-class RandomGenerator < DEVS::AtomicModel
+class RandomGenerator < DEVS::Classic::AtomicModel
   def initialize(min = 0, max = 10, min_step = 1, max_step = 1)
     super()
 
@@ -26,7 +26,7 @@ class RandomGenerator < DEVS::AtomicModel
   time_advance { self.sigma }
 end
 
-class Collector < DEVS::AtomicModel
+class Collector < DEVS::Classic::AtomicModel
   def initialize
     super()
     @results = {}
