@@ -31,14 +31,14 @@ module DEVS
       end
 
       protected
-      def init_event(event)
+      def handle_init_event(event)
         children.each { |child| child.dispatch(event) }
         @time_last = event.time
         @time_next = min_time_next
         info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
-      def star_event(event)
+      def handle_star_event(event)
         if event.time != @time_next
           raise BadSynchronisationError,
                 "time: #{event.time} should match time_next: #{@time_next}"
@@ -58,7 +58,7 @@ module DEVS
         info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
-      def input_event(event)
+      def handle_input_event(event)
         unless @time_last <= event.time && event.time <= @time_next
           raise BadSynchronisationError, "time: #{event.time} should be between\
  time_last: #{@time_last} and time_next: #{@time_next}"
@@ -81,7 +81,7 @@ module DEVS
         info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
-      def output_event(event)
+      def handle_output_event(event)
         payload = event.message.payload
         port = event.message.port
 
