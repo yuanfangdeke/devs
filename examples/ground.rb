@@ -155,22 +155,10 @@ DEVS.simulate do
     end
 
     time_advance { self.sigma }
-
-    add_output_port(:pluviometrie)
-    add_output_port(:ruissellement)
   end
 
-  atomic(PlotCollector) do
-    name :plot_output
-    add_input_port :pluviometrie
-    add_input_port :ruissellement
-  end
-
-  atomic(CSVCollector) do
-    name :csv_output
-    add_input_port :pluviometrie
-    add_input_port :ruissellement
-  end
+  atomic(PlotCollector) { name :plot_output }
+  atomic(CSVCollector) { name :csv_output }
 
   add_internal_coupling(:random, :ground)
   add_internal_coupling(:ground, :plot_output, :pluviometrie, :pluviometrie)

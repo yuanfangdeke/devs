@@ -5,6 +5,10 @@ module DEVS
     attr_accessor :incoming, :outgoing
     attr_reader :type, :name, :host
 
+    def self.types
+      [:input, :output]
+    end
+
     # Returns a new {Port} instance.
     #
     # @param host [Model] the owner of self
@@ -12,10 +16,10 @@ module DEVS
     # @param name [String, Symbol] the name given to identify the port
     def initialize(host, type, name)
       type = type.downcase.to_sym unless type.nil?
-      if [:input, :output].include?(type)
+      if Port.types.include?(type)
         @type = type
       else
-        raise ArgumentError, "type attribute must be either :input or :output"
+        raise ArgumentError, "type attribute must be either of #{Port.types}"
       end
       @name = name.to_sym
       @host = host

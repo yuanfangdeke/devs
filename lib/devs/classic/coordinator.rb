@@ -65,7 +65,7 @@ module DEVS
             info "    #{self.model.name} found external input coupling \
   [#{port.host.name}@#{port.name}, #{coupling.destination.name}@\
   #{coupling.destination_port.name}]"
-            child = child_with_model(coupling.destination)
+            child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
             child.dispatch(Event.new(:x, event.time, message))
           end
@@ -77,7 +77,7 @@ module DEVS
           payload = event.message.payload
           port = event.message.port
 
-          child = child_with_model(port.host)
+          child = port.host.processor
           c = model.first_eoc_with_port_source(port)
 
           unless c.nil?
@@ -97,7 +97,7 @@ module DEVS
   #{coupling.destination.name} on port #{coupling.destination_port.name}"
             message = Message.new(payload, coupling.destination_port)
             new_event = Event.new(:x, event.time, message)
-            child_with_model(coupling.destination).dispatch(new_event)
+            coupling.destination.processor.dispatch(new_event)
           end
         end
       end
@@ -109,10 +109,6 @@ module DEVS
 
       protected
       attr_writer :children
-
-      def child_with_model(model)
-        @children.find { |child| child.model == model }
-      end
 
       def min_time_next
         @children.map { |child| child.time_next }.min

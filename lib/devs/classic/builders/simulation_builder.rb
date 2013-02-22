@@ -10,6 +10,7 @@ module DEVS
           @model.name = :RootCoupledModel
           @model.parent = self
           @processor = Coordinator.new(@model)
+          @model.processor = @processor
           @duration = RootCoordinator::DEFAULT_DURATION
           instance_eval(&block) if block
           @root_coordinator = RootCoordinator.new(@processor, @duration)

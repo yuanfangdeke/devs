@@ -1,7 +1,7 @@
 module DEVS
   module Classic
     class Model
-      attr_accessor :name, :parent
+      attr_accessor :name, :parent, :processor
       attr_reader :input_ports, :output_ports
 
       def initialize
@@ -24,18 +24,6 @@ module DEVS
         false
       end
 
-      # Returns the full path name
-      #
-      # @example
-      #   "CoupledModel_1::AtomicModel_1"
-      def path
-        if parent.nil?
-          name
-        else
-          "#{parent.path}::#{name}"
-        end
-      end
-
       def add_input_port(name = "input_port_#{self.input_ports.size}")
         port = Port.new(self, :input, name)
         @input_ports << port
@@ -53,7 +41,7 @@ module DEVS
       end
 
       def find_input_port_by_name(name)
-        @input_ports.each { |port| return port if port.name == name }
+        @input_ports.find { |port| port.name == name }
       end
 
       def output_ports_names
@@ -61,7 +49,7 @@ module DEVS
       end
 
       def find_output_port_by_name(name)
-        @output_ports.each { |port| return port if port.name == name }
+        @output_ports.find { |port| port.name == name }
       end
 
       def output_messages
@@ -77,12 +65,12 @@ module DEVS
         messages.each do |message|
           if message.port.host != self
             raise InvalidPortHostError, "The port associated with the given\
-            message #{message} doesn't belong to this model"
+ message #{message} doesn't belong to this model"
           end
 
           unless message.port.input?
             raise InvalidPortTypeError, "The port associated with the given\
-  message #{message} isn't an input port"
+ message #{message} isn't an input port"
           end
 
           message.port.incoming = message.payload
@@ -94,10 +82,10 @@ module DEVS
       def find_or_create_input_port_if_necessary(port)
         if port.nil?
           port = add_input_port
-        else
-          if !port.respond_to?(:name)
-            port = find_input_port_by_name(port)
-          end
+        elsif !port.respond_to?(:name)
+          name = port
+          port = find_input_port_by_name(name)
+          port = add_input_port(name) if port.nil?
         end
         port
       end
@@ -105,10 +93,10 @@ module DEVS
       def find_or_create_output_port_if_necessary(port)
         if port.nil?
           port = add_output_port
-        else
-          if !port.respond_to?(:name)
-            port = find_output_port_by_name(port)
-          end
+        elsif !port.respond_to?(:name)
+          name = port
+          port = find_output_port_by_name(name)
+          port = add_output_port(name) if port.nil?
         end
         port
       end

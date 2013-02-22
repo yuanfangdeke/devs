@@ -21,6 +21,7 @@ module DEVS
           end
 
           @processor = Coordinator.new(@model)
+          @model.processor = @processor
           instance_eval(&block) if block
         end
 

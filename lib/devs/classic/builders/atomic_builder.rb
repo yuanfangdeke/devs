@@ -12,6 +12,7 @@ module DEVS
           end
 
           @processor = Simulator.new(@model)
+          @model.processor = @processor
           instance_eval(&block) if block
         end
 
