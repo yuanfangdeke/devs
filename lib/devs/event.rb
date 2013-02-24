@@ -49,7 +49,7 @@ module DEVS
 
     def to_s
       s = "event #{@type.upcase} at #{@time}"
-      s = "#{s} carrying #{@message}" if message
+      s = "#{s} with #{@message}" if message
       s
     end
   end

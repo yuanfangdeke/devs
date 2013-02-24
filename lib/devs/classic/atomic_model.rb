@@ -110,16 +110,13 @@ module DEVS
       # current state
       #
       # @return [Array<Message>]
-      def fetch_output
+      def fetch_output!
         self.output
 
-        messages = []
         @output_ports.each do |port|
           value = port.outgoing
-          messages << Message.new(value, port) unless value.nil?
+          yield(Message.new(value, port)) unless value.nil?
         end
-
-        messages
       end
 
       def add_input_message(message)

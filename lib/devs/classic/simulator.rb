@@ -12,7 +12,7 @@ module DEVS
       def handle_input_event(event)
         if @time_last <= event.time && event.time <= @time_next
           model.elapsed = event.time - @time_last
-          info "    received #{event}"
+          info "    received #{event.message}"
           model.add_input_message(event.message)
           model.external_transition
           @time_last = model.time = event.time
@@ -30,10 +30,11 @@ module DEVS
               + "time_next: #{@time_next}"
         end
 
-        model.fetch_output.each do |message|
+        model.fetch_output! do |message|
           info "    sent #{message}"
           parent.dispatch(Event.new(:y, event.time, message))
         end
+
         model.internal_transition
 
         @time_last = model.time = event.time

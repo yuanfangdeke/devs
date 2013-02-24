@@ -24,7 +24,7 @@ module DEVS
     end
 
     def to_s
-      "[#{source.name}@#{port_source.name}, #{destination.name}@#{dest}]"
+      "[#{source.name}@#{port_source.name}, #{destination.name}@#{destination}]"
     end
   end
 end

@@ -16,7 +16,7 @@ module DEVS
     end
 
     def to_s
-      "message #{@payload} to #{port.host}@#{port}"
+      "message #{@payload}"
     end
   end
 end

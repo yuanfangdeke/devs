@@ -51,7 +51,7 @@ module DEVS
 
         @time_last = event.time
         @time_next = min_time_next
-        info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
+        info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       def handle_input_event(event)
@@ -67,7 +67,7 @@ module DEVS
 
           @time_last = event.time
           @time_next = min_time_next
-          info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
+          info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
         else
           raise BadSynchronisationError, "time: #{event.time} should be " \
               + "between time_last: #{@time_last} and time_next: #{@time_next}"

@@ -64,16 +64,16 @@ module DEVS
         end
       end
 
-      def each_input_coupling(port = nil)
-        each_coupling(@input_couplings, port)
+      def each_input_coupling(port = nil, &block)
+        each_coupling(@input_couplings, port, &block)
       end
 
-      def each_internal_coupling(port = nil)
-        each_coupling(@internal_couplings, port)
+      def each_internal_coupling(port = nil, &block)
+        each_coupling(@internal_couplings, port, &block)
       end
 
-      def each_output_coupling(port = nil)
-        each_coupling(@output_couplings, port)
+      def each_output_coupling(port = nil, &block)
+        each_coupling(@output_couplings, port, &block)
       end
 
       # The <i>Select</i> function as defined is the classic DEVS formalism.
@@ -162,7 +162,7 @@ module DEVS
       end
 
       def each_coupling(ary, port = nil)
-        couplings = port ? ary.select { |c| c.port_source == port } : ary
+        couplings = port.nil? ? ary : ary.select { |c| c.port_source == port }
         couplings.each { |coupling| yield(coupling) } if block_given?
       end
     end
