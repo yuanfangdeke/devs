@@ -1,7 +1,6 @@
 module DEVS
   class Message
     attr_reader :payload, :port
-    alias_method :value, :payload
 
     def initialize(payload, port)
        @payload = payload
@@ -10,6 +9,14 @@ module DEVS
 
     def ==(other)
       @port == other.port
+    end
+
+    def to_a
+      [@payload, @port]
+    end
+
+    def to_s
+      "message #{@payload} to #{port.host}@#{port}"
     end
   end
 end

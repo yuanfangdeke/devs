@@ -20,7 +20,7 @@ class RandomGenerator < DEVS::Classic::AtomicModel
   output do
     messages_count = (1 + rand * output_ports.count).round
     selected_ports = output_ports.sample(messages_count)
-    selected_ports.each { |port| send((@min + rand * @max).round, port) }
+    selected_ports.each { |port| post((@min + rand * @max).round, port) }
   end
 
   time_advance { self.sigma }
@@ -58,10 +58,6 @@ class PlotCollector < Collector
   post_simulation_hook do
     Gnuplot.open do |gp|
       Gnuplot::Plot.new(gp) do |plot|
-
-        #plot.terminal 'png'
-        #plot.output File.expand_path("../#{self.name}.png", __FILE__)
-
         plot.title  self.name
         plot.ylabel "events"
         plot.xlabel "time"
@@ -96,7 +92,7 @@ class CSVCollector < Collector
         values << y
       }
 
-      max = values.map { |column| column.size }.max
+      max = values.map { |column| column.size }.max || 0
       0.upto(max) do |i|
         row = []
         values.each { |column| row << (column[i].nil? ? 0 : column[i]) }
@@ -109,8 +105,8 @@ end
 
 #DEVS.logger = nil
 
-# require 'perftools'
-# PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
+require 'perftools'
+PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
   duration 100
 
@@ -150,8 +146,8 @@ DEVS.simulate do
     }
 
     output do
-      send(@pluviometrie, output_ports.first)
-      send(@ruissellement, output_ports.last)
+      post(@pluviometrie, output_ports.first)
+      post(@ruissellement, output_ports.last)
     end
 
     time_advance { self.sigma }
@@ -166,5 +162,4 @@ DEVS.simulate do
   add_internal_coupling(:ground, :csv_output, :pluviometrie, :pluviometrie)
   add_internal_coupling(:ground, :csv_output, :ruissellement, :ruissellement)
 end
-#end
-
+end

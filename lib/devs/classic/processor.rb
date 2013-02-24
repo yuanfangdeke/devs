@@ -18,14 +18,13 @@ module DEVS
       def stats
         stats = @events_count.dup
         stats[:total] = stats.values.reduce(&:+)
-        info "    #{self.model.name}: #{stats}"
+        info "    #{self.model}: #{stats}"
         @events_count
       end
 
       def receive(event)
         @events_count[event.type] += 1
-        info "#{self.model.name} (tn: #{@time_next}, tl: #{@time_last}) received\
-  event at time #{event.time} of type #{event.type}"
+        info "#{self.model} received #{event}"
 
         case event.type
         when :i then handle_init_event(event)

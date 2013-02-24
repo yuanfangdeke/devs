@@ -18,5 +18,13 @@ module DEVS
     def ==(other)
       @source == other.source && @destination == other.destination
     end
+
+    def to_a
+      [[source, port_source], [destination, destination_port]]
+    end
+
+    def to_s
+      "[#{source.name}@#{port_source.name}, #{destination.name}@#{dest}]"
+    end
   end
 end

@@ -50,12 +50,21 @@ module DEVS
         true
       end
 
+      def observer?
+        self.respond_to? :post_simulation_hook
+      end
+
+      # observer method
+      def update(hook, *args)
+        self.send("#{hook}_hook", *args)
+      end
+
       # Send an output value to the specified output {Port}
       #
       # @param value [Object] the output value
       # @param port [Port, String, Symbol] the output port or its name
       # @todo
-      def send(value, port)
+      def post(value, port)
         raise ArgumentError, "port argument cannot be nil" if port.nil?
         if !port.respond_to?(:name)
           port = find_input_port_by_name(port)
@@ -97,6 +106,36 @@ module DEVS
         port.incoming
       end
 
+      # Builds the outgoing messages added in the output function for the
+      # current state
+      #
+      # @return [Array<Message>]
+      def fetch_output
+        self.output
+
+        messages = []
+        @output_ports.each do |port|
+          value = port.outgoing
+          messages << Message.new(value, port) unless value.nil?
+        end
+
+        messages
+      end
+
+      def add_input_message(message)
+        if message.port.host != self
+          raise InvalidPortHostError, "The port associated with the given\
+message #{message} doesn't belong to this model"
+        end
+
+        unless message.port.input?
+          raise InvalidPortTypeError, "The port associated with the given\
+message #{message} isn't an input port"
+        end
+
+        message.port.incoming = message.payload
+      end
+
       # DEVS functions
       def external_transition; end
 
@@ -107,9 +146,6 @@ module DEVS
       end
 
       def output; end
-
-      # Hooks
-      def post_simulation_hook; end
 
       protected
       attr_writer :sigma

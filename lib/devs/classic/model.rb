@@ -24,59 +24,66 @@ module DEVS
         false
       end
 
+      # Adds an input port to <i>self</i>.
+      #
+      # @param name [String, Symbol]
+      # @return [Port] the newly created port
       def add_input_port(name = "input_port_#{self.input_ports.size}")
         port = Port.new(self, :input, name)
         @input_ports << port
         port
       end
 
+      # Adds an output port to <i>self</i>.
+      #
+      # @param name [String, Symbol] the port name
+      # @return [Port] the newly created port
       def add_output_port(name = "output_port_#{self.output_ports.size}")
         port = Port.new(self, :output, name)
         @output_ports << port
         port
       end
 
+      # Returns the list of input ports' names
+      #
+      # @return [Array<String, Symbol>] the name list
       def input_ports_names
         @input_ports.map { |port| port.name }
       end
 
+      # Find the input {Port} identified by the given <i>name</i>
+      #
+      # @param name [String, Symbol] the port name
+      # @return [Port] the matching port, nil otherwise
       def find_input_port_by_name(name)
         @input_ports.find { |port| port.name == name }
       end
 
+      # Returns the list of output ports' names
+      #
+      # @return [Array<String, Symbol>] the name list
       def output_ports_names
         @output_ports.map { |port| port.name }
       end
 
+      # Find the output {Port} identified by the given <i>name</i>
+      #
+      # @param name [String, Symbol] the port name
+      # @return [Port] the matching port, nil otherwise
       def find_output_port_by_name(name)
         @output_ports.find { |port| port.name == name }
       end
 
-      def output_messages
-        messages = []
-        @output_ports.each do |port|
-          value = port.outgoing
-          messages << Message.new(value, port) unless value.nil?
-        end
-        messages
+      # Find any {Port} identified by the given <i>name</i>
+      #
+      # @return [Port] the matching port if any, nil otherwise
+      def [](name)
+        find_input_port_by_name(name) || find_output_port_by_name(name)
       end
 
-      def add_input_messages(*messages)
-        messages.each do |message|
-          if message.port.host != self
-            raise InvalidPortHostError, "The port associated with the given\
- message #{message} doesn't belong to this model"
-          end
-
-          unless message.port.input?
-            raise InvalidPortTypeError, "The port associated with the given\
- message #{message} isn't an input port"
-          end
-
-          message.port.incoming = message.payload
-        end
+      def to_s
+        name.to_s
       end
-      alias_method :add_input_message, :add_input_messages
 
       protected
       def find_or_create_input_port_if_necessary(port)

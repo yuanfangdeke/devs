@@ -18,24 +18,21 @@ module DEVS
         hsh
       end
 
-      def add_child(child)
+      def <<(child)
         unless @children.include?(child)
           @children << child
           child.parent = self
         end
         child
       end
-
-      def post_simulation_hook
-        @children.each { |child| child.post_simulation_hook }
-      end
+      alias_method :add_child, :<<
 
       protected
       def handle_init_event(event)
         children.each { |child| child.dispatch(event) }
         @time_last = event.time
         @time_next = min_time_next
-        info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
+        info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       def handle_star_event(event)
@@ -47,62 +44,52 @@ module DEVS
         children = imminent_children
         children_models = children.map { |processor| processor.model }
         child_model = model.select(children_models)
-        info "    selected #{child_model.name} in \
-[#{children_models.map { |model| model.name }.join(', ')}]"
+        info "    selected #{child_model} in #{children_models}"
         child = children[children_models.index(child_model)]
 
         child.dispatch(event)
 
         @time_last = event.time
         @time_next = min_time_next
-        info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
+        info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       def handle_input_event(event)
-        unless @time_last <= event.time && event.time <= @time_next
-          raise BadSynchronisationError, "time: #{event.time} should be between\
- time_last: #{@time_last} and time_next: #{@time_next}"
+        if @time_last <= event.time && event.time <= @time_next
+          payload, port = *event.message
+
+          model.each_input_coupling(port) do |coupling|
+            info "    #{self.model} found external input coupling #{coupling}"
+            child = coupling.destination.processor
+            message = Message.new(payload, coupling.destination_port)
+            child.dispatch(Event.new(:x, event.time, message))
+          end
+
+          @time_last = event.time
+          @time_next = min_time_next
+          info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
+        else
+          raise BadSynchronisationError, "time: #{event.time} should be " \
+              + "between time_last: #{@time_last} and time_next: #{@time_next}"
         end
-
-        payload = event.message.payload
-        port = event.message.port
-
-        model.eic_with_port_source(port).each do |coupling|
-          info "    #{self.model.name} found external input coupling \
-[#{port.host.name}@#{port.name}, #{coupling.destination.name}@\
-#{coupling.destination_port.name}]"
-          child = coupling.destination.processor
-          message = Message.new(payload, coupling.destination_port)
-          child.dispatch(Event.new(:x, event.time, message))
-        end
-
-        @time_last = event.time
-        @time_next = min_time_next
-        info "#{self.model.name} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       def handle_output_event(event)
-        payload = event.message.payload
-        port = event.message.port
+        payload, port = *event.message
 
-        c = model.first_eoc_with_port_source(port)
-        unless c.nil?
-          info "    found external output coupling [#{port.host.name}@\
-#{port.name}, #{coupling.destination.name}@\
-#{coupling.destination_port.name}]"
-           info "    dispatching event of type x with message #{payload} to \
-#{coupling.destination.name} on port #{coupling.destination_port.name}"
+        model.each_output_coupling(port) do |coupling|
+          info "    found external output coupling #{coupling}"
           message = Message.new(payload, c.destination_port)
-          parent.dispatch(Event.new(:y, event.time, message))
+          new_event = Event.new(:y, event.time, message)
+          info "    dispatching #{new_event}"
+          parent.dispatch(event)
         end
 
-        model.ic_with_port_source(port).each do |coupling|
-          info "    found internal coupling [#{port.host.name}@#{port.name},\
- #{coupling.destination.name}@#{coupling.destination_port.name}]"
-          info "    dispatching event of type x with message #{payload} to \
-#{coupling.destination.name} on port #{coupling.destination_port.name}"
+        model.each_internal_coupling(port) do |coupling|
+          info "    found internal coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:x, event.time, message)
+          info "    dispatching #{new_event}"
           coupling.destination.processor.dispatch(new_event)
         end
       end

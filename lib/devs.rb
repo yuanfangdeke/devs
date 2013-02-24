@@ -1,7 +1,5 @@
 require 'logger'
-# require 'highline/import'
-# require 'graphviz'
-
+require 'observer'
 
 module DEVS
   INFINITY = Float::INFINITY
@@ -14,7 +12,6 @@ require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
 require 'devs/port'
-require 'devs/root_coordinator'
 
 require 'devs/classic'
 
@@ -28,21 +25,10 @@ module DEVS
   #
   #   end
   #
-  def self.simulate(&block)
-    root_coordinator = Classic::Builders::SimulationBuilder.new(&block)
-                       .root_coordinator
-
-    # response = ask("Build the graph of the simulation? (yes, no): ") do |q|
-    #   q.default = 'yes'
-    #   q.validate = /(yes)|(no)/i
-    # end
-    # case response
-    # when /yes/
-    #   GraphBuilder.new(root_coordinator.child.model)
-    # end
-
-    root_coordinator.simulate
+  def simulate(&block)
+    Classic::Builders::SimulationBuilder.new(&block).root_coordinator.simulate
   end
+  module_function :simulate
 
   # Returns the current version of the gem
   def version

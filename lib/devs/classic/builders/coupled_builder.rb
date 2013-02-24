@@ -12,6 +12,7 @@ module DEVS
         undef :ta
         undef :output
         undef :lambda
+        undef :post_simulation_hook
 
         def initialize(klass, *args, &block)
           if klass.nil? || !klass.respond_to?(:new)
@@ -32,8 +33,8 @@ module DEVS
           coordinator = CoupledBuilder.new(type, *args, &block).processor
           coordinator.parent = @processor
           coordinator.model.parent = @model
-          @model.add_child(coordinator.model)
-          @processor.add_child(coordinator)
+          @model << coordinator.model
+          @processor << coordinator
         end
 
         def atomic(*args, &block)
@@ -43,8 +44,8 @@ module DEVS
           simulator = AtomicBuilder.new(type, *args, &block).processor
           simulator.parent = @processor
           simulator.model.parent = @model
-          @model.add_child(simulator.model)
-          @processor.add_child(simulator)
+          @model << simulator.model
+          @processor << simulator
         end
 
         def select(&block)
@@ -58,12 +59,12 @@ module DEVS
         def add_external_output_coupling(*args)
           @model.add_external_output_coupling(*args)
         end
-        alias_method :add_external_output, :add_external_output_coupling
+        alias_method :add_output_coupling, :add_external_output_coupling
 
         def add_external_input_coupling(*args)
           @model.add_external_input_coupling(*args)
         end
-        alias_method :add_external_input, :add_external_input_coupling
+        alias_method :add_input_coupling, :add_external_input_coupling
       end
     end
   end

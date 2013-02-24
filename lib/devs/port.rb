@@ -44,6 +44,10 @@ module DEVS
     end
     alias_method :output?, :output_port?
 
+    def to_s
+      input? ? "-->#{name}" : "#{name}-->"
+    end
+
     def incoming
       message = @incoming
       @incoming = nil

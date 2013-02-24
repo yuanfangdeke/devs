@@ -1,19 +1,19 @@
 module DEVS
   module Classic
     class CoupledModel < Model
-      attr_reader :children, :ic, :eic, :eoc
+      include Enumerable
+
+      attr_reader :children, :internal_couplings, :input_couplings,
+                  :output_couplings
 
       alias_method :components, :children
-      alias_method :internal_couplings, :ic
-      alias_method :external_input_couplings, :eic
-      alias_method :external_output_couplings, :eoc
 
       def initialize
         super
         @children = []
-        @ic = []
-        @eic = []
-        @eoc = []
+        @internal_couplings = []
+        @input_couplings = []
+        @output_couplings = []
       end
 
       def coupled?
@@ -24,44 +24,64 @@ module DEVS
       #
       # @param child [Model] the new child
       # @return [Model] the added child
-      def add_child(child)
+      def <<(child)
         unless @children.include?(child)
           @children << child
           child.parent = self
         end
         child
       end
+      alias_method :add_child, :<<
 
       # Returns the children names
+      #
+      # @return [Array<String, Symbol>] the children names
       def children_names
         @children.map { |child| child.name }
       end
 
-      def find_child_by_name(name)
+      # Find the component {Model} identified by the given <i>name</i>
+      #
+      # @param name [String, Symbol] the component name
+      # @return [Model] the matching component, nil otherwise
+      def [](name)
         @children.find { |model| model.name == name }
       end
+      alias_method :find_child_by_name, :[]
 
       def find_child_with_path(path = '')
         model = self
         path.split('::').each do |name|
-          model = find_child_by_name(name)
+          model = self[name]
         end
       end
 
-      def eic_with_port_source(port)
-        @eic.select { |coupling| coupling.port_source == port }
+      def each
+        if block_given?
+          @children.each { |child| yield(child) }
+        else
+          @children.each
+        end
       end
 
-      def ic_with_port_source(port)
-        @ic.select { |coupling| coupling.port_source == port }
+      def each_input_coupling(port = nil)
+        each_coupling(@input_couplings, port)
       end
 
-      def first_eoc_with_port_source(port)
-        @eoc.select { |coupling|
-          coupling.port_source == port
-        }.first
+      def each_internal_coupling(port = nil)
+        each_coupling(@internal_couplings, port)
       end
 
+      def each_output_coupling(port = nil)
+        each_coupling(@output_couplings, port)
+      end
+
+      # The <i>Select</i> function as defined is the classic DEVS formalism.
+      # Select one {Model} among all. By default returns the first. Override
+      # if a different behavior is desired
+      #
+      # @param imminent_children [Array<Model>] the imminent children
+      # @return [Model] the selected component
       def select(imminent_children)
         imminent_children.first
       end
@@ -83,7 +103,7 @@ module DEVS
         child_port = child.find_or_create_input_port_if_necessary(child_port)
 
         coupling = Coupling.new(input_port, child_port)
-        @eic << coupling unless @eic.include?(coupling)
+        @input_couplings << coupling unless @input_couplings.include?(coupling)
       end
       alias_method :add_external_input, :add_external_input_coupling
 
@@ -105,14 +125,16 @@ module DEVS
         child_port = child.find_or_create_output_port_if_necessary(child_port)
 
         coupling = Coupling.new(output_port, child_port)
-        @eoc << coupling unless @eoc.include?(coupling)
+        @output_couplings << coupling unless @output_couplings.include?(coupling)
       end
       alias_method :add_external_output, :add_external_output_coupling
 
       # Add an internal coupling (IC) to self. Establish a relation between an
       # output {Port} of a first child and the input {Port} of a second child.
       #
-      # If the ports parameters are ommited, they will be automatically generated.
+      # If the ports parameters are ommited, they will be automatically
+      # generated. Otherwise, the specified ports will be used. If a name is
+      # given instead
       #
       # @param a [Model, String, Symbol] the first child or its name
       # @param b [Model, String, Symbol] the second child or its name
@@ -127,16 +149,21 @@ module DEVS
         input_port = b.find_or_create_input_port_if_necessary(input_port)
 
         coupling = Coupling.new(output_port, input_port)
-        @ic << coupling unless @ic.include?(coupling)
+        @internal_couplings << coupling unless @internal_couplings.include?(coupling)
       end
 
       private
       def ensure_child(child)
         if !child.respond_to?(:name)
-          child = find_child_by_name(child)
+          child = self[child]
         end
         raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
         child
+      end
+
+      def each_coupling(ary, port = nil)
+        couplings = port ? ary.select { |c| c.port_source == port } : ary
+        couplings.each { |coupling| yield(coupling) } if block_given?
       end
     end
   end

@@ -46,5 +46,11 @@ module DEVS
     def <=>(other)
       other.time <=> @time
     end
+
+    def to_s
+      s = "event #{@type.upcase} at #{@time}"
+      s = "#{s} carrying #{@message}" if message
+      s
+    end
   end
 end
