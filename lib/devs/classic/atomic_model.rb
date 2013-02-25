@@ -65,8 +65,7 @@ module DEVS
       # @param port [Port, String, Symbol] the output port or its name
       # @todo
       def post(value, port)
-        port = ensure_output_port(port)
-        port.outgoing = value
+        ensure_output_port(port).add_outgoing(value)
       end
 
       # Retrieve a {Message} from the specified input {Port}
@@ -74,8 +73,7 @@ module DEVS
       # @param port [Port, String, Symbol] the port or its name
       # @return [Object] the input value if any, nil otherwise
       def retrieve(port)
-        port = ensure_input_port(port)
-        port.incoming
+        ensure_input_port(port).pop_incoming
       end
 
       # Builds the outgoing messages added in the output function for the
@@ -86,7 +84,7 @@ module DEVS
         self.output
 
         @output_ports.each do |port|
-          value = port.outgoing
+          value = port.pop_outgoing
           yield(Message.new(value, port)) unless value.nil?
         end
       end
@@ -102,7 +100,7 @@ message #{message} doesn't belong to this model"
 message #{message} isn't an input port"
         end
 
-        message.port.incoming = message.payload
+        message.port.add_incoming(message.payload)
       end
 
       # DEVS functions

@@ -2,7 +2,6 @@ module DEVS
 
   # This class represents a port that belong to a {Model} (the {#host}).
   class Port
-    attr_accessor :incoming, :outgoing
     attr_reader :type, :name, :host
 
     def self.types
@@ -24,8 +23,8 @@ module DEVS
       @name = name.to_sym
       @host = host
 
-      @incoming = nil
-      @outgoing = nil
+      @incoming = []
+      @outgoing = []
     end
 
     # Check if self is an input port
@@ -48,27 +47,39 @@ module DEVS
       input? ? "-->#{name}" : "#{name}-->"
     end
 
-    def incoming
-      message = @incoming
-      @incoming = nil
-      message
+    # Append the given <i>message</i> to incoming messages
+    #
+    # @param message [Message] the received message
+    # @return [Message] the incoming message
+    def add_incoming(message)
+      @incoming << message
     end
 
-    def outgoing
-      message = @outgoing
-      @outgoing = nil
-      message
+    # Pop a {Message} from incoming messages
+    #
+    # @return [Message] an incoming message
+    def pop_incoming
+      @incoming.pop
     end
 
-    def outgoing=(value)
-      unless @outgoing.nil?
-        raise MessageAlreadySentError, "An outgoing message already exists"
+    # Append the given <i>message</i> to outgoing messages
+    #
+    # @param message [Message] the posted message
+    # @return [Message] the outgoing message
+    def add_outgoing(message)
+      if @outgoing.count == 1
+        raise MessageAlreadySentError, "An outgoing message already exists on "\
+            + "this port"
+      else
+        @outgoing << message
       end
-      @outgoing = value
     end
 
-    def incoming=(value)
-      @incoming = value
+    # Pop a {Message} from outgoing messages
+    #
+    # @return [Message] an outgoing message
+    def pop_outgoing
+      @outgoing.pop
     end
   end
 end
