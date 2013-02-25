@@ -65,21 +65,7 @@ module DEVS
       # @param port [Port, String, Symbol] the output port or its name
       # @todo
       def post(value, port)
-        raise ArgumentError, "port argument cannot be nil" if port.nil?
-        if !port.respond_to?(:name)
-          port = find_input_port_by_name(port)
-          raise ArgumentError, "the given port doesn't exists" if port.nil?
-        end
-
-        unless port.host == self
-          raise InvalidPortHostError, "The given port doesn't belong to this \
-          model"
-        end
-
-        unless port.output?
-          raise InvalidPortTypeError, "The given port isn't an output port"
-        end
-
+        port = ensure_output_port(port)
         port.outgoing = value
       end
 
@@ -88,21 +74,7 @@ module DEVS
       # @param port [Port, String, Symbol] the port or its name
       # @return [Object] the input value if any, nil otherwise
       def retrieve(port)
-        raise ArgumentError, "port argument cannot be nil" if port.nil?
-        if !port.respond_to?(:name)
-          port = find_input_port_by_name(port)
-          raise ArgumentError, "the given port doesn't exists" if port.nil?
-        end
-
-        unless port.host == self
-          raise InvalidPortHostError, "The given port doesn't belong to this \
-          model"
-        end
-
-        unless port.input?
-          raise InvalidPortTypeError, "The given port isn't an input port"
-        end
-
+        port = ensure_input_port(port)
         port.incoming
       end
 
@@ -146,6 +118,37 @@ message #{message} isn't an input port"
 
       protected
       attr_writer :sigma
+
+      def ensure_port(port)
+        raise ArgumentError, "port argument cannot be nil" if port.nil?
+        if !port.respond_to?(:name)
+          port = find_input_port_by_name(port)
+          raise ArgumentError, "the given port doesn't exists" if port.nil?
+        end
+
+        unless port.host == self
+          raise InvalidPortHostError, "The given port doesn't belong to this \
+          model"
+        end
+
+        port
+      end
+
+      def ensure_input_port(port)
+        port = ensure_port(port)
+        unless port.input?
+          raise InvalidPortTypeError, "The given port isn't an input port"
+        end
+        port
+      end
+
+      def ensure_output_port(port)
+        port = ensure_port(port)
+        unless port.output?
+          raise InvalidPortTypeError, "The given port isn't an output port"
+        end
+        port
+      end
     end
   end
 end
