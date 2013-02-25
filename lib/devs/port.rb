@@ -47,39 +47,27 @@ module DEVS
       input? ? "-->#{name}" : "#{name}-->"
     end
 
-    # Append the given <i>message</i> to incoming messages
-    #
-    # @param message [Message] the received message
-    # @return [Message] the incoming message
-    def add_incoming(message)
-      @incoming << message
+    def incoming
+      message = @incoming
+      @incoming = nil
+      message
     end
 
-    # Pop a {Message} from incoming messages
-    #
-    # @return [Message] an incoming message
-    def pop_incoming
-      @incoming.pop
+    def outgoing
+      message = @outgoing
+      @outgoing = nil
+      message
     end
 
-    # Append the given <i>message</i> to outgoing messages
-    #
-    # @param message [Message] the posted message
-    # @return [Message] the outgoing message
-    def add_outgoing(message)
-      if @outgoing.count == 1
-        raise MessageAlreadySentError, "An outgoing message already exists on "\
-            + "this port"
-      else
-        @outgoing << message
+    def outgoing=(value)
+      unless @outgoing.nil?
+        raise MessageAlreadySentError, "An outgoing message already exists"
       end
+      @outgoing = value
     end
 
-    # Pop a {Message} from outgoing messages
-    #
-    # @return [Message] an outgoing message
-    def pop_outgoing
-      @outgoing.pop
+    def incoming=(value)
+      @incoming = value
     end
   end
 end
