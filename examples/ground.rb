@@ -105,8 +105,8 @@ end
 
 #DEVS.logger = nil
 
-require 'perftools'
-PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
+# require 'perftools'
+# PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
   duration 100
 
@@ -162,4 +162,4 @@ DEVS.simulate do
   add_internal_coupling(:ground, :csv_output, :pluviometrie, :pluviometrie)
   add_internal_coupling(:ground, :csv_output, :ruissellement, :ruissellement)
 end
-end
+#end

@@ -6,7 +6,6 @@ module DEVS
           define_method(:confluent_transition, &block) if block
         end
         alias_method :delta_con, :confluent_transition
-        alias_method :confluent_transition, :confluent_transition
       end
 
       def confluent_transition; end
