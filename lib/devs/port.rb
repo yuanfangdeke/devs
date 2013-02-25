@@ -23,8 +23,8 @@ module DEVS
       @name = name.to_sym
       @host = host
 
-      @incoming = []
-      @outgoing = []
+      @incoming = nil
+      @outgoing = nil
     end
 
     # Check if self is an input port
