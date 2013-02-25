@@ -42,9 +42,9 @@ module DEVS
         end
 
         children = imminent_children
-        children_models = children.map { |processor| processor.model }
+        children_models = children.map(&:model)
         child_model = model.select(children_models)
-        info "    selected #{child_model} in #{children_models}"
+        info "    selected #{child_model} in #{children_models.map(&:name)}"
         child = children[children_models.index(child_model)]
 
         child.dispatch(event)
