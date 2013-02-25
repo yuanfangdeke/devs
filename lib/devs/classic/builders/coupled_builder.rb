@@ -9,7 +9,6 @@ module DEVS
         undef :int_transition
         undef :delta_int
         undef :time_advance
-        undef :ta
         undef :output
         undef :lambda
         undef :post_simulation_hook

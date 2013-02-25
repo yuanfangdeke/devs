@@ -53,7 +53,6 @@ module DEVS
         alias_method :delta_ext, :external_transition
         alias_method :int_transition, :internal_transition
         alias_method :delta_int, :internal_transition
-        alias_method :ta, :time_advance
         alias_method :lambda, :output
 
         # Hooks

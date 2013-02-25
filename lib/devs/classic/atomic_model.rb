@@ -4,10 +4,6 @@ module DEVS
       attr_accessor :elapsed, :time
       attr_reader :sigma
 
-      alias_method :clock, :time
-      alias_method :t, :time
-      alias_method :e, :elapsed
-
       class << self
         # DEVS functions
         def external_transition(&block)
@@ -30,7 +26,6 @@ module DEVS
         alias_method :delta_ext, :external_transition
         alias_method :int_transition, :internal_transition
         alias_method :delta_int, :internal_transition
-        alias_method :ta, :time_advance
         alias_method :lambda, :output
 
         # Hooks
