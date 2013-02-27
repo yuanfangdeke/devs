@@ -1,3 +1,4 @@
+require 'set'
 require 'logger'
 require 'observer'
 
@@ -12,8 +13,10 @@ require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
 require 'devs/port'
+require 'devs/builders'
 
 require 'devs/classic'
+require 'devs/parallel'
 
 module DEVS
 
@@ -26,9 +29,14 @@ module DEVS
   #   end
   #
   def simulate(&block)
-    Classic::Builders::SimulationBuilder.new(&block).root_coordinator.simulate
+    Builders::SimulationBuilder.new(Classic, &block).root_coordinator.simulate
   end
   module_function :simulate
+
+  def psimulate(&block)
+    Builders::SimulationBuilder.new(Parallel, &block).root_coordinator.simulate
+  end
+  module_function :psimulate
 
   # Returns the current version of the gem
   def version
