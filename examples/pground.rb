@@ -110,7 +110,12 @@ end
 DEVS.psimulate do
   duration 100
 
-  atomic(RandomGenerator, 0, 5) { name :random }
+  coupled do
+    name :generator
+    atomic(RandomGenerator, 0, 5) { name :random }
+    add_external_output_coupling(:random, :output)
+  end
+
 
   atomic do
     name :ground
@@ -151,13 +156,20 @@ DEVS.psimulate do
     time_advance { self.sigma }
   end
 
-  atomic(PlotCollector) { name :plot_output }
-  atomic(CSVCollector) { name :csv_output }
+  coupled do
+    name :collector
 
-  add_internal_coupling(:random, :ground)
-  add_internal_coupling(:ground, :plot_output, :pluviometrie, :pluviometrie)
-  add_internal_coupling(:ground, :plot_output, :ruissellement, :ruissellement)
-  add_internal_coupling(:ground, :csv_output, :pluviometrie, :pluviometrie)
-  add_internal_coupling(:ground, :csv_output, :ruissellement, :ruissellement)
+    atomic(PlotCollector) { name :plot_output }
+    atomic(CSVCollector) { name :csv_output }
+
+    add_external_input_coupling(:plot_output, :pluviometrie, :pluviometrie)
+    add_external_input_coupling(:csv_output, :pluviometrie, :pluviometrie)
+    add_external_input_coupling(:plot_output, :ruissellement, :ruissellement)
+    add_external_input_coupling(:csv_output, :ruissellement, :ruissellement)
+  end
+
+  add_internal_coupling(:generator, :ground, :output)
+  add_internal_coupling(:ground, :collector, :pluviometrie, :pluviometrie)
+  add_internal_coupling(:ground, :collector, :ruissellement, :ruissellement)
 end
 #end
