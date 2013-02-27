@@ -22,7 +22,6 @@ module DEVS
         if event.time == @time_next
           model.fetch_output! do |message|
             #parent.async.dispatch(Event.new(:y, event.time, message))
-            puts "#{self.model} collected #{message}"
             parent.dispatch(Event.new(:y, event.time, message))
           end
           :done
