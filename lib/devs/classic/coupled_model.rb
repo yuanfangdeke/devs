@@ -124,7 +124,7 @@ module DEVS
         output_port = find_or_create_output_port_if_necessary(output_port)
         child_port = child.find_or_create_output_port_if_necessary(child_port)
 
-        coupling = Coupling.new(output_port, child_port)
+        coupling = Coupling.new(child_port, output_port)
         @output_couplings << coupling unless @output_couplings.include?(coupling)
       end
       alias_method :add_external_output, :add_external_output_coupling
