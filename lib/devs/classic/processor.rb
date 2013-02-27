@@ -22,7 +22,7 @@ module DEVS
         @events_count
       end
 
-      def receive(event)
+      def dispatch(event)
         @events_count[event.type] += 1
         info "#{self.model} received #{event}"
 
@@ -33,7 +33,6 @@ module DEVS
         when :y then handle_output_event(event)
         end
       end
-      alias_method :dispatch, :receive
     end
   end
 end
