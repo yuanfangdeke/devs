@@ -40,11 +40,11 @@ module DEVS
 
         model.each_output_coupling(port) do |coupling|
           info "    found external output coupling #{coupling}"
-          message = Message.new(payload, c.destination_port)
+          message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:y, event.time, message)
           info "    dispatching #{new_event}"
-          #parent.async.dispatch(event)
-          parent.dispatch(event)
+          #parent.async.dispatch(new_event)
+          parent.dispatch(new_event)
         end
 
         futures = []
