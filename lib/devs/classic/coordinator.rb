@@ -29,8 +29,8 @@ module DEVS
 
       protected
       def handle_init_event(event)
-        children.each { |child| child.dispatch(event) }
-        @time_last = event.time
+        @children.each { |child| child.dispatch(event) }
+        @time_last = max_time_last
         @time_next = min_time_next
         info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
       end
@@ -55,7 +55,7 @@ module DEVS
       end
 
       def handle_input_event(event)
-        if @time_last <= event.time && event.time <= @time_next
+        if (@time_last..@time_next).include?(event.time)
           payload, port = *event.message
 
           model.each_input_coupling(port) do |coupling|

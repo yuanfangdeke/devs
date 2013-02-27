@@ -10,7 +10,7 @@ module DEVS
       end
 
       def handle_input_event(event)
-        if @time_last <= event.time && event.time <= @time_next
+        if (@time_last..@time_next).include?(event.time)
           model.elapsed = event.time - @time_last
           info "    received #{event.message}"
           model.add_input_message(event.message)
