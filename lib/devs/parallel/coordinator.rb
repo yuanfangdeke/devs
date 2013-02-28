@@ -68,20 +68,18 @@ module DEVS
 
       def handle_star_event(event)
         if (@time_last..@time_next).include?(event.time)
-          children_with_inputs = @bag.map { |msg| msg.port.host.processor }
-          futures = []
-          selected = []
-          model.each_input_coupling do |coupling|
-            child = coupling.destination.processor
+          inputs = Hash.new { |hash, key| hash[key] = [] }
+          @bag.each { |msg| inputs[msg.port] << msg.payload }
 
-            if children_with_inputs.include?(child)
-              selected << child
+          inputs.each do |port, values|
+            model.each_input_coupling(port) do |coupling|
               info "    #{self.model} found external input coupling #{coupling}"
-              message = Message.new(payload, coupling.destination_port)
-              #future << child.future.dispatch(Event.new(:x, event.time, message))
-
-              @synchronize << child
-              child.dispatch(Event.new(:x, event.time, message))
+              values.each do |payload|
+                message = Message.new(payload, coupling.destination_port)
+                child = coupling.destination.processor
+                @synchronize << child
+                child.dispatch(Event.new(:x, event.time, message))
+              end
             end
           end
           @bag.clear
@@ -102,6 +100,35 @@ module DEVS
               + "between time_last: #{@time_last} and time_next: #{@time_next}"
         end
       end
+
+      # def handle_star_event(event)
+      #   if event.time == @time_next
+      #     imminent_children.each { |child| child.dispatch(event) }
+      #     :done
+      #   else
+      #     raise BadSynchronisationError,
+      #           "time: #{event.time} should match time_next: #{@time_next}"
+      #   end
+      # end
+
+      # def handle_input_event(event)
+      #   if (@time_last..@time_next).include?(event.time)
+      #     payload, port = *event.message
+
+      #     receivers = []
+      #     model.each_input_coupling(port) do |coupling|
+      #       info "    #{self.model} found external input coupling #{coupling}"
+      #       child = coupling.destination.processor
+      #       receivers << child
+      #       message = Message.new(payload, coupling.destination_port)
+      #       child.dispatch(Event.new(:x, event.time, message))
+      #     end
+
+      #   else
+      #     raise BadSynchronisationError, "time: #{event.time} should be " \
+      #         + "between time_last: #{@time_last} and time_next: #{@time_next}"
+      #   end
+      # end
     end
   end
 end
