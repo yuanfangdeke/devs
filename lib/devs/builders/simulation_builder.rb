@@ -7,7 +7,6 @@ module DEVS
       def initialize(namespace, &block)
         @model = namespace::CoupledModel.new
         @model.name = :RootCoupledModel
-        @model.parent = self
         @namespace = namespace
 
         @processor = namespace::Coordinator.new(@model)
