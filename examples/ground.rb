@@ -103,12 +103,12 @@ class CSVCollector < Collector
   end
 end
 
-#DEVS.logger = nil
+DEVS.logger = nil
 
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
-  duration 100
+  duration 10000
 
   coupled do
     name :generator
