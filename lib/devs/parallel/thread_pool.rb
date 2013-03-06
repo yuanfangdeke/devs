@@ -60,6 +60,10 @@ module DEVS
 
       Thread.abort_on_exception = true
       @workers = ThreadGroup.new
+
+      @lock.synchronize do
+        @min_pool_size.times { spawn_thread }
+      end
     end
 
     def spawn_thread
