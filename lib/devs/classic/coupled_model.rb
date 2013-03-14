@@ -139,7 +139,7 @@ module DEVS
       # @param a [Model, String, Symbol] the first child or its name
       # @param b [Model, String, Symbol] the second child or its name
       # @param output_port [Port, String, Symbol] a's output port or its name
-      # @param input_port [Port, String, Symbol] b's output port ot its name
+      # @param input_port [Port, String, Symbol] b's input port ot its name
       def add_internal_coupling(a, b, output_port = nil, input_port = nil)
         a = ensure_child(a)
         b = ensure_child(b)
