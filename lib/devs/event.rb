@@ -1,4 +1,6 @@
 module DEVS
+  # This class represent an event passing between simulators and is essential
+  # to implement the DEVS communication protocol
   class Event
     include Comparable
     attr_reader :type, :time, :message
@@ -20,6 +22,13 @@ module DEVS
       [:i, :x, :*, :y]
     end
 
+    # Returns a new {Event} instance.
+    #
+    # @param type [Symbol] the type of event
+    # @param time [Numeric] the time at which the event was emitted
+    # @param message [Message] the message carrying the payload
+    # @raise [ArgumentError] if the given type is unknown or if the given time
+    #   is not in a correct range
     def initialize(type, time, message = nil)
       if Event.types.include?(type)
         @type = type

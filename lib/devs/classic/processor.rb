@@ -5,6 +5,9 @@ module DEVS
       attr_accessor :parent
       attr_reader :model, :time_next, :time_last
 
+      # Returns a new {Processor} instance.
+      #
+      # @param model [Model] the model associated with this processor
       def initialize(model)
         @model = model
         @time_next = 0
@@ -19,6 +22,9 @@ module DEVS
         @events_count
       end
 
+      # Handles an incoming event
+      #
+      # @param event [Event] the incoming event
       def dispatch(event)
         @events_count[event.type] += 1
         info "#{self.model} received #{event}"

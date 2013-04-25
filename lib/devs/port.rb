@@ -4,6 +4,12 @@ module DEVS
   class Port
     attr_reader :type, :name, :host
 
+    # Represent the list of possible type of ports.
+    #
+    # 1. :input for an input port
+    # 2. :output for an output port
+    #
+    # @return [Array<Symbol>] the port types
     def self.types
       [:input, :output]
     end
@@ -13,6 +19,7 @@ module DEVS
     # @param host [Model] the owner of self
     # @param type [Symbol] the type of port, either `:input` or `:output`
     # @param name [String, Symbol] the name given to identify the port
+    # @raise [ArgumentError] if the specified type is unknown
     def initialize(host, type, name)
       type = type.downcase.to_sym unless type.nil?
       if Port.types.include?(type)
@@ -47,18 +54,29 @@ module DEVS
       input? ? "-->#{name}" : "#{name}-->"
     end
 
+    # Read the incoming {Message} if any and empty the mailbox.
+    #
+    # @return [Message] the incoming message or nil
     def incoming
       message = @incoming
       @incoming = nil
       message
     end
 
+    # Read the outgoing {Message} if any and empty the mailbox.
+    #
+    # @return [Message] the outgoing message or nil
     def outgoing
       message = @outgoing
       @outgoing = nil
       message
     end
 
+    # Put an outgoing {Message} into the mailbox.
+    #
+    # @param value [Message] the message to send
+    # @raise [MessageAlreadySentError] if an outgoing {Message} is already
+    #   waiting to be picked up
     def outgoing=(value)
       unless @outgoing.nil?
         raise MessageAlreadySentError, "An outgoing message already exists"
@@ -66,6 +84,9 @@ module DEVS
       @outgoing = value
     end
 
+    # Put an incoming {Message} into the mailbox.
+    #
+    # @param value [Message] the input message
     def incoming=(value)
       @incoming = value
     end

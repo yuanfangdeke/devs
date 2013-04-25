@@ -4,6 +4,7 @@ module DEVS
       attr_accessor :name, :parent, :processor
       attr_reader :input_ports, :output_ports
 
+      # Returns a new {Model} instance.
       def initialize
         @name = "#{self.class}_#{self.object_id}"
         @input_ports = []
@@ -86,6 +87,14 @@ module DEVS
       end
 
       protected
+
+      # Find or create an input port if necessary. If the given argument is nil,
+      # an input port is created with a default name. Otherwise, an attempt to
+      # find the matching port is made. If the given port doesn't exists, it is
+      # created with the given name.
+      #
+      # @param port [String, Symbol] the input port name
+      # @return [Port] the matching port or the newly created port
       def find_or_create_input_port_if_necessary(port)
         if port.nil?
           port = add_input_port
@@ -97,6 +106,13 @@ module DEVS
         port
       end
 
+      # Find or create an output port if necessary. If the given argument is nil,
+      # an output port is created with a default name. Otherwise, an attempt to
+      # find the matching port is made. If the given port doesn't exists, it is
+      # created with the given name.
+      #
+      # @param port [String, Symbol] the output port name
+      # @return [Port] the matching port or the newly created port
       def find_or_create_output_port_if_necessary(port)
         if port.nil?
           port = add_output_port

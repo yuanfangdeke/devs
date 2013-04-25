@@ -1,5 +1,7 @@
 module DEVS
   module Classic
+    # This class represent a simulator associated with an {CoupledModel},
+    # responsible to route events to proper children
     class Coordinator < Processor
       attr_reader :children
 
@@ -18,6 +20,8 @@ module DEVS
         hsh
       end
 
+      # Append a child to {#children} list, ensuring that the child now has
+      # self as parent.
       def <<(child)
         unless @children.include?(child)
           @children << child
@@ -28,6 +32,10 @@ module DEVS
       alias_method :add_child, :<<
 
       protected
+
+      # Handles events of init type (i messages)
+      #
+      # @param event [Event] the init event
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
         @time_last = max_time_last
@@ -35,6 +43,11 @@ module DEVS
         info "#{self.model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
+      # Handles star events (* messages)
+      #
+      # @param event [Event] the star event
+      # @raise [BadSynchronisationError] if the event time is not equal to
+      #   {#time_next}
       def handle_star_event(event)
         if event.time != @time_next
           raise BadSynchronisationError,
@@ -54,6 +67,11 @@ module DEVS
         info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
+      # Handles input events (x messages)
+      #
+      # @param event [Event] the input event
+      # @raise [BadSynchronisationError] if the event time isn't in a proper
+      #   range, e.g isn't between {#time_last} and {#time_next}
       def handle_input_event(event)
         if (@time_last..@time_next).include?(event.time)
           payload, port = *event.message
@@ -74,6 +92,9 @@ module DEVS
         end
       end
 
+      # Handles output events (y messages)
+      #
+      # @param event [Event] the output event
       def handle_output_event(event)
         payload, port = *event.message
 
@@ -94,14 +115,24 @@ module DEVS
         end
       end
 
+      # Returns the minimum time next in all children
+      #
+      # @return [Numeric] the min time next
       def min_time_next
         @children.map { |child| child.time_next }.min
       end
 
+      # Returns the maximum time last in all children
+      #
+      # @return [Numeric] the max time last
       def max_time_last
         @children.map { |child| child.time_last }.max
       end
 
+      # Returns a subset of {#children} including imminent children, e.g with
+      # a time next value matching {#time_next}.
+      #
+      # @return [Array<Model>] the imminent children
       def imminent_children
         @children.select { |child| child.time_next == time_next }
       end

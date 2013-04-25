@@ -4,8 +4,9 @@ module DEVS
       attr_accessor :elapsed, :time
       attr_reader :sigma
 
+      # syntax sugaring
       class << self
-        # DEVS functions
+        # @!group DEVS functions
         def external_transition(&block)
           define_method(:external_transition, &block) if block
         end
@@ -28,10 +29,15 @@ module DEVS
         alias_method :delta_int, :internal_transition
         alias_method :lambda, :output
 
-        # Hooks
+        # @!endgroup
+
+        # @!group Hook methods
+
         def post_simulation_hook(&block)
           define_method(:post_simulation_hook, &block) if block
         end
+
+        # @!endgroup
       end
 
       def initialize
@@ -41,15 +47,23 @@ module DEVS
         @sigma = INFINITY
       end
 
+      # Returns a boolean indicating if <i>self</i> is an atomic model
+      #
+      # @return [true]
       def atomic?
         true
       end
 
+      # Returns a boolean indicating if <i>self</i> is an observer of hooks
+      # events
+      #
+      # @return [Boolean] true if a hook method is defined, false otherwise
       def observer?
         self.respond_to? :post_simulation_hook
       end
 
-      # observer method
+      # Observer callback method. Dispatches the hook event to the appropriate
+      # method
       def update(hook, *args)
         self.send("#{hook}_hook", *args)
       end
@@ -84,6 +98,13 @@ module DEVS
         end
       end
 
+      # Append an incoming message to the appropriate port's mailbox.
+      #
+      # @param message [Message] the incoming message
+      # @raise [InvalidPortHostError] if <i>self</i> is not the correct host
+      #   for this message
+      # @raise [InvalidPortTypeError] if the {Message#port} is not an input
+      #   port
       def add_input_message(message)
         if message.port.host != self
           raise InvalidPortHostError, "The port associated with the given\
@@ -98,16 +119,23 @@ message #{message} isn't an input port"
         message.port.incoming = message.payload
       end
 
-      # DEVS functions
+      # @!group DEVS functions
+
+      # External transition function (δext)
       def external_transition; end
 
+      # Internal transition function (δint)
       def internal_transition; end
 
+      # Time advance function (ta)
       def time_advance
         @sigma
       end
 
+      # Output function (λ)
       def output; end
+
+      # @!endgroup
 
       protected
       attr_writer :sigma

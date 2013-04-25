@@ -1,21 +1,41 @@
 module DEVS
   module Classic
-    class RootCoordinator
-      include Logging
+    # This class represent the processor on top of the simulation tree,
+    # responsible for coordinating the simulation
+    class RootCoordinator < Processor
+      # used for hooks
       include Observable
 
+      # The default duration of the simulation if argument omitted
       DEFAULT_DURATION = 60
+
+      undef :model, :time_last, :time_next, :parent, :parent=
 
       attr_reader :time, :duration, :child
 
       alias_method :clock, :time
 
+      # Returns a new {RootCoordinator} instance.
+      #
+      # @param child [Coordinator] the child coordinator
+      # @param duration [Numeric] the duration of the simulation
+      # @raise [ArgumentError] if the child is not a coordinator
       def initialize(child, duration = DEFAULT_DURATION)
+        unless child.is_a?(Coordinator)
+          raise ArgumentError, 'child must be of Coordinator type'
+        end
         @duration = duration
         @time = 0
         @child = child
+        @events_count = Hash.new(0)
       end
 
+      def dispatch(event)
+        @events_count[event.type] += 1
+        info "#{self.model} received #{event} from thread #{Thread.current}"
+      end
+
+      # Run the simulation
       def simulate
         @real_start_time = Time.now
         info "*** Beginning simulation at #{@real_start_time} with duration:" \

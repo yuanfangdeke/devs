@@ -16,6 +16,9 @@ module DEVS
         @output_couplings = []
       end
 
+      # Returns a boolean indicating if <i>self</i> is a coupled model
+      #
+      # @return [true]
       def coupled?
         true
       end
@@ -49,13 +52,22 @@ module DEVS
       end
       alias_method :find_child_by_name, :[]
 
-      def find_child_with_path(path = '')
-        model = self
-        path.split('::').each do |name|
-          model = self[name]
-        end
-      end
+      # def find_child_with_path(path = '')
+      #   model = self
+      #   path.split('::').each do |name|
+      #     model = self[name]
+      #   end
+      # end
 
+      # Calls <i>block</i> once for each child in <b>self</b>, passing that
+      # element as a parameter.
+      #
+      # If no block is given, an {Enumerator} is returned instead.
+      # @overload each
+      #   @yieldparam child [Model] the child that is yielded
+      #   @return [nil]
+      # @overload each
+      #   @return [Enumerator<Model>]
       def each
         if block_given?
           @children.each { |child| yield(child) }
@@ -64,14 +76,32 @@ module DEVS
         end
       end
 
+      # Calls <i>block</i> once for each external input coupling (EIC) in
+      # {#input_couplings}, passing that element as a parameter. If a port is
+      # given, it is used to filter the couplings having this port as a source.
+      #
+      # @param port [Port] the source port or nil
+      # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_input_coupling(port = nil, &block)
         each_coupling(@input_couplings, port, &block)
       end
 
+      # Calls <i>block</i> once for each internal coupling (IC) in
+      # {#internal_couplings}, passing that element as a parameter. If a port is
+      # given, it is used to filter the couplings having this port as a source.
+      #
+      # @param port [Port] the source port or nil
+      # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_internal_coupling(port = nil, &block)
         each_coupling(@internal_couplings, port, &block)
       end
 
+      # Calls <i>block</i> once for each external output coupling (EOC) in
+      # {#output_couplings}, passing that element as a parameter. If a port is
+      # given, it is used to filter the couplings having this port as a source.
+      #
+      # @param port [Port] the source port or nil
+      # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_output_coupling(port = nil, &block)
         each_coupling(@output_couplings, port, &block)
       end

@@ -1,6 +1,7 @@
 module DEVS
   module Parallel
     class AtomicModel < Classic::AtomicModel
+      # syntax sugaring
       class << self
         def confluent_transition(&block)
           define_method(:confluent_transition, &block) if block
@@ -23,6 +24,11 @@ module DEVS
         external_transition
       end
 
+      # Append the given bag of input to the appropriate port's mailbox
+      #
+      # @param bag [Array<Message>]
+      # @raise [InvalidPortHostError] if the {Port#host} is not <i>self</i>
+      # @raise [InvalidPortTypeError] if the {Port} is not of input type
       def add_bag(bag)
         inputs = Hash.new { |hash, key| hash[key] = [] }
         bag.each { |msg| inputs[msg.port] << msg.payload }
