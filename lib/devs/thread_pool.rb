@@ -136,7 +136,7 @@ module DEVS
     end
     private :spawn_thread
 
-    # Returns the amount of work remaining.
+    # Returns the remaining amount of work.
     #
     # @return [Fixnum] the amount
     def backlog
