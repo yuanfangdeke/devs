@@ -1,5 +1,6 @@
 module DEVS
   module Classic
+    # @abstract Base model class for {AtomicModel} and {CoupledModel} classes
     class Model
       attr_accessor :name, :parent, :processor
       attr_reader :input_ports, :output_ports
@@ -11,16 +12,16 @@ module DEVS
         @output_ports = []
       end
 
-      # Check if self is an atomic model
+      # Returns a boolean indicating if <i>self</i> is an atomic model
       #
-      # @return [Boolean]
+      # @return [false]
       def atomic?
         false
       end
 
-      # Check if self is a coupled model
+      # Returns a boolean indicating if <i>self</i> is an atomic model
       #
-      # @return [Boolean]
+      # @return [false]
       def coupled?
         false
       end
@@ -82,6 +83,7 @@ module DEVS
         find_input_port_by_name(name) || find_output_port_by_name(name)
       end
 
+      # @return [String]
       def to_s
         name.to_s
       end

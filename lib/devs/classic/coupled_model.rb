@@ -1,5 +1,6 @@
 module DEVS
   module Classic
+    # This class represent a DEVS coupled model.
     class CoupledModel < Model
       include Enumerable
 
@@ -8,6 +9,39 @@ module DEVS
 
       alias_method :components, :children
 
+      # @!attribute [r] children
+      #   This attribute returns a list of all its child models, composed of
+      #   {AtomicModel}s or/and {CoupledModel}s.
+      #   @return [Array<Model>] Returns a list of all its child models
+
+      # @!attribute [r] internal_couplings
+      #   This attribute returns a list of all its <i>internal couplings</i> (IC).
+      #   An internal coupling connects two {#children}: an output {Port} of
+      #   the first {Model} is thereby connected to an input {Port} of the
+      #   second child.
+      #   @see #add_internal_coupling
+      #   @return [Array<Coupling>] Returns a list of all its
+      #     <i>internal couplings</i> (IC)
+
+      # @!attribute [r] input_couplings
+      #   This attribute returns a list of all its
+      #   <i>external input couplings</i> (EIC). Each of them links one of all
+      #   {#children} to one of its own {Port}. More precisely, it links an
+      #   input {Port} of <i>self</i> to an input {Port} of the child.
+      #   @see #add_external_input_coupling
+      #   @return [Array<Coupling>] Returns a list of all its
+      #     <i>external input couplings</i> (EIC)
+
+      # @!attribute [r] output_couplings
+      #   This attribute returns a list of all its
+      #   <i>external output couplings</i> (EOC). Each of them links one of all
+      #   {#children} to one of its own {Port}. More precisely, it links an
+      #   output {Port} of the child to an output {Port} of <i>self</i>.
+      #   @see #add_external_input_coupling
+      #   @return [Array<Coupling>] Returns a list of all its
+      #     <i>external output couplings</i> (EOC)
+
+      # Returns a new instance of {CoupledModel}
       def initialize
         super
         @children = []
@@ -80,7 +114,7 @@ module DEVS
       # {#input_couplings}, passing that element as a parameter. If a port is
       # given, it is used to filter the couplings having this port as a source.
       #
-      # @param port [Port] the source port or nil
+      # @param port [Port, nil] the source port or nil
       # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_input_coupling(port = nil, &block)
         each_coupling(@input_couplings, port, &block)
@@ -90,7 +124,7 @@ module DEVS
       # {#internal_couplings}, passing that element as a parameter. If a port is
       # given, it is used to filter the couplings having this port as a source.
       #
-      # @param port [Port] the source port or nil
+      # @param port [Port, nil] the source port or nil
       # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_internal_coupling(port = nil, &block)
         each_coupling(@internal_couplings, port, &block)
@@ -100,7 +134,7 @@ module DEVS
       # {#output_couplings}, passing that element as a parameter. If a port is
       # given, it is used to filter the couplings having this port as a source.
       #
-      # @param port [Port] the source port or nil
+      # @param port [Port, nil] the source port or nil
       # @yieldparam coupling [Coupling] the coupling that is yielded
       def each_output_coupling(port = nil, &block)
         each_coupling(@output_couplings, port, &block)
@@ -112,11 +146,15 @@ module DEVS
       #
       # @param imminent_children [Array<Model>] the imminent children
       # @return [Model] the selected component
+      # @example
+      #   def select(imminent_children)
+      #     imminent_children.sample
+      #   end
       def select(imminent_children)
         imminent_children.first
       end
 
-      # Add an external input coupling (EIC) to self. Establish a relation between
+      # Adds an external input coupling (EIC) to self. Establish a relation between
       # a self input {Port} and an input {Port} of one of self's children.
       #
       # If the ports aren't provided, they will be automatically generated.
@@ -137,7 +175,7 @@ module DEVS
       end
       alias_method :add_external_input, :add_external_input_coupling
 
-      # Add an external output coupling (EOC) to self. Establish a relation
+      # Adds an external output coupling (EOC) to self. Establish a relation
       # between an output {Port} of one of self's children and one of self's
       # output ports.
       #
@@ -159,7 +197,7 @@ module DEVS
       end
       alias_method :add_external_output, :add_external_output_coupling
 
-      # Add an internal coupling (IC) to self. Establish a relation between an
+      # Adds an internal coupling (IC) to self. Establish a relation between an
       # output {Port} of a first child and the input {Port} of a second child.
       #
       # If the ports parameters are ommited, they will be automatically
@@ -183,6 +221,7 @@ module DEVS
       end
 
       private
+
       def ensure_child(child)
         if !child.respond_to?(:name)
           child = self[child]

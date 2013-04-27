@@ -1,7 +1,16 @@
 module DEVS
-  # This class represent the coupling between two DEVS models.
+  # This class represent a coupling between two DEVS models.
   class Coupling
     attr_reader :source, :destination, :port_source, :destination_port
+
+    # @!attribute [r] source
+    #   @return [Model] Returns the source model
+    # @!attribute [r] destination
+    #   @return [Model] Returns the receiver model
+    # @!attribute [r] port_source
+    #   @return [Port] Returns the source port
+    # @!attribute [r] destination_port
+    #   @return [Port] Returns the receiver port
 
     # Returns a new {Coupling} instance.
     #
@@ -39,10 +48,12 @@ module DEVS
       @source == other.source && @destination == other.destination
     end
 
+    # @return [Array]
     def to_a
       [[source, port_source], [destination, destination_port]]
     end
 
+    # @return [String]
     def to_s
       "[#{source.name}@#{port_source.name}, " \
       + "#{destination.name}@#{destination_port.name}]"

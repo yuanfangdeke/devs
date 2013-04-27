@@ -5,6 +5,14 @@ module DEVS
     include Comparable
     attr_reader :type, :time, :message
 
+    # @!attribute [r] type
+    #   @return [Symbol] Returns the event type included in {Event.types}
+    # @!attribute [r] time
+    #   @return [Fixnum] Returns the simulation time at which the event was
+    #     emitted
+    # @!attribute [r] message
+    #   @return [Message] Returns the message associated with this event
+
     # Represent the list of possible events exchanged between a parent
     # simulation component (either {Simulator} or {Coordinator}) and its
     # subordinate.

@@ -4,6 +4,16 @@ module DEVS
   class Message
     attr_reader :payload, :port
 
+    # @!attribute [r] payload
+    #   @return [Object] Returns the payload
+
+    # @!attribute [r] port
+    #   @return [Port] Returns the associated port
+
+    # Returns a new {Message} instance.
+    #
+    # @param payload [Object] the message payload
+    # @param port [Port] the port associated with the message
     def initialize(payload, port)
        @payload = payload
        @port = port
@@ -13,10 +23,12 @@ module DEVS
       @port == other.port
     end
 
+    # @return [Array]
     def to_a
       [@payload, @port]
     end
 
+    # @return [String]
     def to_s
       "message #{@payload}"
     end

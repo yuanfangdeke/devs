@@ -15,6 +15,17 @@ module DEVS
 
       alias_method :clock, :time
 
+      # @!attribute [r] time
+      #   @return [Fixnum] Returns the current simulation time
+
+      # @!attribute [r] duration
+      #   @return [Fixnum] Returns the total duration of the simulation time
+
+      # @!attribute [r] child
+      #   Returns the coordinator which <i>self</i> is managing.
+      #   @return [Coordinator] Returns the coordinator associated with the
+      #     <i>self</i>
+
       # Returns a new {RootCoordinator} instance.
       #
       # @param child [Coordinator] the child coordinator

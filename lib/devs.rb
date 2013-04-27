@@ -2,6 +2,7 @@ require 'set'
 require 'logger'
 require 'observer'
 
+# @author Romain Franceschini <franceschini.romain@gmail.com>
 module DEVS
   INFINITY = Float::INFINITY
 end
@@ -14,11 +15,15 @@ require 'devs/message'
 require 'devs/coupling'
 require 'devs/port'
 require 'devs/builders'
+require 'devs/thread_pool'
+require 'devs/latch'
 
 require 'devs/classic'
 
 module DEVS
   # Returns the current version of the gem
+  #
+  # @return [String] the string representation of the version
   def version
     VERSION
   end

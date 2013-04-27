@@ -5,6 +5,14 @@ module DEVS
     class Coordinator < Processor
       attr_reader :children
 
+      # @!attribute [r] children
+      #   This attribute returns a list of all its child {Processor}s, composed
+      #   of {Simulator}s or/and {Coordinator}s.
+      #   @return [Array<Processor>] Returns a list of all its child processors
+
+      # Returns a new instance of {Coordinator}
+      #
+      # @param model [CoupledModel] the managed coupled model
       def initialize(model)
         super(model)
         @children = []

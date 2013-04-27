@@ -6,21 +6,29 @@ module DEVS
 
   module Logging
     # Send a debug message
+    #
+    # @param string [String] the string to log
     def debug(string)
       DEVS.logger.debug(string) if DEVS.logger
     end
 
     # Send a info message
+    #
+    # @param string [String] the string to log
     def info(string)
       DEVS.logger.info(string) if DEVS.logger
     end
 
     # Send a warning message
+    #
+    # @param string [String] the string to log
     def warn(string)
       DEVS.logger.warn(string) if DEVS.logger
     end
 
     # Send an error message
+    #
+    # @param string [String] the string to log
     def error(string)
       DEVS.logger.error(string) if DEVS.logger
     end

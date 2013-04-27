@@ -5,6 +5,20 @@ module DEVS
       attr_accessor :parent
       attr_reader :model, :time_next, :time_last
 
+      # @!attribute parent
+      #   @return [Processor] Returns the parent {Processor}
+
+      # @!attribute [r] model
+      #   @return [Model] Returns the model associated with <i>self</i>
+
+      # @!attribute [r] time_next
+      #   @return [Fixnum] Returns the next simulation time at which the
+      #     associated {Model} should be activated
+
+      # @!attribute [r] time_last
+      #   @return [Fixnum] Returns the last simulation time at which the
+      #     associated {Model} was activated
+
       # Returns a new {Processor} instance.
       #
       # @param model [Model] the model associated with this processor
