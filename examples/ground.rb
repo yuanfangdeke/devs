@@ -4,7 +4,7 @@ require 'devs'
 require 'gnuplot'
 require 'csv'
 
-class RandomGenerator < DEVS::Classic::AtomicModel
+class RandomGenerator < DEVS::AtomicModel
   def initialize(min = 0, max = 10, min_step = 1, max_step = 1)
     super()
 
@@ -26,7 +26,7 @@ class RandomGenerator < DEVS::Classic::AtomicModel
   time_advance { self.sigma }
 end
 
-class Collector < DEVS::Classic::AtomicModel
+class Collector < DEVS::AtomicModel
   def initialize
     super()
     @results = {}
@@ -103,12 +103,10 @@ class CSVCollector < Collector
   end
 end
 
-DEVS.logger = nil
-
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
-  duration 10000
+  duration 100
 
   coupled do
     name :generator
