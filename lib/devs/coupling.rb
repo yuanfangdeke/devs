@@ -20,12 +20,6 @@ module DEVS
     # @raise [InvalidPortTypeError] if the port_source is not an output port or
     #   if the destination_port is not an input port
     def initialize(port_source, destination_port)
-      unless port_source.output?
-        raise InvalidPortTypeError, 'port_source must be an output port'
-      end
-      unless destination_port.input?
-        raise InvalidPortTypeError, 'destination_port must be an input port'
-      end
       @port_source = port_source
       @destination_port = destination_port
     end
