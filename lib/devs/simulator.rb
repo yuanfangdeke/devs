@@ -5,7 +5,7 @@ module DEVS
     attr_reader :model, :time_next, :time_last
 
     # @!attribute [rw] parent
-    #   @return [Processor] Returns the parent {Processor}
+    #   @return [Coordinator] Returns the parent {Coordinator}
 
     # @!attribute [r] model
     #   @return [Model] Returns the model associated with <i>self</i>
@@ -18,7 +18,7 @@ module DEVS
     #   @return [Fixnum] Returns the last simulation time at which the
     #     associated {Model} was activated
 
-    # Returns a new {Processor} instance.
+    # Returns a new {Simulator} instance.
     #
     # @param model [Model] the model associated with this processor
     def initialize(model)

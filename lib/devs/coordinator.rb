@@ -5,9 +5,10 @@ module DEVS
     attr_reader :children
 
     # @!attribute [r] children
-    #   This attribute returns a list of all its child {Processor}s, composed
+    #   This attribute returns a list of all its children, composed
     #   of {Simulator}s or/and {Coordinator}s.
-    #   @return [Array<Processor>] Returns a list of all its child processors
+    #   @return [Array<Processor, Coordinator>] Returns a list of all its child
+    #     processors
 
     # Returns a new instance of {Coordinator}
     #
