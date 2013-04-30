@@ -10,12 +10,16 @@ module DEVS
 
     undef :model, :time_last, :time_next, :parent, :parent=
 
-    attr_reader :time, :duration, :child
+    attr_reader :duration, :child, :start_time
+    attr_accessor :time
 
     alias_method :clock, :time
 
-    # @!attribute [r] time
+    # @!attribute [rw] time
     #   @return [Fixnum] Returns the current simulation time
+
+    # @!attribute [r] start_time
+    #   @return [Time] Returns the time at which the simulation started
 
     # @!attribute [r] duration
     #   @return [Fixnum] Returns the total duration of the simulation time
@@ -30,11 +34,12 @@ module DEVS
     # @param child [Coordinator] the child coordinator
     # @param duration [Numeric] the duration of the simulation
     # @raise [ArgumentError] if the child is not a coordinator
-    def initialize(child, duration = DEFAULT_DURATION)
+    def initialize(child, duration = DEFAULT_DURATION, strategy)
       unless child.is_a?(Coordinator)
         raise ArgumentError, 'child must be of Coordinator type'
       end
       @duration = duration
+      @strategy = strategy
       @time = 0
       @child = child
       @events_count = Hash.new(0)
@@ -47,21 +52,14 @@ module DEVS
 
     # Run the simulation
     def simulate
-      @real_start_time = Time.now
-      info "*** Beginning simulation at #{@real_start_time} with duration:" \
+      @start_time = Time.now
+      info "*** Beginning simulation at #{@start_time} with duration:" \
          + "#{duration}"
 
-      child.dispatch(Event.new(:i, @time))
-      @time = child.time_next
+      # call strategy
+      @strategy.simulate(self)
 
-      loop do
-        info "* Tick at: #{@time}, #{Time.now - @real_start_time} secs elapsed"
-        child.dispatch(Event.new(:*, @time))
-        @time = child.time_next
-        break if @time >= @duration
-      end
-
-      msg = "*** Simulation ended after #{Time.now - @real_start_time} secs."
+      msg = "*** Simulation ended after #{Time.now - @start_time} secs."
       DEVS.logger ? info(msg) : puts(msg)
 
       info "* Events stats :"
