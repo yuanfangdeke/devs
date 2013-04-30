@@ -21,8 +21,9 @@ module DEVS
         end
 
         @namespace = namespace
-        #@processor = namespace::Coordinator.new(@model)
-        @processor = Coordinator.new(@model, namespace::CoordinatorStrategy)
+        @processor = Coordinator.new(@model)
+        @processor.singleton_class.send(:include, namespace::CoordinatorStrategy)
+
         @model.processor = @processor
         instance_eval(&block) if block
       end

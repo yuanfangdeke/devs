@@ -10,7 +10,9 @@ module DEVS
           @model = klass.new(*args)
         end
 
-        @processor = Simulator.new(@model, namespace::SimulatorStrategy)
+        @processor = Simulator.new(@model)
+        @processor.singleton_class.send(:include, namespace::SimulatorStrategy)
+
         @model.processor = @processor
         instance_eval(&block) if block
       end

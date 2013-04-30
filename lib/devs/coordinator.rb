@@ -12,10 +12,8 @@ module DEVS
     # Returns a new instance of {Coordinator}
     #
     # @param model [CoupledModel] the managed coupled model
-    # @param [#handle_init_event, #handle_star_event, #handle_input_event,
-    #   #handle_output_event] strategy the strategy handling dispatched events
-    def initialize(model, strategy)
-      super(model, strategy)
+    def initialize(model)
+      super(model)
       @children = []
     end
 

@@ -10,12 +10,11 @@ module DEVS
 
     undef :model, :time_last, :time_next, :parent, :parent=
 
-    attr_reader :duration, :child, :start_time
-    attr_accessor :time
+    attr_reader :time, :duration, :child, :start_time
 
     alias_method :clock, :time
 
-    # @!attribute [rw] time
+    # @!attribute [r] time
     #   @return [Fixnum] Returns the current simulation time
 
     # @!attribute [r] start_time
@@ -34,12 +33,11 @@ module DEVS
     # @param child [Coordinator] the child coordinator
     # @param duration [Numeric] the duration of the simulation
     # @raise [ArgumentError] if the child is not a coordinator
-    def initialize(child, duration = DEFAULT_DURATION, strategy)
+    def initialize(child, duration = DEFAULT_DURATION)
       unless child.is_a?(Coordinator)
         raise ArgumentError, 'child must be of Coordinator type'
       end
       @duration = duration
-      @strategy = strategy
       @time = 0
       @child = child
       @events_count = Hash.new(0)
@@ -54,10 +52,10 @@ module DEVS
     def simulate
       @start_time = Time.now
       info "*** Beginning simulation at #{@start_time} with duration:" \
-         + "#{duration}"
+         + "#{@duration}"
 
-      # call strategy
-      @strategy.simulate(self)
+      # root coordinator strategy
+      run
 
       msg = "*** Simulation ended after #{Time.now - @start_time} secs."
       DEVS.logger ? info(msg) : puts(msg)
@@ -71,5 +69,8 @@ module DEVS
       changed
       notify_observers(:post_simulation)
     end
+
+    private
+    attr_writer :time
   end
 end

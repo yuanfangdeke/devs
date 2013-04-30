@@ -1,8 +1,8 @@
 module DEVS
   class Simulator
     include Logging
-    attr_accessor :parent, :time_next, :time_last
-    attr_reader :model
+    attr_accessor :parent
+    attr_reader :model, :time_next, :time_last
 
     # @!attribute [rw] parent
     #   @return [Processor] Returns the parent {Processor}
@@ -10,22 +10,19 @@ module DEVS
     # @!attribute [r] model
     #   @return [Model] Returns the model associated with <i>self</i>
 
-    # @!attribute [rw] time_next
+    # @!attribute [r] time_next
     #   @return [Fixnum] Returns the next simulation time at which the
     #     associated {Model} should be activated
 
-    # @!attribute [rw] time_last
+    # @!attribute [r] time_last
     #   @return [Fixnum] Returns the last simulation time at which the
     #     associated {Model} was activated
 
     # Returns a new {Processor} instance.
     #
     # @param model [Model] the model associated with this processor
-    # @param [#handle_init_event, #handle_star_event, #handle_input_event,
-    #   #handle_output_event] strategy the strategy handling dispatched events
-    def initialize(model, strategy)
+    def initialize(model)
       @model = model
-      @strategy = strategy
       @time_next = 0
       @time_last = 0
       @events_count = Hash.new(0)
@@ -46,10 +43,10 @@ module DEVS
       info "#{self.model} received #{event}"
 
       case event.type
-      when :i then @strategy.handle_init_event(self, event)
-      when :* then @strategy.handle_star_event(self, event)
-      when :x then @strategy.handle_input_event(self, event)
-      when :y then @strategy.handle_output_event(self, event)
+      when :i then handle_init_event(event)
+      when :* then handle_star_event(event)
+      when :x then handle_input_event(event)
+      when :y then handle_output_event(event)
       end
     end
   end

@@ -9,8 +9,10 @@ module DEVS
         @model = CoupledModel.new
         @model.name = :RootCoupledModel
 
+        @namespace = namespace
         #@processor = namespace::Coordinator.new(@model)
-        @processor = Coordinator.new(@model, namespace::CoordinatorStrategy)
+        @processor = Coordinator.new(@model)
+        @processor.singleton_class.send(:include, namespace::CoordinatorStrategy)
 
         @model.processor = @processor
 
@@ -18,7 +20,9 @@ module DEVS
 
         instance_eval(&block) if block
 
-        @root_coordinator = RootCoordinator.new(@processor, @duration, namespace::RootCoordinatorStrategy)
+        @root_coordinator = RootCoordinator.new(@processor, @duration)
+        @root_coordinator.singleton_class.send(:include, namespace::RootCoordinatorStrategy)
+
         @processor.parent = @root_coordinator
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
