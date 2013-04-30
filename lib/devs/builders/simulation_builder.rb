@@ -17,6 +17,7 @@ module DEVS
         instance_eval(&block) if block
 
         @root_coordinator = namespace::RootCoordinator.new(@processor, @duration)
+        @processor.parent = @root_coordinator
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
 
