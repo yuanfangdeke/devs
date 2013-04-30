@@ -1,10 +1,5 @@
-require 'devs/classic/model'
-require 'devs/classic/atomic_model'
-require 'devs/classic/coupled_model'
-require 'devs/classic/processor'
-require 'devs/classic/simulator'
-require 'devs/classic/coordinator'
-require 'devs/classic/root_coordinator'
+require 'devs/classic/simulator_strategy'
+require 'devs/classic/coordinator_strategy'
 
 module DEVS
   # Runs a simulation
