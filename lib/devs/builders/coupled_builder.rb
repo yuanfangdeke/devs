@@ -14,13 +14,15 @@ module DEVS
 
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
-          @model = namespace::CoupledModel.new
+          #@model = namespace::CoupledModel.new
+          @model = CoupledModel.new
         else
           @model = klass.new(*args)
         end
 
         @namespace = namespace
-        @processor = namespace::Coordinator.new(@model)
+        #@processor = namespace::Coordinator.new(@model)
+        @processor = Coordinator.new(@model, namespace::CoordinatorStrategy)
         @model.processor = @processor
         instance_eval(&block) if block
       end

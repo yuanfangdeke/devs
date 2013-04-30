@@ -5,12 +5,12 @@ module DEVS
 
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
-          @model = namespace::AtomicModel.new
+          @model = AtomicModel.new
         else
           @model = klass.new(*args)
         end
 
-        @processor = namespace::Simulator.new(@model)
+        @processor = Simulator.new(@model, namespace::SimulatorStrategy)
         @model.processor = @processor
         instance_eval(&block) if block
       end
