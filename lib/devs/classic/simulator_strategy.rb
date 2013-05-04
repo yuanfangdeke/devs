@@ -16,7 +16,7 @@ module DEVS
       #
       # @param event [Event] the input event
       # @raise [BadSynchronisationError] if the event time isn't in a proper
-      #   range, e.g isn't between {#time_last} and {#time_next}
+      #   range, e.g isn't between {Simulator#time_last} and {Simulator#time_next}
       def handle_input_event(event)
         if (@time_last..@time_next).include?(event.time)
           model.elapsed = event.time - @time_last
@@ -36,7 +36,7 @@ module DEVS
       #
       # @param event [Event] the star event
       # @raise [BadSynchronisationError] if the event time is not equal to
-      #   {#time_next}
+      #   {Simulator#time_next}
       def handle_star_event(event)
         if event.time != @time_next
           raise BadSynchronisationError, "time: #{event.time} should match" \
