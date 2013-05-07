@@ -1,7 +1,5 @@
 module DEVS
-  module Parallel
-    class CoupledModel < Classic::CoupledModel
-      undef :select
-    end
+  class CoupledModel
+    undef :select
   end
 end

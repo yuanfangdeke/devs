@@ -1,20 +1,16 @@
 module DEVS
   module Parallel
-    class Simulator < Classic::Simulator
-      def initialize(model)
-        super(model)
+    module SimulatorStrategy
+      def after_initialize
         @bag = []
+        @lock = Mutex.new
       end
 
-      def dispatch(event)
-        super(event)
-
-        case event.type
-        when :'@' then handle_collect_event(event)
-        end
+      def handle_init_event(event)
+        @time_last = model.time = event.time
+        @time_next = @time_last + model.time_advance
+        info "    time_last: #{@time_last} | time_next: #{@time_next}"
       end
-
-      protected
 
       def handle_collect_event(event)
         if event.time == @time_next
@@ -57,12 +53,14 @@ module DEVS
         info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
+      # version bouquin zeigler
+
       # def handle_star_event(event)
       #   if event.time == @time_next
       #     model.fetch_output! do |message|
       #       parent.dispatch(Event.new(:y, event.time, message))
       #     end
-      #     :done
+      #     #:done
       #   else
       #     raise BadSynchronisationError,
       #           "time: #{event.time} should match time_next: #{@time_next}"
@@ -83,13 +81,14 @@ module DEVS
       #     model.add_bag(@bag)
       #     model.external_transition
       #     @bag.clear
+
+      #     @time_last = model.time = event.time
+      #     @time_next = event.time + model.time_advance
       #   elsif !(@time_last..@time_next).include?(event.time)
       #     raise BadSynchronisationError, "time: #{event.time} should be " \
       #         + "between time_last: #{@time_last} and time_next: #{@time_next}"
       #   end
-      #   @time_last = model.time = event.time
-      #   @time_next = event.time + model.time_advance
-      #   :done
+      #   #:done
       # end
     end
   end

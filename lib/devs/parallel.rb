@@ -1,18 +1,15 @@
-require 'devs/parallel/version'
 require 'devs/parallel/event'
 require 'devs/parallel/atomic_model'
 require 'devs/parallel/coupled_model'
-require 'devs/parallel/simulator'
-require 'devs/parallel/coordinator'
-require 'devs/parallel/root_coordinator'
+
+require 'devs/parallel/dispatch_template'
+require 'devs/parallel/simulator_strategy'
+require 'devs/parallel/coordinator_strategy'
+require 'devs/parallel/root_coordinator_strategy'
 
 module DEVS
-  def psimulate(&block)
+  def simulate(&block)
     Builders::SimulationBuilder.new(Parallel, &block).root_coordinator.simulate
   end
-  module_function :psimulate
-end
-er.new(Parallel, &block).root_coordinator.simulate
-  end
-  module_function :psimulate
+  module_function :simulate
 end
