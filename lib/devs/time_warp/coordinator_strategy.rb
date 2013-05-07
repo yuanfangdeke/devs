@@ -1,16 +1,6 @@
 module DEVS
   module TimeWarp
-    class Coordinator < Classic::Coordinator
-      def dispatch(event)
-        super(event)
-
-        case event.type
-        when :rollback then handle_rollback_event(event)
-        end
-      end
-
-      private
-
+    class CoordinatorStrategy
       def handle_rollback_event(event)
         children_ahead(event.time).each do |child|
           child.dispatch(event)
