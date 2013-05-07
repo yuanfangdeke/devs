@@ -16,6 +16,12 @@ Or install it yourself as:
 
     $ gem install devs
 
+## Documentation
+
+The following API documentation is available :
+
+* [YARD API documentation](http://www.rubydoc.info/github/romain1189/devs/master/frames)
+
 ## Usage
 
     require 'devs'
