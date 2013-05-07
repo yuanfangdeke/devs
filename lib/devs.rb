@@ -22,6 +22,7 @@ require 'devs/coordinator'
 require 'devs/root_coordinator'
 require 'devs/builders'
 require 'devs/thread_pool'
+require 'devs/dispatcher'
 require 'devs/latch'
 require 'devs/notifications'
 
