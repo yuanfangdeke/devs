@@ -6,7 +6,7 @@ require 'devs/parallel'
 require 'gnuplot'
 require 'csv'
 
-class RandomGenerator < DEVS::Parallel::AtomicModel
+class RandomGenerator < DEVS::AtomicModel
   def initialize(min = 0, max = 10, min_step = 1, max_step = 1)
     super()
 
@@ -28,7 +28,7 @@ class RandomGenerator < DEVS::Parallel::AtomicModel
   time_advance { self.sigma }
 end
 
-class Collector < DEVS::Parallel::AtomicModel
+class Collector < DEVS::AtomicModel
   def initialize
     super()
     @results = {}
@@ -109,15 +109,14 @@ end
 
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
-DEVS.psimulate do
-  duration 10000
+DEVS.simulate do
+  duration 100
 
   coupled do
     name :generator
     atomic(RandomGenerator, 0, 5) { name :random }
     add_external_output_coupling(:random, :output)
   end
-
 
   atomic do
     name :ground
