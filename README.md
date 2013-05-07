@@ -34,22 +34,22 @@ Or install it yourself as:
 
         time_advance { self.sigma }
 
+        output do
+          post(@state, output_ports.first)
+        end
+
         internal_transition do
           case @state
           when :red
             @state = :green
-            self.sigma = 20
+            self.sigma = 5
           when :green
             @state = :orange
-            self.sigma = 2
+            self.sigma = 20
           when :orange
             @state = :red
-            self.sigma = 5
+            self.sigma = 2
           end
-        end
-
-        output do
-          post(@state, output_ports.first)
         end
       end
     end
