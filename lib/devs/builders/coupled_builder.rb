@@ -14,7 +14,6 @@ module DEVS
 
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
-          #@model = namespace::CoupledModel.new
           @model = CoupledModel.new
         else
           @model = klass.new(*args)
@@ -22,7 +21,9 @@ module DEVS
 
         @namespace = namespace
         @processor = Coordinator.new(@model)
+        @processor.singleton_class.send(:include, namespace::DispatchTemplate)
         @processor.singleton_class.send(:include, namespace::CoordinatorStrategy)
+        @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
         instance_eval(&block) if block

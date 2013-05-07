@@ -11,7 +11,9 @@ module DEVS
         end
 
         @processor = Simulator.new(@model)
+        @processor.singleton_class.send(:include, namespace::DispatchTemplate)
         @processor.singleton_class.send(:include, namespace::SimulatorStrategy)
+        @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
         instance_eval(&block) if block

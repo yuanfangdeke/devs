@@ -5,14 +5,14 @@ module DEVS
       attr_reader :root_coordinator
 
       def initialize(namespace, &block)
-        #@model = namespace::CoupledModel.new
         @model = CoupledModel.new
         @model.name = :RootCoupledModel
 
         @namespace = namespace
-        #@processor = namespace::Coordinator.new(@model)
         @processor = Coordinator.new(@model)
+        @processor.singleton_class.send(:include, namespace::DispatchTemplate)
         @processor.singleton_class.send(:include, namespace::CoordinatorStrategy)
+        @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
 
@@ -21,7 +21,9 @@ module DEVS
         instance_eval(&block) if block
 
         @root_coordinator = RootCoordinator.new(@processor, @duration)
+        #@processor.singleton_class.send(:include, namespace::DispatchTemplate)
         @root_coordinator.singleton_class.send(:include, namespace::RootCoordinatorStrategy)
+        @root_coordinator.after_initialize if @root_coordinator.respond_to?(:after_initialize)
 
         @processor.parent = @root_coordinator
         hooks.each { |observer| @root_coordinator.add_observer(observer) }

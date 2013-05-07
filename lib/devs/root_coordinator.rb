@@ -43,11 +43,6 @@ module DEVS
       @events_count = Hash.new(0)
     end
 
-    def dispatch(event)
-      @events_count[event.type] += 1
-      info "#{self.model} received #{event} from thread #{Thread.current}"
-    end
-
     # Run the simulation
     def simulate
       @start_time = Time.now
