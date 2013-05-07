@@ -21,4 +21,10 @@ namespace :example do
 
   desc "Run all examples"
   task :all => examples.map { |fn| fn.split('/').last.split('.').first.to_sym }
+
+  desc "List examples"
+  task :list do
+    puts "Available examples"
+    puts examples.map { |fn| "* #{fn.split('/').last.split('.').first}" }
+  end
 end
