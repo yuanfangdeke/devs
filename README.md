@@ -19,6 +19,12 @@ Or install it yourself as:
 
     $ gem install devs
 
+Inside of your Ruby program do:
+
+    require 'dcell'
+
+...to pull it in as a dependency.
+
 ## Documentation
 
 The following API documentation is available :
@@ -27,41 +33,43 @@ The following API documentation is available :
 
 ## Usage
 
-    require 'devs'
+```ruby
+require 'devs'
 
-    DEVS.simulate do
-      duration 50
+DEVS.simulate do
+  duration 50
 
-      atomic do
-        name :traffic_light
-        add_output_port :out
+  atomic do
+    name :traffic_light
+    add_output_port :out
 
-        init do
-          @state = :red
-          self.sigma = 0
-        end
+    init do
+      @state = :red
+      self.sigma = 0
+    end
 
-        time_advance { self.sigma }
+    time_advance { self.sigma }
 
-        output do
-          post(@state, output_ports.first)
-        end
+    output do
+      post(@state, output_ports.first)
+    end
 
-        internal_transition do
-          case @state
-          when :red
-            @state = :green
-            self.sigma = 5
-          when :green
-            @state = :orange
-            self.sigma = 20
-          when :orange
-            @state = :red
-            self.sigma = 2
-          end
-        end
+    internal_transition do
+      case @state
+      when :red
+        @state = :green
+        self.sigma = 5
+      when :green
+        @state = :orange
+        self.sigma = 20
+      when :orange
+        @state = :red
+        self.sigma = 2
       end
     end
+  end
+end
+```
 
 For more examples, see the examples folder
 
