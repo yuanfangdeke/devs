@@ -1,6 +1,6 @@
 module DEVS
   module TimeWarp
-    class SimulatorStrategy
+    module SimulatorStrategy
       def after_initialize
         super
         @queue = []

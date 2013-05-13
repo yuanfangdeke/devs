@@ -1,6 +1,6 @@
 module DEVS
   module TimeWarp
-    class RootCoordinatorStrategy
+    module RootCoordinatorStrategy
       def after_initialize
         @input_events = []
         @output_events = []

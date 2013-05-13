@@ -1,6 +1,6 @@
 module DEVS
   module TimeWarp
-    class CoordinatorStrategy
+    module CoordinatorStrategy
       def handle_rollback_event(event)
         children_ahead(event.time).each do |child|
           child.dispatch(event)
