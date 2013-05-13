@@ -4,7 +4,7 @@ require 'devs'
 
 include DEVS
 
-class TestPort < MiniTest::Unit::TestCase
+class TestPort < MiniTest::Test
   def setup
     @input_port = Port.new(nil, :input, :p0)
     @output_port = Port.new(nil, :output, :p1)

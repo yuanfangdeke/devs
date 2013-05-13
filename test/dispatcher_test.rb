@@ -5,7 +5,7 @@ require 'devs'
 
 include DEVS
 
-class TestDispatcher < MiniTest::Unit::TestCase
+class TestDispatcher < MiniTest::Test
   def setup
     @dispatcher = Dispatcher.new
     @dispatcher.run!

@@ -4,7 +4,7 @@ require 'devs'
 
 include DEVS
 
-class TestLatch < MiniTest::Unit::TestCase
+class TestLatch < MiniTest::Test
 
   def test_requires_positive_count
     assert_raises(ArgumentError) { Latch.new(-1) }

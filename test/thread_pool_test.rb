@@ -6,7 +6,7 @@ require 'devs/parallel'
 
 include DEVS
 
-class TestThreadPool < MiniTest::Unit::TestCase
+class TestThreadPool < MiniTest::Test
   def teardown
     @pool.shutdown if @pool
   end
