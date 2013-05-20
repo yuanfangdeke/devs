@@ -22,7 +22,7 @@ Or install it yourself as:
 
 Inside of your Ruby program do:
 
-    require 'dcell'
+    require 'devs'
 
 ...to pull it in as a dependency.
 
