@@ -21,8 +21,7 @@ module DEVS
         if (@time_last..@time_next).include?(event.time)
           model.elapsed = event.time - @time_last
           info "    received #{event.message}"
-          model.add_input_message(event.message)
-          model.external_transition
+          model.external_transition(ensure_input_message(event.message).freeze)
           @time_last = model.time = event.time
           @time_next = event.time + model.time_advance
           info "    time_last: #{@time_last} | time_next: #{@time_next}"

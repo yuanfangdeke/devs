@@ -19,6 +19,13 @@ module DEVS
        @port = port
     end
 
+    # Returns the model that owns {#port}
+    #
+    # @return [Model] the model
+    def host
+      @port.host
+    end
+
     def ==(other)
       @port == other.port
     end

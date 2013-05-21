@@ -40,7 +40,6 @@ module DEVS
       @name = name.to_sym
       @host = host
 
-      @incoming = nil
       @outgoing = nil
     end
 
@@ -65,15 +64,6 @@ module DEVS
       input? ? "-->#{name}" : "#{name}-->"
     end
 
-    # Read the incoming {Message} if any and empty the mailbox.
-    #
-    # @return [Message, nil] the incoming message or nil
-    def incoming
-      message = @incoming
-      @incoming = nil
-      message
-    end
-
     # Read the outgoing {Message} if any and empty the mailbox.
     #
     # @return [Message, nil] the outgoing message or nil
@@ -94,14 +84,6 @@ module DEVS
         raise MessageAlreadySentError, "An outgoing message already exists"
       end
       @outgoing = value
-    end
-
-    # Put an incoming {Message} into the mailbox.
-    #
-    # @param value [Message] the input message
-    # @return [Message] the added message
-    def incoming=(value)
-      @incoming = value
     end
   end
 end

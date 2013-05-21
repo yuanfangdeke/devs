@@ -18,25 +18,9 @@ module DEVS
     # transitions.
     #
     # @todo see elapsed time reset
-    def confluent_transition
+    def confluent_transition(*messages)
       internal_transition
-      external_transition
-    end
-
-    # Append the given bag of input to the appropriate port's mailbox
-    #
-    # @param bag [Array<Message>]
-    # @raise [InvalidPortHostError] if the {Port#host} is not <i>self</i>
-    # @raise [InvalidPortTypeError] if the {Port} is not of input type
-    def add_bag(bag)
-      inputs = Hash.new { |hash, key| hash[key] = [] }
-      bag.each { |msg| inputs[msg.port] << msg.payload }
-
-      inputs.each do |port, values|
-        raise InvalidPortHostError if port.host != self
-        raise InvalidPortTypeError unless port.input?
-        port.incoming = values
-      end
+      external_transition(*messages)
     end
   end
 end

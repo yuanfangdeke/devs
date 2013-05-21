@@ -34,15 +34,13 @@ module DEVS
             model.internal_transition
           else
             info "  confluent transition"
-            model.add_bag(@bag)
-            model.confluent_transition
+            model.confluent_transition(*frozen_bag)
             @bag.clear
           end
         elsif (@time_last..@time_next).include?(event.time) && !@bag.empty?
           info "  external transition"
           model.elapsed = event.time - @time_last
-          model.add_bag(@bag)
-          model.external_transition
+          model.external_transition(*frozen_bag)
           @bag.clear
         elsif !(@time_last..@time_next).include?(event.time)
           raise BadSynchronisationError, "time: #{event.time} should be " \
@@ -52,6 +50,11 @@ module DEVS
         @time_next = event.time + model.time_advance
         info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
+
+      def frozen_bag
+        @bag.map { |message| ensure_input_message(message).freeze }
+      end
+      protected :frozen_bag
 
       # version bouquin zeigler
 
