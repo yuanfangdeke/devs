@@ -3,6 +3,7 @@
 [![Dependency Status](https://gemnasium.com/romain1189/devs.png)](https://gemnasium.com/romain1189/devs)
 [![Build Status](https://secure.travis-ci.org/romain1189/devs.png?branch=master)](http://travis-ci.org/romain1189/devs)
 [![Code Climate](https://codeclimate.com/github/romain1189/devs.png)](https://codeclimate.com/github/romain1189/devs)
+[![Coverage Status](https://coveralls.io/repos/romain1189/devs/badge.png)](https://coveralls.io/r/romain1189/devs)
 
 DEVS abbreviating Discrete Event System Specification is a modular and hierarchical formalism for modeling and analyzing general systems that can be discrete event systems which might be described by state transition tables, and continuous state systems which might be described by differential equations, and hybrid continuous state and discrete event systems. DEVS is a timed event system.
 

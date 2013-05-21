@@ -1,3 +1,5 @@
+require 'test_helper'
+
 require 'minitest/autorun'
 require 'minitest/mock'
 
@@ -28,7 +30,7 @@ class TestDispatcher < MiniTest::Test
       @dispatcher.dispatch(processor_mock, event_mock)
 
       mocks << processor_mock
-      mocks << event_mock
+      #mocks << event_mock
     end
     sleep 2
 
