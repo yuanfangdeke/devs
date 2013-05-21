@@ -52,12 +52,6 @@ module DEVS
         @model.define_singleton_method(:output, &block) if block
       end
 
-      alias_method :ext_transition, :external_transition
-      alias_method :delta_ext, :external_transition
-      alias_method :int_transition, :internal_transition
-      alias_method :delta_int, :internal_transition
-      alias_method :lambda, :output
-
       # Hooks
       def post_simulation_hook(&block)
         @model.define_singleton_method(:post_simulation_hook, &block) if block

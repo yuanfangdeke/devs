@@ -2,14 +2,9 @@ module DEVS
   module Builders
     class CoupledBuilder < AtomicBuilder
       undef :external_transition
-      undef :ext_transition
-      undef :delta_ext
       undef :internal_transition
-      undef :int_transition
-      undef :delta_int
       undef :time_advance
       undef :output
-      undef :lambda
       undef :post_simulation_hook
 
       def initialize(namespace, klass, *args, &block)

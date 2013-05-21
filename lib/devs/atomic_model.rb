@@ -39,8 +39,6 @@ module DEVS
       def external_transition(&block)
         define_method(:external_transition, &block) if block
       end
-      alias_method :ext_transition, :external_transition
-      alias_method :delta_ext, :external_transition
 
       # Defines the internal transition function (δint) using the given block
       # as body.
@@ -52,8 +50,6 @@ module DEVS
       def internal_transition(&block)
         define_method(:internal_transition, &block) if block
       end
-      alias_method :int_transition, :internal_transition
-      alias_method :delta_int, :internal_transition
 
       # Defines the time advance function (ta) using the given block as body.
       #
@@ -76,7 +72,6 @@ module DEVS
       def output(&block)
         define_method(:output, &block) if block
       end
-      alias_method :lambda, :output
 
       # @!endgroup
 

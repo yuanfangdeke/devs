@@ -21,7 +21,7 @@ module DEVS
         instance_eval(&block) if block
 
         @root_coordinator = RootCoordinator.new(@processor, @duration)
-        #@processor.singleton_class.send(:include, namespace::DispatchTemplate)
+        #@root_coordinator.singleton_class.send(:include, namespace::DispatchTemplate)
         @root_coordinator.singleton_class.send(:include, namespace::RootCoordinatorStrategy)
         @root_coordinator.after_initialize if @root_coordinator.respond_to?(:after_initialize)
 
