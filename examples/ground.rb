@@ -1,107 +1,10 @@
 $:.push File.expand_path('../../lib', __FILE__)
 
 require 'devs'
-require 'gnuplot'
-require 'csv'
+require 'devs/models'
 
-class RandomGenerator < DEVS::AtomicModel
-  def initialize(min = 0, max = 10, min_step = 1, max_step = 1)
-    super()
-
-    @min = min
-    @max = max
-    @min_step = min_step
-    @max_step = max_step
-    self.sigma = 0
-  end
-
-  delta_int { self.sigma = (@min_step + rand * @max_step).round }
-
-  output do
-    messages_count = (1 + rand * output_ports.count).round
-    selected_ports = output_ports.sample(messages_count)
-    selected_ports.each { |port| post((@min + rand * @max).round, port) }
-  end
-
-  time_advance { self.sigma }
-end
-
-class Collector < DEVS::AtomicModel
-  def initialize
-    super()
-    @results = {}
-  end
-
-  external_transition do
-    input_ports.each do |port|
-      value = retrieve(port)
-
-      if @results.has_key?(port.name)
-        ary = @results[port.name]
-      else
-        ary = []
-        @results[port.name] = ary
-      end
-
-      ary << [self.time, value] unless value.nil?
-    end
-
-    self.sigma = 0
-  end
-
-  internal_transition { self.sigma = DEVS::INFINITY }
-
-  time_advance { self.sigma }
-end
-
-class PlotCollector < Collector
-  post_simulation_hook do
-    Gnuplot.open do |gp|
-      Gnuplot::Plot.new(gp) do |plot|
-        plot.title  self.name
-        plot.ylabel "events"
-        plot.xlabel "time"
-
-        @results.each { |key, value|
-          x = []
-          y = []
-          @results[key].each { |a| x << a.first; y << a.last }
-          plot.data <<  Gnuplot::DataSet.new([x, y]) do |ds|
-            ds.with = "lines"
-            ds.title = key
-          end
-        }
-      end
-    end
-  end
-end
-
-class CSVCollector < Collector
-  post_simulation_hook do
-    content = CSV.generate do |csv|
-      columns = []
-      @results.keys.each { |column| columns << "time"; columns << column }
-      csv << columns
-
-      values = []
-      @results.each { |key, value|
-        y = []
-        x = []
-        @results[key].each { |a| x << a.first; y << a.last }
-        values << x
-        values << y
-      }
-
-      max = values.map { |column| column.size }.max || 0
-      0.upto(max) do |i|
-        row = []
-        values.each { |column| row << (column[i].nil? ? 0 : column[i]) }
-        csv << row
-      end
-    end
-    File.open("#{self.name}.csv", 'w') { |file| file.write(content) }
-  end
-end
+# Uncomment this line to use P-DEVS instead of classic simulators
+#require 'devs/parallel'
 
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
@@ -110,7 +13,7 @@ DEVS.simulate do
 
   coupled do
     name :generator
-    atomic(RandomGenerator, 0, 5) { name :random }
+    atomic(DEVS::Models::Generators::RandomGenerator, 0, 5) { name :random }
     add_external_output_coupling(:random, :output)
   end
 
@@ -126,9 +29,9 @@ DEVS.simulate do
       @ruissellement = 0
     end
 
-    delta_ext do
-      input_ports.each do |port|
-        value = retrieve(port)
+    external_transition do |*messages|
+      messages.each do |message|
+        value = message.payload
         @pluviometrie += value unless value.nil?
       end
 
@@ -142,7 +45,7 @@ DEVS.simulate do
       self.sigma = 0
     end
 
-    delta_int {
+    internal_transition {
       @ruissellement = 0
       self.sigma = DEVS::INFINITY
     }
@@ -158,8 +61,8 @@ DEVS.simulate do
   coupled do
     name :collector
 
-    atomic(PlotCollector) { name :plot_output }
-    atomic(CSVCollector) { name :csv_output }
+    atomic(DEVS::Models::Collectors::PlotCollector) { name :plot_output }
+    atomic(DEVS::Models::Collectors::CSVCollector) { name :csv_output }
 
     add_external_input_coupling(:plot_output, :pluviometrie, :pluviometrie)
     add_external_input_coupling(:csv_output, :pluviometrie, :pluviometrie)
