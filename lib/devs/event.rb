@@ -44,7 +44,7 @@ module DEVS
     end
 
     def to_s
-      s = "event #{@type.upcase} at #{@time}"
+      s = "event #{@type} at #{@time}"
       s = "#{s} with #{@message}" if message
       s
     end
