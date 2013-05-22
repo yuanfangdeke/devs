@@ -50,7 +50,7 @@ module DEVS
         save_current_state
       end
 
-      def handle_star_event(event)
+      def handle_internal_event(event)
         super(event)
         save_current_state
       end

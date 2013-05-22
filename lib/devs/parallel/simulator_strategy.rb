@@ -27,7 +27,7 @@ module DEVS
         @bag << event.message
       end
 
-      def handle_star_event(event)
+      def handle_internal_event(event)
         if event.time == @time_next
           if @bag.empty?
             info "  internal transition"
@@ -57,7 +57,7 @@ module DEVS
 
       # version bouquin zeigler
 
-      # def handle_star_event(event)
+      # def handle_internal_event(event)
       #   if event.time == @time_next
       #     model.fetch_output! do |message|
       #       parent.dispatch(Event.new(:y, event.time, message))

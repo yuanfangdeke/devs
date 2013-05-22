@@ -8,7 +8,7 @@ module DEVS
         loop do
           info "* Tick at: #{@time}, #{Time.now - @start_time} secs elapsed"
           child.dispatch(Event.new(:collect, @time))
-          child.dispatch(Event.new(:star, @time))
+          child.dispatch(Event.new(:internal, @time))
           @time = child.time_next
           break if @time >= @duration
         end

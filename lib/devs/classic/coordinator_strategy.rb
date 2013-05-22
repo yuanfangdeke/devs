@@ -17,7 +17,7 @@ module DEVS
       # @param event [Event] the star event
       # @raise [BadSynchronisationError] if the event time is not equal to
       #   {Coordinator#time_next}
-      def handle_star_event(event)
+      def handle_internal_event(event)
         if event.time != @time_next
           raise BadSynchronisationError,
                 "time: #{event.time} should match time_next: #{@time_next}"

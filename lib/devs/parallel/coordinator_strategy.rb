@@ -56,7 +56,7 @@ module DEVS
         @bag << event.message
       end
 
-      def handle_star_event(event)
+      def handle_internal_event(event)
         if (@time_last..@time_next).include?(event.time)
           inputs = Hash.new { |hash, key| hash[key] = [] }
           @bag.each { |msg| inputs[msg.port] << msg.payload }
@@ -75,7 +75,7 @@ module DEVS
           @bag.clear
 
           @synchronize.each do |child|
-            child.dispatch(Event.new(:star, event.time))
+            child.dispatch(Event.new(:internal, event.time))
           end
 
           @synchronize.clear
@@ -89,7 +89,7 @@ module DEVS
 
       # version bouquin zeigler
 
-      # def handle_star_event(event)
+      # def handle_internal_event(event)
       #   if event.time == @time_next
       #     imminent_children.each { |child| child.dispatch(event) }
       #     #:done
