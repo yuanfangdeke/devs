@@ -5,7 +5,7 @@ require 'minitest/mock'
 
 require 'devs'
 
-include DEVS
+include DEVS::Concurrency
 
 class TestDispatcher < MiniTest::Test
   def setup

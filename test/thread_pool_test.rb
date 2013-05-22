@@ -6,7 +6,7 @@ require 'minitest/mock'
 require 'devs'
 require 'devs/parallel'
 
-include DEVS
+include DEVS::Concurrency
 
 class TestThreadPool < MiniTest::Test
   def teardown
