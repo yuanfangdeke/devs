@@ -1,4 +1,3 @@
-require 'devs/classic/dispatch_template'
 require 'devs/classic/simulator_strategy'
 require 'devs/classic/coordinator_strategy'
 require 'devs/classic/root_coordinator_strategy'
