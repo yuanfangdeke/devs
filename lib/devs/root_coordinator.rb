@@ -46,8 +46,7 @@ module DEVS
     # Run the simulation
     def simulate
       @start_time = Time.now
-      info "*** Beginning simulation at #{@start_time} with duration:" \
-         + "#{@duration}"
+      info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
 
       # root coordinator strategy
       run

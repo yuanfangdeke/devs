@@ -49,8 +49,7 @@ module DEVS
 
     # @return [String]
     def to_s
-      "[#{source.name}@#{port_source.name}, " \
-      + "#{destination.name}@#{destination_port.name}]"
+      "[#{source.name}@#{port_source.name}, #{destination.name}@#{destination_port.name}]"
     end
   end
 end

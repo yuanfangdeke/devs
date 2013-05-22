@@ -43,8 +43,7 @@ module DEVS
           model.external_transition(*frozen_bag)
           @bag.clear
         elsif !(@time_last..@time_next).include?(event.time)
-          raise BadSynchronisationError, "time: #{event.time} should be " \
-              + "between time_last: #{@time_last} and time_next: #{@time_next}"
+          raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
         @time_last = model.time = event.time
         @time_next = event.time + model.time_advance

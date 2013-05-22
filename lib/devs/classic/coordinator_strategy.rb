@@ -57,8 +57,7 @@ module DEVS
           @time_next = min_time_next
           info "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
         else
-          raise BadSynchronisationError, "time: #{event.time} should be " \
-              + "between time_last: #{@time_last} and time_next: #{@time_next}"
+          raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
       end
 

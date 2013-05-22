@@ -26,8 +26,7 @@ module DEVS
           @time_next = event.time + model.time_advance
           info "    time_last: #{@time_last} | time_next: #{@time_next}"
         else
-          raise BadSynchronisationError, "time: #{event.time} should be " \
-              + "between time_last: #{@time_last} and time_next: #{@time_next}"
+          raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
       end
 
@@ -38,8 +37,7 @@ module DEVS
       #   {Simulator#time_next}
       def handle_star_event(event)
         if event.time != @time_next
-          raise BadSynchronisationError, "time: #{event.time} should match" \
-              + "time_next: #{@time_next}"
+          raise BadSynchronisationError, "time: #{event.time} should match time_next: #{@time_next}"
         end
 
         model.fetch_output! do |message|
