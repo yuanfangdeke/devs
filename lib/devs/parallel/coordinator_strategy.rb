@@ -33,7 +33,7 @@ module DEVS
         model.each_internal_coupling(port) do |coupling|
           info "    found internal coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:x, event.time, message)
+          new_event = Event.new(:input, event.time, message)
           info "    dispatching #{new_event}"
 
           child = coupling.destination.processor
@@ -46,7 +46,7 @@ module DEVS
         model.each_output_coupling(port) do |coupling|
           info "    found external output coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:y, event.time, message)
+          new_event = Event.new(:output, event.time, message)
           info "    dispatching #{new_event}"
           parent.dispatch(new_event)
         end
@@ -68,14 +68,14 @@ module DEVS
                 message = Message.new(payload, coupling.destination_port)
                 child = coupling.destination.processor
                 @synchronize << child
-                child.dispatch(Event.new(:x, event.time, message))
+                child.dispatch(Event.new(:input, event.time, message))
               end
             end
           end
           @bag.clear
 
           @synchronize.each do |child|
-            child.dispatch(Event.new(:*, event.time))
+            child.dispatch(Event.new(:star, event.time))
           end
 
           @synchronize.clear

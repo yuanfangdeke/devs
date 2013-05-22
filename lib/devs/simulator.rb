@@ -41,6 +41,9 @@ module DEVS
     def dispatch(event)
       @events_count[event.type] += 1
       info "#{self.model} received #{event}"
+
+      name = "handle_#{event.type}_event".to_sym
+      __send__(name, event) if respond_to?(name)
     end
 
     # Ensure the given {Message} is an input {Port} and belongs to {#model}.

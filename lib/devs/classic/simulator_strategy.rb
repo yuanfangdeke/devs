@@ -44,7 +44,7 @@ module DEVS
 
         model.fetch_output! do |message|
           info "    sent #{message}"
-          parent.dispatch(Event.new(:y, event.time, message))
+          parent.dispatch(Event.new(:output, event.time, message))
         end
 
         model.internal_transition

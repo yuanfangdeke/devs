@@ -15,7 +15,7 @@ module DEVS
       def handle_collect_event(event)
         if event.time == @time_next
           model.fetch_output! do |message|
-            parent.dispatch(Event.new(:y, event.time, message))
+            parent.dispatch(Event.new(:output, event.time, message))
           end
         else
           raise BadSynchronisationError,
