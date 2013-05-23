@@ -38,12 +38,18 @@ module DEVS
     # Handles an incoming event
     #
     # @param event [Event] the incoming event
+    # @raise [RuntimeError] if the processor cannot handle the given event
+    #   ({Event#type})
     def dispatch(event)
       @events_count[event.type] += 1
       info "#{self.model} received #{event}"
 
       name = "handle_#{event.type}_event".to_sym
-      __send__(name, event) if respond_to?(name)
+      if respond_to?(name)
+        __send__(name, event)
+      else
+        raise RuntimeError, "#{self} doesn't respond to #{event.type} events"
+      end
     end
 
     # Ensure the given {Message} is an input {Port} and belongs to {#model}.
