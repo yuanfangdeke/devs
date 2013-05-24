@@ -1,3 +1,5 @@
+require 'pqueue'
+
 require 'devs/time_warp/simulator_strategy'
 require 'devs/time_warp/coordinator_strategy'
 require 'devs/time_warp/root_coordinator_strategy'
