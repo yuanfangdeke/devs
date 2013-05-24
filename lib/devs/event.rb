@@ -43,6 +43,10 @@ module DEVS
       other.time <=> @time
     end
 
+    def ==(other)
+      @type == other.type && @time == other.time
+    end
+
     def to_s
       s = "event #{@type} at #{@time}"
       s = "#{s} with #{@message}" if message
