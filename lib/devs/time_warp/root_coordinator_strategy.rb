@@ -2,11 +2,13 @@ module DEVS
   module TimeWarp
     module RootCoordinatorStrategy
       def after_initialize
-        @input_events = []
-        @output_events = []
+        # queue to store input events
+        @input_events = PQueue.new
+        # queue to store output events
+        @output_events = PQueue.new
 
         # the sent, not yet received output events
-        @pending_output_events = []
+        @pending_output_events = PQueue.new
 
         @time_last = 0
       end
