@@ -34,8 +34,6 @@ module DEVS
         end
       end
 
-      private
-
       def handle_init_event(event)
         super(event)
         save_current_state
@@ -93,6 +91,17 @@ module DEVS
 
         @time_last = state.time_last
         @time_next = state.time_next
+      end
+
+      # Perform a fossil collection based on the given global virtual time. All
+      # events prior to GVT can be freed so we can clean up saved states.
+      #
+      # @param gvt [Fixnum] the global virtual time, computed as the minimum of
+      #   the last event times in all processors and the minimum of the pending
+      #   events
+      # @return [Array<State>] the deleted states
+      def fossil_collection(gvt)
+        @queue.delete_if { |state| state.time_next < gvt }
       end
     end
   end

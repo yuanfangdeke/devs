@@ -13,6 +13,10 @@ module DEVS
       def children_ahead(time)
         children.select { |child| child.time_last > time }
       end
+
+      def fossil_collection(gvt)
+        @children.each { |child| child.fossil_collection(gvt) }
+      end
     end
   end
 end
