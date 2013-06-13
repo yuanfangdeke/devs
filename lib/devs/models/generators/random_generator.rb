@@ -1,3 +1,4 @@
+require 'securerandom'
 
 module DEVS
   module Models
@@ -16,9 +17,9 @@ module DEVS
         internal_transition { self.sigma = (@min_step + rand * @max_step).round }
 
         output do
-          messages_count = (1 + rand * output_ports.count).round
+          messages_count = (1 + SecureRandom.random_number * output_ports.count).round
           selected_ports = output_ports.sample(messages_count)
-          selected_ports.each { |port| post((@min + rand * @max).round, port) }
+          selected_ports.each { |port| post((@min + SecureRandom.random_number * @max).round, port) }
         end
 
         time_advance { self.sigma }
