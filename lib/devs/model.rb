@@ -102,7 +102,10 @@ module DEVS
       unless port.kind_of?(Port)
         name = port
         port = find_input_port_by_name(name)
-        port = add_input_port(name) if port.nil?
+        if port.nil?
+          port = add_input_port(name)
+          DEVS.logger.warn("specified input port #{name} doesn't exist for #{self}. creating it")
+        end
       end
       port
     end
@@ -118,7 +121,10 @@ module DEVS
       unless port.kind_of?(Port)
         name = port
         port = find_output_port_by_name(name)
-        port = add_output_port(name) if port.nil?
+        if port.nil?
+          port = add_output_port(name)  
+          DEVS.logger.warn("specified output port #{name} doesn't exist for #{self}. creating it")
+        end
       end
       port
     end
