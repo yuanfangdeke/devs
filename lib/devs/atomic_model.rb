@@ -165,7 +165,7 @@ module DEVS
     #   model
     def ensure_port(port)
       raise ArgumentError, "port argument cannot be nil" if port.nil?
-      if !port.respond_to?(:name)
+      unless port.kind_of?(Port)
         port = self[port]
         raise ArgumentError, "the given port doesn't exists" if port.nil?
       end

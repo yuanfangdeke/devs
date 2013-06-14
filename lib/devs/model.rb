@@ -97,9 +97,7 @@ module DEVS
     # @param port [String, Symbol] the input port name
     # @return [Port] the matching port or the newly created port
     def find_or_create_input_port_if_necessary(port)
-      if port.nil?
-        port = add_input_port
-      elsif !port.respond_to?(:name)
+      unless port.kind_of?(Port)
         name = port
         port = find_input_port_by_name(name)
         port = add_input_port(name) if port.nil?
@@ -115,9 +113,7 @@ module DEVS
     # @param port [String, Symbol] the output port name
     # @return [Port] the matching port or the newly created port
     def find_or_create_output_port_if_necessary(port)
-      if port.nil?
-        port = add_output_port
-      elsif !port.respond_to?(:name)
+      unless port.kind_of?(Port)
         name = port
         port = find_output_port_by_name(name)
         port = add_output_port(name) if port.nil?
