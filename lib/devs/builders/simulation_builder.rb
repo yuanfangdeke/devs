@@ -23,7 +23,6 @@ module DEVS
         @root_coordinator.singleton_class.send(:include, namespace::RootCoordinatorStrategy)
         @root_coordinator.after_initialize if @root_coordinator.respond_to?(:after_initialize)
 
-        @processor.parent = @root_coordinator
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
 
