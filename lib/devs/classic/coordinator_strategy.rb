@@ -9,7 +9,7 @@ module DEVS
         @children.each { |child| child.dispatch(event) }
         @time_last = max_time_last
         @time_next = min_time_next
-        info "#{model} set tl: #{@time_last}; tn: #{@time_next}"
+        debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       # Handles star events (* messages)
@@ -26,14 +26,14 @@ module DEVS
         children = imminent_children
         children_models = children.map(&:model)
         child_model = model.select(children_models)
-        info "    selected #{child_model} in #{children_models.map(&:name)}"
+        debug "    selected #{child_model} in #{children_models.map(&:name)}"
         child = children[children_models.index(child_model)]
 
         child.dispatch(event)
 
         @time_last = event.time
         @time_next = min_time_next
-        info "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       # Handles input events (x messages)
@@ -47,7 +47,7 @@ module DEVS
           payload, port = *event.message
 
           model.each_input_coupling(port) do |coupling|
-            info "    #{model} found external input coupling #{coupling}"
+            debug "    #{model} found external input coupling #{coupling}"
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
             child.dispatch(Event.new(:input, event.time, message))
@@ -55,7 +55,7 @@ module DEVS
 
           @time_last = event.time
           @time_next = min_time_next
-          info "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+          debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
         else
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
@@ -68,18 +68,18 @@ module DEVS
         payload, port = *event.message
 
         model.each_output_coupling(port) do |coupling|
-          info "    found external output coupling #{coupling}"
+          debug "    found external output coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:output, event.time, message)
-          info "    dispatching #{new_event}"
+          debug "    dispatching #{new_event}"
           parent.dispatch(new_event)
         end
 
         model.each_internal_coupling(port) do |coupling|
-          info "    found internal coupling #{coupling}"
+          debug "    found internal coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:input, event.time, message)
-          info "    dispatching #{new_event}"
+          debug "    dispatching #{new_event}"
           coupling.destination.processor.dispatch(new_event)
         end
       end

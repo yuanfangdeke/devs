@@ -6,7 +6,7 @@ module DEVS
         @time = child.time_next
 
         loop do
-          info "* Tick at: #{@time}, #{Time.now - @start_time} secs elapsed"
+          debug "* Tick at: #{@time}, #{Time.now - @start_time} secs elapsed"
           child.dispatch(Event.new(:internal, @time))
           @time = child.time_next
           break if @time >= @duration

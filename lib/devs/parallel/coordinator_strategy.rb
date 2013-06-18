@@ -10,7 +10,7 @@ module DEVS
         @children.each { |child| child.dispatch(event) }
         @time_last = max_time_last
         @time_next = min_time_next
-        info "#{model} set tl: #{@time_last}; tn: #{@time_next}"
+        debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       def handle_collect_event(event)
@@ -31,10 +31,10 @@ module DEVS
         payload, port = *event.message
 
         model.each_internal_coupling(port) do |coupling|
-          info "    found internal coupling #{coupling}"
+          debug "    found internal coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:input, event.time, message)
-          info "    dispatching #{new_event}"
+          debug "    dispatching #{new_event}"
 
           child = coupling.destination.processor
 
@@ -44,10 +44,10 @@ module DEVS
         end
 
         model.each_output_coupling(port) do |coupling|
-          info "    found external output coupling #{coupling}"
+          debug "    found external output coupling #{coupling}"
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:output, event.time, message)
-          info "    dispatching #{new_event}"
+          debug "    dispatching #{new_event}"
           parent.dispatch(new_event)
         end
       end
@@ -63,7 +63,7 @@ module DEVS
 
           inputs.each do |port, values|
             model.each_input_coupling(port) do |coupling|
-              info "    #{self.model} found external input coupling #{coupling}"
+              debug "    #{self.model} found external input coupling #{coupling}"
               values.each do |payload|
                 message = Message.new(payload, coupling.destination_port)
                 child = coupling.destination.processor
@@ -107,7 +107,7 @@ module DEVS
       #     # input
       #     receivers = []
       #     model.each_input_coupling(port) do |coupling|
-      #       info "    #{self.model} found external input coupling #{coupling}"
+      #       debug "    #{self.model} found external input coupling #{coupling}"
       #       child = coupling.destination.processor
       #       receivers << child
       #       message = Message.new(payload, coupling.destination_port)
@@ -115,7 +115,7 @@ module DEVS
       #     end
 
       #     (imminent_children - receivers).each do |child|
-      #       info "lololol #{child}"
+      #       debug "lololol #{child}"
       #       child.dispatch(Event.new(:x, event.time))
       #     end
 

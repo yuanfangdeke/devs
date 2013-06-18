@@ -46,20 +46,21 @@ module DEVS
     # Run the simulation
     def simulate
       @start_time = Time.now
-      info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+      debug "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
 
       # root coordinator strategy
       run
 
       msg = "*** Simulation ended after #{Time.now - @start_time} secs."
-      DEVS.logger ? info(msg) : puts(msg)
+      debug(msg)
+      puts(msg)
 
-      info "* Events stats :"
+      debug "* Events stats :"
       stats = child.stats
       stats[:total] = stats.values.reduce(&:+)
-      info "    OVERALL #{stats}"
+      debug "    OVERALL #{stats}"
 
-      info "* Calling post simulation hooks"
+      debug "* Calling post simulation hooks"
       changed
       notify_observers(:post_simulation)
     end

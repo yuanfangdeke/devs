@@ -9,7 +9,7 @@ module DEVS
       def handle_init_event(event)
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        info "    time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "    time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       # Handles input events (x messages)
@@ -20,11 +20,11 @@ module DEVS
       def handle_input_event(event)
         if (@time_last..@time_next).include?(event.time)
           model.elapsed = event.time - @time_last
-          info "    received #{event.message}"
+          debug "    received #{event.message}"
           model.external_transition(ensure_input_message(event.message).freeze)
           @time_last = model.time = event.time
           @time_next = event.time + model.time_advance
-          info "    time_last: #{@time_last} | time_next: #{@time_next}"
+          debug "    time_last: #{@time_last} | time_next: #{@time_next}"
         else
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
@@ -41,7 +41,7 @@ module DEVS
         end
 
         model.fetch_output! do |message|
-          info "    sent #{message}"
+          debug "    sent #{message}"
           parent.dispatch(Event.new(:output, event.time, message))
         end
 
@@ -49,7 +49,7 @@ module DEVS
 
         @time_last = model.time = event.time
         @time_next = event.time + model.time_advance
-        info "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
     end
   end

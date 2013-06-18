@@ -31,7 +31,7 @@ module DEVS
     def stats
       stats = @events_count.dup
       stats[:total] = stats.values.reduce(&:+)
-      info "    #{self.model}: #{stats}"
+      debug "    #{self.model}: #{stats}"
       @events_count
     end
 
@@ -42,7 +42,7 @@ module DEVS
     #   ({Event#type})
     def dispatch(event)
       @events_count[event.type] += 1
-      info "#{self.model} received #{event}"
+      debug "#{self.model} received #{event}"
 
       name = "handle_#{event.type}_event".to_sym
       if respond_to?(name)

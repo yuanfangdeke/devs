@@ -9,12 +9,13 @@ module DEVS
       def handle_init_event(event)
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        info "    time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "    time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       def handle_collect_event(event)
         if event.time == @time_next
           model.fetch_output! do |message|
+            debug "    sent #{message}"
             parent.dispatch(Event.new(:output, event.time, message))
           end
         else
@@ -24,21 +25,22 @@ module DEVS
       end
 
       def handle_input_event(event)
+        debug "    adding #{event.message} to bag"
         @bag << event.message
       end
 
       def handle_internal_event(event)
         if event.time == @time_next
           if @bag.empty?
-            info "  internal transition"
+            debug "   internal transition"
             model.internal_transition
           else
-            info "  confluent transition"
+            debug "   confluent transition"
             model.confluent_transition(*frozen_bag)
             @bag.clear
           end
         elsif (@time_last..@time_next).include?(event.time) && !@bag.empty?
-          info "  external transition"
+          debug "    external transition"
           model.elapsed = event.time - @time_last
           model.external_transition(*frozen_bag)
           @bag.clear
@@ -47,7 +49,7 @@ module DEVS
         end
         @time_last = model.time = event.time
         @time_next = event.time + model.time_advance
-        info "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "#{self.model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       def frozen_bag

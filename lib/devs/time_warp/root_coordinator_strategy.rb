@@ -18,7 +18,7 @@ module DEVS
         @time_last = child.time_last
 
         loop do
-          info "* Tick at: #{@time}, #{Time.now - @real_start_time} secs elapsed"
+          debug "* Tick at: #{@time}, #{Time.now - @real_start_time} secs elapsed"
           input_event = @input_events.pop
 
           if input_event.time <= child.time_next
