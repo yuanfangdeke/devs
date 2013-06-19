@@ -28,23 +28,31 @@ module DEVS
     # Adds an input port to <i>self</i>.
     #
     # @param name [String, Symbol]
-    # @return [nil]
+    # @return [Port, Array<Port>] the created port or the list of created ports
     def add_input_port(*names)
-      names.each do |name|
-        @input_ports << Port.new(self, :input, name)
+      ports = names.map { |name| Port.new(self, :input, name) }
+      @input_ports.concat(ports)
+      
+      if ports.size == 1
+        ports.first
+      else
+        ports
       end
-      nil
     end
 
     # Adds an output port to <i>self</i>.
     #
     # @param name [String, Symbol] the port name
-    # @return [nil]
+    # @return [Port, Array<Port>] the created port or the list of created ports
     def add_output_port(*names)
-      names.each do |name|
-        @output_ports << Port.new(self, :output, name)
+      ports = names.map { |name| Port.new(self, :output, name) }
+      @output_ports.concat(ports)
+      
+      if ports.size == 1
+        ports.first
+      else
+        ports
       end
-      nil
     end
 
     # Returns the list of input ports' names
