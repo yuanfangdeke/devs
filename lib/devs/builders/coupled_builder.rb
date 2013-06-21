@@ -22,7 +22,8 @@ module DEVS
         @model.processor = @processor
         instance_eval(&block) if block
       end
-
+      
+      # @return [CoupledModel] the new coupled model
       def coupled(*args, &block)
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
@@ -32,8 +33,11 @@ module DEVS
         coordinator.model.parent = @model
         @model << coordinator.model
         @processor << coordinator
+        
+        coordinator.model
       end
-
+      
+      # @return [AtomicModel] the new atomic model
       def atomic(*args, &block)
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
@@ -43,6 +47,8 @@ module DEVS
         simulator.model.parent = @model
         @model << simulator.model
         @processor << simulator
+        
+        simulator.model
       end
 
       def select(&block)
