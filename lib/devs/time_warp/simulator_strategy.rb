@@ -13,10 +13,10 @@ module DEVS
         attr_reader :time_last, :time_next, :instance_variables
 
         # @!attribute [r] time_last
-        #   @return [Fixnum] Returns the saved time last value
+        #   @return [Numeric] Returns the saved time last value
 
         # @!attribute [r] time_next
-        #   @return [Fixnum] Returns the saved time next value
+        #   @return [Numeric] Returns the saved time next value
 
         # @!attribute [r] instance_variables
         #   @return [Hash<Symbol, Object>] Returns a hash associating each value
@@ -24,8 +24,8 @@ module DEVS
 
         # Returns a new instance of {State}
         #
-        # @param time_last [Fixnum] the current {Simulator#time_last} value
-        # @param time_next [Fixnum] the current {Simulator#time_next} value
+        # @param time_last [Numeric] the current {Simulator#time_last} value
+        # @param time_next [Numeric] the current {Simulator#time_next} value
         # @param instance_variables [Hash<Symbol, Object>] a hash associating
         #   each value for each variable name
         def initialize(time_last, time_next, instance_variables)
@@ -67,7 +67,7 @@ module DEVS
 
       # Restore the state of the associated {Model} at a given time.
       #
-      # @param time [Fixnum] the time at which the model state should be
+      # @param time [Numeric] the time at which the model state should be
       #   restored
       # @raise [BadSynchronisationError] if no state were saved at the given
       #   time
@@ -96,7 +96,7 @@ module DEVS
       # Perform a fossil collection based on the given global virtual time. All
       # events prior to GVT can be freed so we can clean up saved states.
       #
-      # @param gvt [Fixnum] the global virtual time, computed as the minimum of
+      # @param gvt [Numeric] the global virtual time, computed as the minimum of
       #   the last event times in all processors and the minimum of the pending
       #   events
       # @return [Array<State>] the deleted states

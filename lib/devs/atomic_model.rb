@@ -6,18 +6,18 @@ module DEVS
     # @!attribute sigma
     #   Sigma is a convenient variable introduced to simplify modeling phase
     #   and represent the next activation time (see {#time_advance})
-    #   @return [Fixnum] Returns the sigma (σ) value
+    #   @return [Numeric] Returns the sigma (σ) value
 
     # @!attribute elapsed
     #   This attribute is updated along simulation. It represents the elapsed
     #   time since the last transition.
-    #   @return [Fixnum] Returns the elapsed time since the last transition
+    #   @return [Numeric] Returns the elapsed time since the last transition
 
     # @!attribute time
     #   This attribute is updated along with simulation clock and
     #   represent the last simulation time at which this model
     #   was activated. Its default assigned value is {INFINITY}.
-    #   @return [Fixnum] Returns the last activation time
+    #   @return [Numeric] Returns the last activation time
 
     # syntax sugaring
     class << self
@@ -255,7 +255,7 @@ module DEVS
     # @see AtomicModel.time_advance
     # @example
     #   def time_advance; self.sigma; end
-    # @return [Fixnum] the time to wait before the model will be activated
+    # @return [Numeric] the time to wait before the model will be activated
     def time_advance
       @sigma
     end

@@ -11,7 +11,7 @@ module DEVS
 
       # Returns a new {Latch} instance.
       #
-      # @param count [Fixnum] the specified count
+      # @param count [Numeric] the specified count
       # @raise [ArgumentError] if count is not a positive value
       def initialize(count = 1)
         raise ArgumentError, "count should be positive" if count < 0
@@ -24,7 +24,7 @@ module DEVS
       #
       # @note The count should have reached zero in order to reset the count and
       #   reuse the latch.
-      # @param count [Fixnum] the new count
+      # @param count [Numeric] the new count
       # @raise [ArgumentError] if count is not a positive value
       # @raise [StandardError] if the count is not equal to zero
       def count=(count = 1)
@@ -37,7 +37,7 @@ module DEVS
 
       # Returns the count value
       #
-      # @return [Fixnum] the count value
+      # @return [Numeric] the count value
       def count
         @lock.synchronize { @count }
       end

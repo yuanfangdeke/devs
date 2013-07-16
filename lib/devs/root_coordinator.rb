@@ -15,13 +15,13 @@ module DEVS
     alias_method :clock, :time
 
     # @!attribute [r] time
-    #   @return [Fixnum] Returns the current simulation time
+    #   @return [Numeric] Returns the current simulation time
 
     # @!attribute [r] start_time
     #   @return [Time] Returns the time at which the simulation started
 
     # @!attribute [r] duration
-    #   @return [Fixnum] Returns the total duration of the simulation time
+    #   @return [Numeric] Returns the total duration of the simulation time
 
     # @!attribute [r] child
     #   Returns the coordinator which <i>self</i> is managing.

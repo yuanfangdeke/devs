@@ -16,7 +16,7 @@ module DEVS
         # Returns a new {AutoTrim} instance.
         #
         # @param pool [ThreadPool] the associate thread pool
-        # @param timeout [Fixnum] the frequency (in seconds) at which the thread
+        # @param timeout [Numeric] the frequency (in seconds) at which the thread
         #   will attempt to release unecessary worker threads
         def initialize(pool, timeout)
           @pool = pool
@@ -45,7 +45,7 @@ module DEVS
         # Update the frequency (in seconds) at which the thread will attempt to
         # release release unecessary worker threads
         #
-        # @param value [Fixnum] the frequency (in seconds)
+        # @param value [Numeric] the frequency (in seconds)
         def timeout=(value)
           @timeout = value
           @thread.wakeup
@@ -54,8 +54,8 @@ module DEVS
 
       # Returns a new {ThreadPool} instance.
       #
-      # @param min [Fixnum] the minimum number of threads waiting to do some work
-      # @param max [Fixnum] the maximum number of threads to spawn when the pool
+      # @param min [Numeric] the minimum number of threads waiting to do some work
+      # @param max [Numeric] the maximum number of threads to spawn when the pool
       #   is overloaded
       def initialize(min = 1, max = nil, &block)
         @block = block
@@ -139,7 +139,7 @@ module DEVS
 
       # Returns the remaining amount of work.
       #
-      # @return [Fixnum] the amount
+      # @return [Integer] the amount
       def backlog
         @lock.synchronize { @queue.count }
       end
@@ -173,8 +173,8 @@ module DEVS
 
       # Resize the thread pool according to the given values.
       #
-      # @param min [Fixnum] the new minimum number of waiting threads
-      # @param max [Fixnum] the maximum number of spawned threads
+      # @param min [Integer] the new minimum number of waiting threads
+      # @param max [Integer the maximum number of spawned threads
       def resize(min = 1, max = nil)
         min = 0 if min < 0
         max = min if max < min || max.nil?
@@ -207,7 +207,7 @@ module DEVS
 
       # Change the time to keep alive extra worker threads.
       #
-      # @param value [Fixnum] the value in seconds to keep alive extra worker
+      # @param value [Numeric] the value in seconds to keep alive extra worker
       #   threads
       def keep_alive_time=(value)
         @keep_alive_time = value

@@ -11,11 +11,11 @@ module DEVS
     #   @return [Model] Returns the model associated with <i>self</i>
 
     # @!attribute [r] time_next
-    #   @return [Fixnum] Returns the next simulation time at which the
+    #   @return [Numeric] Returns the next simulation time at which the
     #     associated {Model} should be activated
 
     # @!attribute [r] time_last
-    #   @return [Fixnum] Returns the last simulation time at which the
+    #   @return [Numeric] Returns the last simulation time at which the
     #     associated {Model} was activated
 
     # Returns a new {Simulator} instance.
