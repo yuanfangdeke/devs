@@ -54,8 +54,8 @@ module DEVS
 
       # Returns a new {ThreadPool} instance.
       #
-      # @param min [Numeric] the minimum number of threads waiting to do some work
-      # @param max [Numeric] the maximum number of threads to spawn when the pool
+      # @param min [Integer] the minimum number of threads waiting to do some work
+      # @param max [Integer] the maximum number of threads to spawn when the pool
       #   is overloaded
       def initialize(min = 1, max = nil, &block)
         @block = block
