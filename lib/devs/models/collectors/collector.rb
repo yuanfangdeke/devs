@@ -18,7 +18,7 @@ module DEVS
               @results[port.name] = ary
             end
 
-            ary << [self.time, value] unless value.nil?
+            ary << [@time, value] unless value.nil?
           end
 
           self.sigma = 0
