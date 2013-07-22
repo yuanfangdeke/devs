@@ -5,19 +5,19 @@ module DEVS
     attr_reader :type, :name, :host
 
     # @!attribute [r] type
-    #   @return [Symbol] Returns port's type, either <i>:input</i> or
-    #     <i>:output</i>
+    #   @return [Symbol] Returns port's type, either <tt>:input</tt> or
+    #     <tt>:output</tt>
 
     # @!attribute [r] name
-    #   @return [Symbol] Returns the name identifying <i>self</i>
+    #   @return [Symbol] Returns the name identifying <tt>self</tt>
 
     # @!attribute [r] host
-    #   @return [Model] Returns the model that owns <i>self</i>
+    #   @return [Model] Returns the model that owns <tt>self</tt>
 
     # Represent the list of possible type of ports.
     #
-    # 1. :input for an input port
-    # 2. :output for an output port
+    # 1. <tt>:input</tt> for an input port
+    # 2. <tt>:output</tt> for an output port
     #
     # @return [Array<Symbol>] the port types
     def self.types
@@ -27,7 +27,8 @@ module DEVS
     # Returns a new {Port} instance.
     #
     # @param host [Model] the owner of self
-    # @param type [Symbol] the type of port, either `:input` or `:output`
+    # @param type [Symbol] the type of port, either <tt>:input</tt> or
+    #   <tt>:output</tt>
     # @param name [String, Symbol] the name given to identify the port
     # @raise [ArgumentError] if the specified type is unknown
     def initialize(host, type, name)
@@ -43,9 +44,10 @@ module DEVS
       @outgoing = nil
     end
 
-    # Check if self is an input port
+    # Check if <tt>self</tt> is an input port
     #
-    # @return [Boolean] true if self is an input port, false otherwise
+    # @return [Boolean] <tt>true</tt> if <tt>self</tt> is an input port,
+    #   <tt>false</tt> otherwise
     def input_port?
       type == :input
     end
@@ -53,7 +55,8 @@ module DEVS
 
     # Check if self is an output port
     #
-    # @return [Boolean] true if self is an output port, false otherwise
+    # @return [Boolean] <tt>true</tt> if <tt>self</tt> is an output port,
+    #   <tt>false</tt> otherwise
     def output_port?
       type == :output
     end
@@ -66,7 +69,7 @@ module DEVS
 
     # Read the outgoing {Message} if any and empty the mailbox.
     #
-    # @return [Message, nil] the outgoing message or nil
+    # @return [Message, nil] the outgoing message or <tt>nil</tt>
     def outgoing
       message = @outgoing
       @outgoing = nil

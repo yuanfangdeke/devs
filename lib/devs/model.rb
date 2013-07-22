@@ -11,28 +11,28 @@ module DEVS
       @output_ports = []
     end
 
-    # Returns a boolean indicating if <i>self</i> is an atomic model
+    # Returns a boolean indicating if <tt>self</tt> is an atomic model
     #
     # @return [false]
     def atomic?
       false
     end
 
-    # Returns a boolean indicating if <i>self</i> is an atomic model
+    # Returns a boolean indicating if <tt>self</tt> is an atomic model
     #
     # @return [false]
     def coupled?
       false
     end
 
-    # Adds an input port to <i>self</i>.
+    # Adds an input port to <tt>self</tt>.
     #
     # @param name [String, Symbol]
     # @return [Port, Array<Port>] the created port or the list of created ports
     def add_input_port(*names)
       ports = names.map { |name| Port.new(self, :input, name) }
       @input_ports.concat(ports)
-      
+
       if ports.size == 1
         ports.first
       else
@@ -40,14 +40,14 @@ module DEVS
       end
     end
 
-    # Adds an output port to <i>self</i>.
+    # Adds an output port to <tt>self</tt>.
     #
     # @param name [String, Symbol] the port name
     # @return [Port, Array<Port>] the created port or the list of created ports
     def add_output_port(*names)
       ports = names.map { |name| Port.new(self, :output, name) }
       @output_ports.concat(ports)
-      
+
       if ports.size == 1
         ports.first
       else
@@ -62,7 +62,7 @@ module DEVS
       @input_ports.map { |port| port.name }
     end
 
-    # Find the input {Port} identified by the given <i>name</i>
+    # Find the input {Port} identified by the given <tt>name</tt>
     #
     # @param name [String, Symbol] the port name
     # @return [Port] the matching port, nil otherwise
@@ -77,7 +77,7 @@ module DEVS
       @output_ports.map { |port| port.name }
     end
 
-    # Find the output {Port} identified by the given <i>name</i>
+    # Find the output {Port} identified by the given <tt>name</tt>
     #
     # @param name [String, Symbol] the port name
     # @return [Port] the matching port, nil otherwise

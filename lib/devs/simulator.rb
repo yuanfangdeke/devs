@@ -8,7 +8,7 @@ module DEVS
     #   @return [Coordinator] Returns the parent {Coordinator}
 
     # @!attribute [r] model
-    #   @return [Model] Returns the model associated with <i>self</i>
+    #   @return [Model] Returns the model associated with <tt>self</tt>
 
     # @!attribute [r] time_next
     #   @return [Numeric] Returns the next simulation time at which the

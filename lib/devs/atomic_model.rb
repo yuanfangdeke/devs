@@ -97,16 +97,17 @@ module DEVS
 
       @elapsed = 0.0
       @sigma = INFINITY
+      @time = 0
     end
 
-    # Returns a boolean indicating if <i>self</i> is an atomic model
+    # Returns a boolean indicating if <tt>self</tt> is an atomic model
     #
     # @return [true]
     def atomic?
       true
     end
 
-    # Returns a boolean indicating if <i>self</i> is an observer of hooks
+    # Returns a boolean indicating if <tt>self</tt> is an observer of hooks
     # events
     #
     # @api private
@@ -248,7 +249,7 @@ module DEVS
     def internal_transition; end
 
     # Time advance function (ta), called after each transition to give a
-    # chance to <i>self</i> to be active. By default returns {#sigma}
+    # chance to <tt>self</tt> to be active. By default returns {#sigma}
     #
     # @note Override this method to implement the appropriate behavior of
     #   your model or define it with {AtomicModel.time_advance}

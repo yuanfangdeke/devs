@@ -186,7 +186,7 @@ module DEVS
 
       # Returns a boolean indicating if the auto trim feature is active.
       #
-      # @return [Boolean] true if <i>self</i> the auto trim feature is active,
+      # @return [Boolean] true if <tt>self</tt> the auto trim feature is active,
       #   false otherwise
       def auto_trim?
         @auto_trim != nil
@@ -214,7 +214,7 @@ module DEVS
         @auto_trim.timeout = value if @auto_trim
       end
 
-      # Shutdown <i>self</i>, killing all threads.
+      # Shutdown <tt>self</tt>, killing all threads.
       def shutdown
         @lock.synchronize do
           @shutdown = true

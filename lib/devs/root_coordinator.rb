@@ -5,6 +5,8 @@ module DEVS
     # used for hooks
     include Observable
 
+    attr_accessor :duration
+
     # The default duration of the simulation if argument omitted
     DEFAULT_DURATION = 60
 
@@ -24,7 +26,7 @@ module DEVS
     #   @return [Numeric] Returns the total duration of the simulation time
 
     # @!attribute [r] child
-    #   Returns the coordinator which <i>self</i> is managing.
+    #   Returns the coordinator which <tt>self</tt> is managing.
     #   @return [Coordinator] Returns the coordinator associated with the
     #     <i>self</i>
 
@@ -46,14 +48,12 @@ module DEVS
     # Run the simulation
     def simulate
       @start_time = Time.now
-      debug "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+      info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
 
       # root coordinator strategy
       run
 
-      msg = "*** Simulation ended after #{Time.now - @start_time} secs."
-      debug(msg)
-      puts(msg)
+      info "*** Simulation ended after #{Time.now - @start_time} secs."
 
       debug "* Events stats :"
       stats = child.stats

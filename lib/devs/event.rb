@@ -34,7 +34,7 @@ module DEVS
     end
 
     # Comparison - Returns an integer (-1, 0 or +1) if this event is less than,
-    # equal to, or greater than <i>other</i>. The comparison is based on the
+    # equal to, or greater than <tt>other</tt>. The comparison is based on the
     # time of each event (descending).
     #
     # @param other [Event] the event to compare to

@@ -49,7 +49,7 @@ module DEVS
       @output_couplings = []
     end
 
-    # Returns a boolean indicating if <i>self</i> is a coupled model
+    # Returns a boolean indicating if <tt>self</tt> is a coupled model
     #
     # @return [true]
     def coupled?
@@ -76,7 +76,7 @@ module DEVS
       @children.map { |child| child.name }
     end
 
-    # Find the component {Model} identified by the given <i>name</i>
+    # Find the component {Model} identified by the given <tt>name</tt>
     #
     # @param name [String, Symbol] the component name
     # @return [Model] the matching component, nil otherwise
@@ -92,7 +92,7 @@ module DEVS
     #   end
     # end
 
-    # Calls <i>block</i> once for each child in <b>self</b>, passing that
+    # Calls <tt>block</tt> once for each child in <tt>self</tt>, passing that
     # element as a parameter.
     #
     # If no block is given, an {Enumerator} is returned instead.
@@ -109,7 +109,7 @@ module DEVS
       end
     end
 
-    # Calls <i>block</i> once for each external input coupling (EIC) in
+    # Calls <tt>block</tt> once for each external input coupling (EIC) in
     # {#input_couplings}, passing that element as a parameter. If a port is
     # given, it is used to filter the couplings having this port as a source.
     #
@@ -119,7 +119,7 @@ module DEVS
       each_coupling(@input_couplings, port, &block)
     end
 
-    # Calls <i>block</i> once for each internal coupling (IC) in
+    # Calls <tt>block</tt> once for each internal coupling (IC) in
     # {#internal_couplings}, passing that element as a parameter. If a port is
     # given, it is used to filter the couplings having this port as a source.
     #
@@ -129,7 +129,7 @@ module DEVS
       each_coupling(@internal_couplings, port, &block)
     end
 
-    # Calls <i>block</i> once for each external output coupling (EOC) in
+    # Calls <tt>block</tt> once for each external output coupling (EOC) in
     # {#output_couplings}, passing that element as a parameter. If a port is
     # given, it is used to filter the couplings having this port as a source.
     #
