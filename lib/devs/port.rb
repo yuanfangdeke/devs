@@ -70,7 +70,7 @@ module DEVS
     # Read the outgoing {Message} if any and empty the mailbox.
     #
     # @return [Message, nil] the outgoing message or <tt>nil</tt>
-    def outgoing
+    def pick_up
       message = @outgoing
       @outgoing = nil
       message
@@ -82,7 +82,7 @@ module DEVS
     # @raise [MessageAlreadySentError] if an outgoing {Message} is already
     #   waiting to be picked up
     # @return [Message] the added message
-    def outgoing=(value)
+    def drop_off(value)
       unless @outgoing.nil?
         raise MessageAlreadySentError, "An outgoing message already exists"
       end

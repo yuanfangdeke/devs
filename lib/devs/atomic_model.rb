@@ -135,7 +135,7 @@ module DEVS
     #   model
     # @raise [InvalidPortTypeError] if the given port isn't an output port
     def post(value, port)
-      ensure_output_port(port).outgoing = value
+      ensure_output_port(port).drop_off(value)
     end
 
     # Yield outgoing messages added by the DEVS lambda (λ) function for the
@@ -149,7 +149,7 @@ module DEVS
       self.output
 
       @output_ports.each do |port|
-        value = port.outgoing
+        value = port.pick_up
         yield(Message.new(value, port)) unless value.nil?
       end
 
