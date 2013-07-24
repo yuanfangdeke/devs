@@ -70,7 +70,7 @@ DEVS.simulate do
     add_external_input_coupling(:csv_output, :ruissellement, :ruissellement)
   end
 
-  add_internal_coupling(:generator, :ground, :output)
+  add_internal_coupling(:generator, :ground, :output, :input)
   add_internal_coupling(:ground, :collector, :pluviometrie, :pluviometrie)
   add_internal_coupling(:ground, :collector, :ruissellement, :ruissellement)
 end
