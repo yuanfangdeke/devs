@@ -1,3 +1,3 @@
 require 'mkmf'
 
-create_makefile('devs')
+create_makefile('devs/devs')

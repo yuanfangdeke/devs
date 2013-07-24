@@ -1,8 +1,15 @@
 require 'bundler/gem_tasks'
 require 'rake/testtask'
 require 'rake/extensiontask'
+require 'rake/javaextensiontask'
 
-Rake::ExtensionTask.new('devs')
+if RUBY_PLATFORM =~ /java/
+  Rake::JavaExtensionTask.new('devs')
+else
+  Rake::ExtensionTask.new('devs') do |ext|
+    ext.lib_dir = 'lib/devs'
+  end
+end
 
 Rake::TestTask.new do |t|
   t.libs = ['lib', 'spec', 'test']
