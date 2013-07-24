@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec)/})
   spec.require_paths = ['lib']
+  spec.extensions    = ['ext/devs/extconf.rb']
 
   spec.add_runtime_dependency('pqueue', '~> 2.0')
 
@@ -25,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake')
   spec.add_development_dependency('gnuplot', '~> 2.6.2')
   spec.add_development_dependency('minitest')
+  spec.add_development_dependency('rake-compiler', '~> 0.8')
 end
