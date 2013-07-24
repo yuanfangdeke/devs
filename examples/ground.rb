@@ -14,7 +14,7 @@ DEVS.simulate do
   coupled do
     name :generator
     atomic(DEVS::Models::Generators::RandomGenerator, 0, 5) { name :random }
-    add_external_output_coupling(:random, :output)
+    add_external_output_coupling(:random, :output, :output)
   end
 
   select { |imm| imm.sample }
