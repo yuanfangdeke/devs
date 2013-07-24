@@ -166,11 +166,13 @@ module DEVS
     def add_external_input_coupling(child, input_port = nil, child_port = nil)
       child = ensure_child(child)
 
-      input_port = find_or_create_input_port_if_necessary(input_port)
-      child_port = child.find_or_create_input_port_if_necessary(child_port)
+      if !input_port.nil? && !output_port.nil?
+        input_port = find_or_create_input_port_if_necessary(input_port)
+        child_port = child.find_or_create_input_port_if_necessary(child_port)
 
-      coupling = Coupling.new(input_port, child_port)
-      @input_couplings << coupling unless @input_couplings.include?(coupling)
+        coupling = Coupling.new(input_port, child_port)
+        @input_couplings << coupling unless @input_couplings.include?(coupling)
+      end
     end
     alias_method :add_external_input, :add_external_input_coupling
 
@@ -188,11 +190,13 @@ module DEVS
     def add_external_output_coupling(child, output_port = nil, child_port = nil)
       child = ensure_child(child)
 
-      output_port = find_or_create_output_port_if_necessary(output_port)
-      child_port = child.find_or_create_output_port_if_necessary(child_port)
+      if !output_port.nil? && !child_port.nil?
+        output_port = find_or_create_output_port_if_necessary(output_port)
+        child_port = child.find_or_create_output_port_if_necessary(child_port)
 
-      coupling = Coupling.new(child_port, output_port)
-      @output_couplings << coupling unless @output_couplings.include?(coupling)
+        coupling = Coupling.new(child_port, output_port)
+        @output_couplings << coupling unless @output_couplings.include?(coupling)
+      end
     end
     alias_method :add_external_output, :add_external_output_coupling
 
