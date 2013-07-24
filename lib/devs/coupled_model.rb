@@ -166,7 +166,7 @@ module DEVS
     def add_external_input_coupling(child, input_port = nil, child_port = nil)
       child = ensure_child(child)
 
-      if !input_port.nil? && !output_port.nil?
+      if !input_port.nil? && !child_port.nil?
         input_port = find_or_create_input_port_if_necessary(input_port)
         child_port = child.find_or_create_input_port_if_necessary(child_port)
 
