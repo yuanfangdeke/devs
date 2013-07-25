@@ -1,7 +1,13 @@
 $:.push File.expand_path('../../lib', __FILE__)
 
+# require 'pry'
+# require 'pry-nav'
+# require 'pry-stack_explorer'
+
 require 'devs'
 require 'devs/models'
+
+# DEVS.logger = Logger.new(STDOUT)
 
 # Uncomment this line to use P-DEVS instead of classic simulators
 #require 'devs/parallel'
@@ -9,7 +15,7 @@ require 'devs/models'
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
-  duration 100
+  duration 10000
 
   coupled do
     name :generator
