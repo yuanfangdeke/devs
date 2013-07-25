@@ -57,19 +57,19 @@ module DEVS
     # @raise [InvalidPortHostError] if {#model} is not the correct host
     #   for this message
     # @raise [InvalidPortTypeError] if the {Message#port} is not an input port
-    def ensure_input_message(message)
-      if message.port.host != model
-        raise InvalidPortHostError, "The port associated with the given\
-message #{message} doesn't belong to this model"
-      end
+#     def ensure_input_message(message)
+#       if message.port.host != model
+#         raise InvalidPortHostError, "The port associated with the given\
+# message #{message} doesn't belong to this model"
+#       end
 
-      unless message.port.input?
-        raise InvalidPortTypeError, "The port associated with the given\
-message #{message} isn't an input port"
-      end
+#       unless message.port.input?
+#         raise InvalidPortTypeError, "The port associated with the given\
+# message #{message} isn't an input port"
+#       end
 
-      message
-    end
-    protected :ensure_input_message
+#       message
+#     end
+#     protected :ensure_input_message
   end
 end

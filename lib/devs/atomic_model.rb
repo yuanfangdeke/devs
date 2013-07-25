@@ -144,16 +144,19 @@ module DEVS
     # @note This method calls the DEVS lambda (λ) function
     # @api private
     # @yieldparam message [Message] the message that is yielded
-    # @return [void]
+    # @return [Array<Messages>]
     def fetch_output!
       self.output
+      messages = []
 
       @output_ports.each do |port|
         value = port.pick_up
-        yield(Message.new(value, port)) unless value.nil?
+        msg = Message.new(value, port)
+        yield(msg) if !value.nil? && block_given?
+        messages << msg
       end
 
-      nil
+      messages
     end
 
     # Returns a {Port} given a name or an instance and checks it.

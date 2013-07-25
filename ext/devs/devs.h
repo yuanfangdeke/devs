@@ -7,18 +7,28 @@
 #include <ruby.h>
 
 #include <simulator.h>
+#include <classic_simulator_strategy.h>
 
 extern VALUE mDEVS;
 extern VALUE mDEVSClassic;
 
+extern VALUE mDEVSNoSuchChildError;
+extern VALUE mDEVSBadSynchronisationError;
+extern VALUE mDEVSInvalidPortTypeError;
+extern VALUE mDEVSInvalidPortHostError;
+extern VALUE mDEVSMessageAlreadySentError;
+extern VALUE mDEVSFeedbackLoopError;
+
+extern VALUE mDEVSEvent;
+
 void devs_debug(const char *file, int lines, char *fmt, ...);
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define DEVS_DEBUG(fmt...) devs_debug(__FILE__, __LINE__, fmt);
 #else
-#define DEVS_DEBUG(p)
+#define DEVS_DEBUG(fmt...)
 #endif
 
 #ifndef RSTRING_PTR
