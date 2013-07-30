@@ -239,6 +239,7 @@ module DEVS
     def each_coupling(ary, port = nil)
       couplings = port.nil? ? ary : ary.select { |c| c.port_source == port }
       couplings.each { |coupling| yield(coupling) } if block_given?
+      couplings
     end
   end
 end
