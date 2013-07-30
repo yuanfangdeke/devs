@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec)/})
   spec.require_paths = ['lib']
-  spec.extensions    = FileList['ext/**/extconf.rb']
+  spec.extensions    = ['ext/**/extconf.rb']
 
   spec.add_runtime_dependency('pqueue', '~> 2.0')
 
