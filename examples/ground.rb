@@ -7,7 +7,8 @@ $:.push File.expand_path('../../lib', __FILE__)
 require 'devs'
 require 'devs/models'
 
-# DEVS.logger = Logger.new(STDOUT)
+DEVS.logger = Logger.new(STDOUT)
+DEVS.logger.level = Logger::INFO
 
 # Uncomment this line to use P-DEVS instead of classic simulators
 #require 'devs/parallel'
