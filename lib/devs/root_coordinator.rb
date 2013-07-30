@@ -1,16 +1,15 @@
 module DEVS
   # This class represent the processor on top of the simulation tree,
   # responsible for coordinating the simulation
-  class RootCoordinator < Simulator
+  class RootCoordinator
     # used for hooks
     include Observable
+    include Logging
 
     attr_accessor :duration
 
     # The default duration of the simulation if argument omitted
     DEFAULT_DURATION = 60
-
-    undef :model, :time_last, :time_next, :parent, :parent=
 
     attr_reader :time, :duration, :child, :start_time
 
@@ -55,12 +54,12 @@ module DEVS
 
       info "*** Simulation ended after #{Time.now - @start_time} secs."
 
-      debug "* Events stats :"
+      info "* Events stats :"
       stats = child.stats
       stats[:total] = stats.values.reduce(&:+)
-      debug "    OVERALL #{stats}"
+      info "    OVERALL #{stats}"
 
-      debug "* Calling post simulation hooks"
+      info "* Calling post simulation hooks"
       changed
       notify_observers(:post_simulation)
     end
