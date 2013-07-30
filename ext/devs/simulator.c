@@ -71,7 +71,7 @@ devs_simulator_ensure_input_message(VALUE self, VALUE msg) {
 
     if (host != model) {
         rb_raise(
-            mDEVSInvalidPortHostError,
+            cDEVSInvalidPortHostError,
             "the port associated with the given msg %s doesn't belong to this model",
             RSTRING_PTR(rb_any_to_s(msg))
         );
@@ -80,7 +80,7 @@ devs_simulator_ensure_input_message(VALUE self, VALUE msg) {
     ret = rb_funcall(port, rb_intern("input?"), 0);
     if (ret == Qfalse) {
         rb_raise(
-            mDEVSInvalidPortTypeError,
+            cDEVSInvalidPortTypeError,
             "the port associated with the given msg %s should be an input port",
             RSTRING_PTR(rb_any_to_s(msg))
         );

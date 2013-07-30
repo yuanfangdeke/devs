@@ -3,26 +3,27 @@
 VALUE mDEVS;
 VALUE mDEVSClassic;
 
-VALUE mDEVSNoSuchChildError;
-VALUE mDEVSBadSynchronisationError;
-VALUE mDEVSInvalidPortTypeError;
-VALUE mDEVSInvalidPortHostError;
-VALUE mDEVSMessageAlreadySentError;
-VALUE mDEVSFeedbackLoopError;
+VALUE cDEVSNoSuchChildError;
+VALUE cDEVSBadSynchronisationError;
+VALUE cDEVSInvalidPortTypeError;
+VALUE cDEVSInvalidPortHostError;
+VALUE cDEVSMessageAlreadySentError;
+VALUE cDEVSFeedbackLoopError;
 
-VALUE mDEVSEvent;
+VALUE cDEVSEvent;
+VALUE cDEVSMessage;
 
 void
 devs_debug(const char *file, int lines, char *fmt, ...) {
     if (strlen(fmt) < 255) {
-        char buffer[255];
+        VALUE rb_str;
         va_list arg_ptr;
 
         va_start(arg_ptr, fmt);
-        vsprintf(buffer, fmt, arg_ptr);
+        rb_str = rb_vsprintf(fmt, arg_ptr);
         va_end(arg_ptr);
 
-        fprintf(stdout, "devs-ext: %s:%d - %s\n", file, lines, buffer);
+        fprintf(stdout, "devs-ext: %s:%d - %s\n", file, lines, RSTRING_PTR(rb_str));
     }
 }
 
@@ -30,38 +31,41 @@ void
 Init_devs() {
     mDEVS = rb_define_module("DEVS");
     mDEVSClassic = rb_define_module_under(mDEVS, "Classic");
-    mDEVSNoSuchChildError = rb_define_class_under(
+    cDEVSNoSuchChildError = rb_define_class_under(
         mDEVS,
         "NoSuchChildError",
         rb_eStandardError
     );
-    mDEVSBadSynchronisationError = rb_define_class_under(
+    cDEVSBadSynchronisationError = rb_define_class_under(
         mDEVS,
         "BadSynchronisationError",
         rb_eStandardError
     );
-    mDEVSInvalidPortTypeError = rb_define_class_under(
+    cDEVSInvalidPortTypeError = rb_define_class_under(
         mDEVS,
         "InvalidPortTypeError",
         rb_eStandardError
     );
-    mDEVSInvalidPortHostError = rb_define_class_under(
+    cDEVSInvalidPortHostError = rb_define_class_under(
         mDEVS,
         "InvalidPortHostError",
         rb_eStandardError
     );
-    mDEVSMessageAlreadySentError = rb_define_class_under(
+    cDEVSMessageAlreadySentError = rb_define_class_under(
         mDEVS,
         "MessageAlreadySentError",
         rb_eStandardError
     );
-    mDEVSFeedbackLoopError = rb_define_class_under(
+    cDEVSFeedbackLoopError = rb_define_class_under(
         mDEVS,
         "FeedbackLoopError",
         rb_eStandardError
     );
-    mDEVSEvent = rb_define_class_under(mDEVS, "Event", rb_cObject);
+    cDEVSEvent = rb_define_class_under(mDEVS, "Event", rb_cObject);
+    cDEVSMessage = rb_define_class_under(mDEVS, "Message", rb_cObject);
 
     init_devs_simulator();
     init_devs_classic_simulator_strategy();
+    init_devs_classic_coordinator_strategy();
+    init_devs_classic_root_coordinator_strategy();
 }

@@ -8,22 +8,25 @@
 
 #include <simulator.h>
 #include <classic_simulator_strategy.h>
+#include <classic_coordinator_strategy.h>
+#include <classic_root_coordinator_strategy.h>
 
 extern VALUE mDEVS;
 extern VALUE mDEVSClassic;
 
-extern VALUE mDEVSNoSuchChildError;
-extern VALUE mDEVSBadSynchronisationError;
-extern VALUE mDEVSInvalidPortTypeError;
-extern VALUE mDEVSInvalidPortHostError;
-extern VALUE mDEVSMessageAlreadySentError;
-extern VALUE mDEVSFeedbackLoopError;
+extern VALUE cDEVSNoSuchChildError;
+extern VALUE cDEVSBadSynchronisationError;
+extern VALUE cDEVSInvalidPortTypeError;
+extern VALUE cDEVSInvalidPortHostError;
+extern VALUE cDEVSMessageAlreadySentError;
+extern VALUE cDEVSFeedbackLoopError;
 
-extern VALUE mDEVSEvent;
+extern VALUE cDEVSEvent;
+extern VALUE cDEVSMessage;
 
 void devs_debug(const char *file, int lines, char *fmt, ...);
 
-//#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define DEVS_DEBUG(fmt...) devs_debug(__FILE__, __LINE__, fmt);
