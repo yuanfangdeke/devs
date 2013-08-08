@@ -65,6 +65,7 @@ Init_devs() {
     cDEVSMessage = rb_define_class_under(mDEVS, "Message", rb_cObject);
 
     init_devs_simulator();
+    init_devs_coordinator();
     init_devs_classic_simulator_strategy();
     init_devs_classic_coordinator_strategy();
     init_devs_classic_root_coordinator_strategy();

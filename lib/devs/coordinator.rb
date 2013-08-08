@@ -52,13 +52,5 @@ module DEVS
     def max_time_last
       @children.map { |child| child.time_last }.max
     end
-
-    # Returns a subset of {#children} including imminent children, e.g with
-    # a time next value matching {#time_next}.
-    #
-    # @return [Array<Model>] the imminent children
-    def imminent_children
-      @children.select { |child| child.time_next == time_next }
-    end
   end
 end
