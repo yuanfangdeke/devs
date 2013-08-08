@@ -4,7 +4,10 @@ require 'rake/extensiontask'
 require 'rake/javaextensiontask'
 
 if RUBY_PLATFORM =~ /java/
-  Rake::JavaExtensionTask.new('devs')
+  Rake::JavaExtensionTask.new('devs') do |ext|
+    ext.ext_dir = 'ext/java/devs'
+    ext.lib_dir = 'lib/devs'
+  end
 else
   Rake::ExtensionTask.new('devs') do |ext|
     ext.lib_dir = 'lib/devs'
