@@ -4,7 +4,6 @@ require 'minitest/autorun'
 require 'minitest/mock'
 
 require 'devs'
-require 'devs/parallel'
 
 include DEVS::Concurrency
 

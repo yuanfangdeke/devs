@@ -10,9 +10,6 @@ require 'devs/models'
 DEVS.logger = Logger.new(STDOUT)
 DEVS.logger.level = Logger::INFO
 
-# Uncomment this line to use P-DEVS instead of classic simulators
-#require 'devs/parallel'
-
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
