@@ -8,6 +8,7 @@
 
 #include <simulator.h>
 #include <coordinator.h>
+#include <coupled_model.h>
 #include <classic_simulator_strategy.h>
 #include <classic_coordinator_strategy.h>
 #include <classic_root_coordinator_strategy.h>
