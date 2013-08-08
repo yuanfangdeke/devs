@@ -2,7 +2,6 @@ module DEVS
   # @abstract Base model class for {AtomicModel} and {CoupledModel} classes
   class Model
     attr_accessor :name, :parent, :processor
-    attr_reader :input_ports, :output_ports
 
     # Returns a new {Model} instance.
     def initialize
@@ -25,19 +24,20 @@ module DEVS
       false
     end
 
+    def input_ports
+      @input_ports.dup
+    end
+
+    def output_ports
+      @output_ports.dup
+    end
+
     # Adds an input port to <tt>self</tt>.
     #
     # @param name [String, Symbol]
     # @return [Port, Array<Port>] the created port or the list of created ports
     def add_input_port(*names)
-      ports = names.map { |name| Port.new(self, :input, name) }
-      @input_ports.concat(ports)
-
-      if ports.size == 1
-        ports.first
-      else
-        ports
-      end
+      add_port(:input, *names)
     end
 
     # Adds an output port to <tt>self</tt>.
@@ -45,14 +45,7 @@ module DEVS
     # @param name [String, Symbol] the port name
     # @return [Port, Array<Port>] the created port or the list of created ports
     def add_output_port(*names)
-      ports = names.map { |name| Port.new(self, :output, name) }
-      @output_ports.concat(ports)
-
-      if ports.size == 1
-        ports.first
-      else
-        ports
-      end
+      add_port(:output, *names)
     end
 
     # Returns the list of input ports' names
@@ -107,15 +100,7 @@ module DEVS
     # @param port [String, Symbol] the input port name
     # @return [Port] the matching port or the newly created port
     def find_or_create_input_port_if_necessary(port)
-      unless port.kind_of?(Port)
-        name = port
-        port = find_input_port_by_name(name)
-        if port.nil?
-          port = add_input_port(name)
-          DEVS.logger.warn("specified input port #{name} doesn't exist for #{self}. creating it")
-        end
-      end
-      port
+      find_or_create_port_if_necessary(:input, port)
     end
 
     # Find or create an output port if necessary. If the given argument is nil,
@@ -126,15 +111,47 @@ module DEVS
     # @param port [String, Symbol] the output port name
     # @return [Port] the matching port or the newly created port
     def find_or_create_output_port_if_necessary(port)
+      find_or_create_port_if_necessary(:output, port)
+    end
+
+    private
+
+    def find_or_create_port_if_necessary(type, port)
       unless port.kind_of?(Port)
         name = port
-        port = find_output_port_by_name(name)
+        port = case type
+        when :output then find_output_port_by_name(name)
+        when :input then find_input_port_by_name(name)
+        end
+
         if port.nil?
-          port = add_output_port(name)  
-          DEVS.logger.warn("specified output port #{name} doesn't exist for #{self}. creating it")
+          port = add_port(type, name)
+          DEVS.logger.warn("specified #{type} port #{name} doesn't exist for #{self}. creating it")
         end
       end
       port
+    end
+
+    def add_port(type, *names)
+      ivar, existing = case type
+      when :input  then [@input_ports, input_ports_names]
+      when :output then [@output_ports, output_ports_names]
+      end
+
+      duplicates, names = names.partition { |n|
+        existing.include?(n.to_sym)
+      }
+
+      duplicates.each do |n|
+        DEVS.logger.warn(
+          "specified #{type} port #{n} already exists for #{self}. skipping it"
+        )
+      end
+
+      ports = names.map { |n| Port.new(self, type, n) }
+      ivar.concat(ports)
+
+      ports.size == 1 ? ports.first : ports
     end
   end
 end
