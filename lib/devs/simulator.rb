@@ -34,42 +34,5 @@ module DEVS
       info "    #{self.model}: #{stats}"
       @events_count
     end
-
-    # Handles an incoming event
-    #
-    # @param event [Event] the incoming event
-    # @raise [RuntimeError] if the processor cannot handle the given event
-    #   ({Event#type})
-    # def dispatch(event)
-    #   @events_count[event.type] += 1
-    #   debug "#{self.model} received #{event}"
-
-    #   name = "handle_#{event.type}_event".to_sym
-    #   if respond_to?(name)
-    #     __send__(name, event)
-    #   else
-    #     raise RuntimeError, "#{self} doesn't respond to #{event.type} events"
-    #   end
-    # end
-
-    # Ensure the given {Message} is an input {Port} and belongs to {#model}.
-    # @param message [Message] the incoming message
-    # @raise [InvalidPortHostError] if {#model} is not the correct host
-    #   for this message
-    # @raise [InvalidPortTypeError] if the {Message#port} is not an input port
-#     def ensure_input_message(message)
-#       if message.port.host != model
-#         raise InvalidPortHostError, "The port associated with the given\
-# message #{message} doesn't belong to this model"
-#       end
-
-#       unless message.port.input?
-#         raise InvalidPortTypeError, "The port associated with the given\
-# message #{message} isn't an input port"
-#       end
-
-#       message
-#     end
-#     protected :ensure_input_message
   end
 end

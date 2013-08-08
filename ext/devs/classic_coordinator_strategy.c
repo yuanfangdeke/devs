@@ -7,6 +7,9 @@ static VALUE handle_input_event(VALUE self, VALUE event);
 static VALUE handle_output_event(VALUE self, VALUE event);
 static VALUE handle_internal_event(VALUE self, VALUE event);
 
+/*
+* Document-module: DEVS::Classic::CoordinatorStrategy
+*/
 void
 init_devs_classic_coordinator_strategy() {
     VALUE mod = rb_define_module_under(mDEVSClassic, "CoordinatorStrategy");
@@ -18,9 +21,14 @@ init_devs_classic_coordinator_strategy() {
     rb_define_method(mod, "handle_internal_event", handle_internal_event, 1);
 }
 
-// Handles events of init type (i messages)
-//
-// @param event [Event] the init event
+/*
+* call-seq:
+*   handle_init_event(event)
+*
+* Handles events of init type (i messages)
+*
+* @param event [Event] the init event
+*/
 static VALUE
 handle_init_event(VALUE self, VALUE event) {
     VALUE children = rb_iv_get(self, "@children");
@@ -41,12 +49,17 @@ handle_init_event(VALUE self, VALUE event) {
     return Qnil;
 }
 
-// Handles input events (x messages)
-//
-// @param event [Event] the input event
-// @raise [BadSynchronisationError] if the event time isn't in a proper
-//   range, e.g isn't between {Coordinator#time_last} and
-//   {Coordinator#time_next}
+/*
+* call-seq:
+*   handle_input_event(event)
+*
+* Handles input events (x messages)
+*
+* @param event [Event] the input event
+* @raise [BadSynchronisationError] if the event time isn't in a proper
+*   range, e.g isn't between {Coordinator#time_last} and
+*   {Coordinator#time_next}
+*/
 static VALUE
 handle_input_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
@@ -104,9 +117,14 @@ handle_input_event(VALUE self, VALUE event) {
     return Qnil;
 }
 
-// Handles output events (y messages)
-//
-// @param event [Event] the output event
+/*
+* call-seq:
+*   handle_output_event(event)
+*
+* Handles output events (y messages)
+*
+* @param event [Event] the output event
+*/
 static VALUE
 handle_output_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
@@ -171,11 +189,16 @@ handle_output_event(VALUE self, VALUE event) {
     return Qnil;
 }
 
-// Handles star events (* messages)
-//
-// @param event [Event] the star event
-// @raise [BadSynchronisationError] if the event time is not equal to
-//   {Coordinator#time_next}
+/*
+* call-seq:
+*   handle_internal_event(event)
+*
+* Handles star events (* messages)
+*
+* @param event [Event] the star event
+* @raise [BadSynchronisationError] if the event time is not equal to
+*   {Coordinator#time_next}
+*/
 static VALUE
 handle_internal_event(VALUE self, VALUE event) {
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));

@@ -4,6 +4,9 @@ VALUE cDEVSSimulator;
 
 static VALUE dispatch(VALUE self, VALUE event);
 
+/*
+* Document-class: DEVS::Simulator
+*/
 void
 init_devs_simulator() {
     VALUE klass = rb_define_class_under(mDEVS, "Simulator", rb_cObject);
@@ -18,11 +21,16 @@ init_devs_simulator() {
     );
 }
 
-// Handles an incoming event
-//
-// @param event [Event] the incoming event
-// @raise [RuntimeError] if the processor cannot handle the given event
-//   ({Event#type})
+/*
+* call-seq:
+*   dispatch(event)
+*
+* Handles an incoming event
+*
+* @param event [Event] the incoming event
+* @raise [RuntimeError] if the processor cannot handle the given event
+*   ({Event#type})
+*/
 static VALUE
 dispatch(VALUE self, VALUE event) {
     VALUE result = Qnil;
@@ -57,11 +65,16 @@ dispatch(VALUE self, VALUE event) {
     return result;
 }
 
-// Ensure the given {Message} is an input {Port} and belongs to {#model}.
-// @param message [Message] the incoming message
-// @raise [InvalidPortHostError] if {#model} is not the correct host
-//   for this message
-// @raise [InvalidPortTypeError] if the {Message#port} is not an input port
+/*
+* call-seq:
+*   ensure_input_message(msg)
+*
+* Ensure the given {Message} is an input {Port} and belongs to {#model}.
+* @param message [Message] the incoming message
+* @raise [InvalidPortHostError] if {#model} is not the correct host
+*   for this message
+* @raise [InvalidPortTypeError] if the {Message#port} is not an input port
+*/
 VALUE
 devs_simulator_ensure_input_message(VALUE self, VALUE msg) {
     VALUE model = rb_iv_get(self, "@model");

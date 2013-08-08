@@ -144,7 +144,7 @@ module DEVS
     # @note This method calls the DEVS lambda (λ) function
     # @api private
     # @yieldparam message [Message] the message that is yielded
-    # @return [Array<Messages>]
+    # @return [Array<Message>]
     def fetch_output!
       self.output
       messages = []

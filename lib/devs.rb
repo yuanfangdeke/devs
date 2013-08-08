@@ -9,7 +9,6 @@ module DEVS
 end
 
 require 'devs/version'
-require 'devs/errors'
 require 'devs/logging'
 require 'devs/event'
 require 'devs/message'

@@ -16,7 +16,7 @@ DEVS.logger.level = Logger::INFO
 # require 'perftools'
 # PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
 DEVS.simulate do
-  duration 10000
+  duration 100
 
   coupled do
     name :generator

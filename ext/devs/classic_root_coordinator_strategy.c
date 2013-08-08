@@ -4,6 +4,9 @@ VALUE cDEVSClassicRootCoordinatorStrategy;
 
 static VALUE run(VALUE self);
 
+/*
+* Document-module: DEVS::Classic::RootCoordinatorStrategy
+*/
 void
 init_devs_classic_root_coordinator_strategy() {
     VALUE mod = rb_define_module_under(mDEVSClassic, "RootCoordinatorStrategy");
