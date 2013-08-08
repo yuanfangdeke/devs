@@ -29,7 +29,7 @@ each_coupling(VALUE self, VALUE ary, VALUE port) {
 
         for (int i = 0; i < RARRAY_LEN(ary); i++) {
             VALUE coupling = rb_ary_entry(ary, i);
-            VALUE port_src = rb_funcall(coupling, rb_intern("port_source"), 0);
+            VALUE port_src = rb_iv_get(coupling, "@port_source");
 
             if (port_src == port) {
                 rb_ary_push(couplings, coupling);

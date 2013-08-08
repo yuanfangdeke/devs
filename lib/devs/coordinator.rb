@@ -38,19 +38,5 @@ module DEVS
       child
     end
     alias_method :add_child, :<<
-
-    # Returns the minimum time next in all children
-    #
-    # @return [Numeric] the min time next
-    def min_time_next
-      @children.map { |child| child.time_next }.min
-    end
-
-    # Returns the maximum time last in all children
-    #
-    # @return [Numeric] the max time last
-    def max_time_last
-      @children.map { |child| child.time_last }.max
-    end
   end
 end
