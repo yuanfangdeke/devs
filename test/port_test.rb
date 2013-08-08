@@ -35,4 +35,12 @@ class TestPort < MiniTest::Test
     assert p2.input?
     assert p3.output?
   end
+
+  def test_cant_set_outgoing_value_twice_unless_read
+    @output_port.drop_off(:smthg)
+    assert_raises(MessageAlreadySentError) do
+      @output_port.drop_off(:smthg_else)
+    end
+    assert_equal(:smthg, @output_port.pick_up)
+  end
 end
