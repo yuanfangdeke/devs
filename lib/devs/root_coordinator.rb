@@ -41,7 +41,42 @@ module DEVS
       @duration = duration
       @time = 0
       @child = child
-      @events_count = Hash.new(0)
+    end
+
+    # Returns <tt>true</tt> if the simulation is done, <tt>false</tt> otherwise.
+    #
+    # @return [Boolean]
+    def done?
+      @time >= @duration
+    end
+
+    # Returns <tt>true</tt> if the simulation is currently running,
+    #   <tt>false</tt> otherwise.
+    #
+    # @return [Boolean]
+    def running?
+      defined?(@start_time) && !done?
+    end
+
+    # Returns <tt>true</tt> if the simulation is waiting to be started,
+    #   <tt>false</tt> otherwise.
+    #
+    # @return [Boolean]
+    def waiting?
+      !defined?(@start_time)
+    end
+
+    # Returns the number of messages per model along with the total
+    #
+    # @return [Hash<Symbol, Fixnum>]
+    def stats
+      unless waiting?
+        stats = child.stats
+        total = Hash.new(0)
+        stats.values.each { |h| h.each { |k, v| total[k] += v }}
+        stats[:TOTAL] = total
+        stats
+      end
     end
 
     # Run the simulation
@@ -55,10 +90,9 @@ module DEVS
       @final_time = Time.now
       info "*** Simulation ended at #{@final_time} after #{@final_time - @start_time} secs."
 
-      info "* Events stats :"
-      stats = child.stats
-      stats[:total] = stats.values.reduce(&:+)
-      info "    OVERALL #{stats}"
+      info "* Events stats : {"
+      stats.each { |k, v| info "    #{k} => #{v}" }
+      info "* }"
 
       info "* Calling post simulation hooks"
       changed

@@ -31,8 +31,7 @@ module DEVS
     def stats
       stats = @events_count.dup
       stats[:total] = stats.values.reduce(&:+)
-      info "    #{self.model}: #{stats}"
-      @events_count
+      stats
     end
   end
 end

@@ -19,13 +19,16 @@ module DEVS
     end
 
     def stats
-      super
-      hsh = Hash.new(0)
-      hsh.update(@events_count)
-      children.each do |child|
-        child.stats.each { |key, value| hsh[key] += value }
-      end
-      hsh
+      stats = {}
+      stats[model.name] = super
+      children.each { |child|
+        if child.kind_of?(Coordinator)
+          stats.update(child.stats)
+        elsif child.kind_of?(Simulator)
+          stats[child.model.name] = child.stats
+        end
+      }
+      stats
     end
 
     # Append a child to {#children} list, ensuring that the child now has
