@@ -85,13 +85,6 @@ module DEVS
     end
     alias_method :find_child_by_name, :[]
 
-    # def find_child_with_path(path = '')
-    #   model = self
-    #   path.split('::').each do |name|
-    #     model = self[name]
-    #   end
-    # end
-
     # Calls <tt>block</tt> once for each child in <tt>self</tt>, passing that
     # element as a parameter.
     #
