@@ -66,6 +66,44 @@ module DEVS
       !defined?(@start_time)
     end
 
+    # Returns the simulation status: <tt>waiting</tt>, <tt>running</tt> or
+    #   <tt>done</tt>.
+    #
+    # @return [Symbol] the simulation status
+    def status
+      if waiting?
+        :waiting
+      elsif running?
+        :running
+      elsif done?
+        :done
+      end
+    end
+
+    def percentage
+      case status
+      when :waiting then 0.0
+      when :done    then 1.0
+      when :running
+        if @time > @duration
+          1.0
+        else
+          @time.to_f / @duration.to_f
+        end
+      end
+    end
+
+    def elapsed_secs
+      case status
+      when :waiting
+        0.0
+      when :done
+        @final_time - @start_time
+      when :running
+        Time.now - @start_time
+      end
+    end
+
     # Returns the number of messages per model along with the total
     #
     # @return [Hash<Symbol, Fixnum>]
@@ -81,22 +119,32 @@ module DEVS
 
     # Run the simulation
     def simulate
-      @start_time = Time.now
-      info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+      if waiting?
+        @start_time = Time.now
+        info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
 
-      # root coordinator strategy
-      run
+        # root coordinator strategy
+        run
 
-      @final_time = Time.now
-      info "*** Simulation ended at #{@final_time} after #{@final_time - @start_time} secs."
+        @final_time = Time.now
+        info "*** Simulation ended at #{@final_time} after #{elapsed_secs} secs."
 
-      info "* Events stats : {"
-      stats.each { |k, v| info "    #{k} => #{v}" }
-      info "* }"
+        info "* Events stats : {"
+        stats.each { |k, v| info "    #{k} => #{v}" }
+        info "* }"
 
-      info "* Calling post simulation hooks"
-      changed
-      notify_observers(:post_simulation)
+        info "* Calling post simulation hooks"
+        changed
+        notify_observers(:post_simulation)
+      else
+        if running?
+          error "The simulation already started at #{@start_time} and is currently running."
+        else
+          error "The simulation is already done. Started at #{@start_time} and finished at #{@final_time} in #{elapsed_secs} secs."
+        end
+
+        nil
+      end
 
       self
     end
