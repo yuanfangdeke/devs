@@ -10,7 +10,7 @@ class TestModel < MiniTest::Test
     @model = Model.new
   end
 
-  def test_find_or_create
+  def test_find_or_create_port
     pin1 = @model.add_input_port(:in)
     pout1 = @model.add_output_port(:out)
 
