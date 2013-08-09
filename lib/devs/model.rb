@@ -138,19 +138,18 @@ module DEVS
       when :output then [@output_ports, output_ports_names]
       end
 
-      duplicates, names = names.partition { |n|
-        existing.include?(n.to_sym)
-      }
-
-      duplicates.each do |n|
-        DEVS.logger.warn(
-          "specified #{type} port #{n} already exists for #{self}. skipping it"
-        )
+      ports = []
+      names.each do |name|
+        if existing.include?(n.to_sym)
+          DEVS.logger.warn(
+            "specified #{type} port #{n} already exists for #{self}. skipping..."
+          )
+        else
+          ports << Port.new(self, type, n)
+        end
       end
 
-      ports = names.map { |n| Port.new(self, type, n) }
       ivar.concat(ports)
-
       ports.size == 1 ? ports.first : ports
     end
   end
