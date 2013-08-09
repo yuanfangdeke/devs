@@ -204,13 +204,13 @@ module DEVS
     # @param b [Model, String, Symbol] the second child or its name
     # @param output_port [Port, String, Symbol] a's output port or its name
     # @param input_port [Port, String, Symbol] b's input port ot its name
-    # @raise [FeedbackLoopError] if both given children are the same instance.
-    #   Feeding a model's input port with one of its output ports is not allowed
-    #   in the DEVS formalism
+    # @raise [FeedbackLoopError] if both given children are the same. Direct
+    #   feedback loops are not allowed, i.e, no output port of a component may
+    #   be connected to an input port of the same component
     def add_internal_coupling(a, b, output_port = nil, input_port = nil)
       a = ensure_child(a)
       b = ensure_child(b)
-      raise FeedbackLoopError, "#{a} must be different than #{b}" if a == b
+      raise FeedbackLoopError, "#{a} must be different than #{b}" if a.equal?(b)
 
       output_port = a.find_or_create_output_port_if_necessary(output_port)
       input_port = b.find_or_create_input_port_if_necessary(input_port)
