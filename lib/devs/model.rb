@@ -2,6 +2,7 @@ module DEVS
   # @abstract Base model class for {AtomicModel} and {CoupledModel} classes
   class Model
     attr_accessor :name, :parent, :processor
+    attr_reader :input_ports, :output_ports
 
     # Returns a new {Model} instance.
     def initialize
@@ -22,14 +23,6 @@ module DEVS
     # @return [false]
     def coupled?
       false
-    end
-
-    def input_ports
-      @input_ports.dup
-    end
-
-    def output_ports
-      @output_ports.dup
     end
 
     # Adds an input port to <tt>self</tt>.
@@ -139,7 +132,7 @@ module DEVS
       end
 
       ports = []
-      names.each do |name|
+      names.each do |n|
         if existing.include?(n.to_sym)
           DEVS.logger.warn(
             "specified #{type} port #{n} already exists for #{self}. skipping..."
