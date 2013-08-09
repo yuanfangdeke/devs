@@ -11,7 +11,7 @@ module DEVS
     # The default duration of the simulation if argument omitted
     DEFAULT_DURATION = 60
 
-    attr_reader :time, :duration, :child, :start_time
+    attr_reader :time, :duration, :child, :start_time, :final_time
 
     alias_method :clock, :time
 
@@ -52,7 +52,8 @@ module DEVS
       # root coordinator strategy
       run
 
-      info "*** Simulation ended after #{Time.now - @start_time} secs."
+      @final_time = Time.now
+      info "*** Simulation ended at #{@final_time} after #{@final_time - @start_time} secs."
 
       info "* Events stats :"
       stats = child.stats
@@ -62,6 +63,8 @@ module DEVS
       info "* Calling post simulation hooks"
       changed
       notify_observers(:post_simulation)
+
+      self
     end
 
     private
