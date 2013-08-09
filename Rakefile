@@ -19,8 +19,8 @@ Rake::TestTask.new do |t|
   t.test_files = FileList['test/*_test.rb']
 end
 
-desc "Run tests"
-task :default => :test
+desc "Clean, compile and run tests"
+task :default => [:clean, :compile, :test]
 
 namespace :example do
   examples = FileList['examples/*.rb']
