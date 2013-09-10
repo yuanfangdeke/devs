@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include <ruby.h>
 
@@ -50,6 +51,10 @@ void devs_debug(const char *file, int lines, char *fmt, ...);
 
 #ifndef RARRAY_LEN
 #define RARRAY_LEN(a) RARRAY(a)->len
+#endif
+
+#ifndef INFINITY
+#define INFINITY 1.0 / 0.0
 #endif
 
 #endif
