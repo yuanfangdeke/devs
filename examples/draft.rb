@@ -1,4 +1,8 @@
 require 'devs'
+require 'devs/models'
+
+DEVS.logger = Logger.new(STDOUT)
+DEVS.logger.level = Logger::INFO
 
 DEVS.simulate do
   duration 10_000
@@ -14,12 +18,11 @@ DEVS.simulate do
   add_model do
     name :ground
 
-    at_init do
+    init do
       @pluviometrie = 0
       @cc = 40.0
       @out_flow = 5.0
       @ruissellement = 0
-      # self.next_activation = INFINITY
     end
 
     when_input do |*messages|

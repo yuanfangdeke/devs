@@ -1,7 +1,7 @@
 module DEVS
   module Builders
     class AtomicBuilder < BaseBuilder
-      def initialize(namespace, klass, *args, &block)
+      def initialize(namespace, klass, name=nil, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = AtomicModel.new
         else
@@ -13,6 +13,7 @@ module DEVS
         @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
+        @model.name = name
         instance_eval(&block) if block
       end
 

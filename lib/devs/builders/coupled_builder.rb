@@ -33,11 +33,8 @@ module DEVS
       alias_method :nest, :coupled
 
       # @return [AtomicModel] the new atomic model
-      def atomic(*args, &block)
-        type = nil
-        type, *args = *args if args.first != nil && args.first.respond_to?(:new)
-
-        simulator = AtomicBuilder.new(@namespace, type, *args, &block).processor
+      def atomic(type=nil, opts={}, &block)
+        simulator = AtomicBuilder.new(@namespace, type, opts[:name], *opts[:with_params], &block).processor
         simulator.parent = @processor
         simulator.model.parent = @model
         @model << simulator.model
@@ -70,6 +67,7 @@ module DEVS
       end
 
       def plug_output_port(port, opts={})
+        # def add_external_output_coupling(child, output_port = nil, child_port = nil)
         @model.add_external_output_coupling(opts[:with_child], port, opts[:and_child_port])
       end
 
