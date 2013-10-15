@@ -33,8 +33,9 @@ static VALUE
 handle_init_event(VALUE self, VALUE event) {
     VALUE children = rb_iv_get(self, "@children");
     VALUE model = rb_iv_get(self, "@model");
+    int i;
 
-    for (int i = 0; i < RARRAY_LEN(children); i++) {
+    for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
         rb_funcall(child, rb_intern("dispatch"), 1, event);
     }
@@ -72,7 +73,9 @@ handle_input_event(VALUE self, VALUE event) {
 
     if (ev_time >= time_last && ev_time <= time_next) {
         VALUE ret = rb_funcall(model, rb_intern("each_input_coupling"), 1, port);
-        for (int i = 0; i < RARRAY_LEN(ret); i++) {
+        int i;
+
+        for (i = 0; i < RARRAY_LEN(ret); i++) {
             VALUE coupling = rb_ary_entry(ret, i);
             VALUE mdl_dst = rb_funcall(coupling, rb_intern("destination"), 0);
             VALUE child = rb_funcall(mdl_dst, rb_intern("processor"), 0);
@@ -133,9 +136,10 @@ handle_output_event(VALUE self, VALUE event) {
     VALUE payload = rb_iv_get(msg, "@payload");
     VALUE parent = rb_iv_get(self, "@parent");
     VALUE time = rb_iv_get(event, "@time");
-
+    int i;
     VALUE ret = rb_funcall(model, rb_intern("each_output_coupling"), 1, port);
-    for (int i = 0; i < RARRAY_LEN(ret); i++) {
+
+    for (i = 0; i < RARRAY_LEN(ret); i++) {
         VALUE coupling = rb_ary_entry(ret, i);
         VALUE prt_dst = rb_iv_get(coupling, "@destination_port");
         // debug "    found external output coupling #{coupling}"
@@ -160,7 +164,7 @@ handle_output_event(VALUE self, VALUE event) {
     }
 
     ret = rb_funcall(model, rb_intern("each_internal_coupling"), 1, port);
-    for (int i = 0; i < RARRAY_LEN(ret); i++) {
+    for (i = 0; i < RARRAY_LEN(ret); i++) {
         VALUE coupling = rb_ary_entry(ret, i);
         VALUE mdl_dst = rb_funcall(coupling, rb_intern("destination"), 0);
         VALUE child = rb_funcall(mdl_dst, rb_intern("processor"), 0);
@@ -204,6 +208,7 @@ handle_internal_event(VALUE self, VALUE event) {
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
     VALUE model = rb_iv_get(self, "@model");
+    int i, index;
 
     if (ev_time != time_next) {
         rb_raise(
@@ -216,13 +221,13 @@ handle_internal_event(VALUE self, VALUE event) {
 
     VALUE children = rb_funcall(self, rb_intern("imminent_children"), 0);
     VALUE children_models = rb_ary_new2(RARRAY_LEN(children));
-    for (int i = 0; i < RARRAY_LEN(children); i++) {
+    for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
         rb_ary_push(children_models, rb_iv_get(child, "@model"));
     }
     VALUE child_model = rb_funcall(model, rb_intern("select"), 1, children_models);
     //   debug "    selected #{child_model} in #{children_models.map(&:name)}"
-    int index;
+
     for (index = 0; index < RARRAY_LEN(children); index++) {
         if (child_model == rb_ary_entry(children_models, index)) {
             break;

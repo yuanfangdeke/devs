@@ -106,6 +106,7 @@ handle_internal_event(VALUE self, VALUE event) {
     VALUE ret;
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
+    int i;
 
     if (ev_time != time_next) {
         rb_raise(
@@ -118,7 +119,7 @@ handle_internal_event(VALUE self, VALUE event) {
 
     ret = rb_funcall(model, rb_intern("fetch_output!"), 0);
 
-    for (int i = 0; i < RARRAY_LEN(ret); i++) {
+    for (i = 0; i < RARRAY_LEN(ret); i++) {
         VALUE msg = rb_ary_entry(ret, i);
         VALUE ev = rb_funcall(
             cDEVSEvent,

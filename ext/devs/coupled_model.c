@@ -21,13 +21,14 @@ init_devs_coupled_model() {
 static VALUE
 each_coupling(VALUE self, VALUE ary, VALUE port) {
     VALUE couplings;
+    int i;
 
     if (NIL_P(port)) {
         couplings = ary;
     } else {
         couplings = rb_ary_new();
 
-        for (int i = 0; i < RARRAY_LEN(ary); i++) {
+        for (i = 0; i < RARRAY_LEN(ary); i++) {
             VALUE coupling = rb_ary_entry(ary, i);
             VALUE port_src = rb_iv_get(coupling, "@port_source");
 
