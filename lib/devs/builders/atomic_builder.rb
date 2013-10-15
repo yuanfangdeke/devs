@@ -1,8 +1,6 @@
 module DEVS
   module Builders
-    class AtomicBuilder
-      attr_reader :model, :processor
-
+    class AtomicBuilder < BaseBuilder
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = AtomicModel.new
@@ -18,18 +16,6 @@ module DEVS
         instance_eval(&block) if block
       end
 
-      def add_input_port(*args)
-        @model.add_input_port(*args)
-      end
-
-      def add_output_port(*args)
-        @model.add_output_port(*args)
-      end
-
-      def name(name)
-        @model.name = name
-      end
-
       def init(&block)
         @model.instance_eval(&block) if block
       end
@@ -38,10 +24,12 @@ module DEVS
       def external_transition(&block)
         @model.define_singleton_method(:external_transition, &block) if block
       end
+      alias_method :when_input, :external_transition
 
       def internal_transition(&block)
         @model.define_singleton_method(:internal_transition, &block) if block
       end
+      alias_method :after_output, :internal_transition
 
       def time_advance(&block)
         @model.define_singleton_method(:time_advance, &block) if block

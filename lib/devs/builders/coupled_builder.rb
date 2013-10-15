@@ -1,12 +1,6 @@
 module DEVS
   module Builders
-    class CoupledBuilder < AtomicBuilder
-      undef :external_transition
-      undef :internal_transition
-      undef :time_advance
-      undef :output
-      undef :post_simulation_hook
-
+    class CoupledBuilder < BaseBuilder
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = CoupledModel.new
@@ -22,7 +16,7 @@ module DEVS
         @model.processor = @processor
         instance_eval(&block) if block
       end
-      
+
       # @return [CoupledModel] the new coupled model
       def coupled(*args, &block)
         type = nil
@@ -33,10 +27,11 @@ module DEVS
         coordinator.model.parent = @model
         @model << coordinator.model
         @processor << coordinator
-        
+
         coordinator.model
       end
-      
+      alias_method :nest, :coupled
+
       # @return [AtomicModel] the new atomic model
       def atomic(*args, &block)
         type = nil
@@ -47,9 +42,10 @@ module DEVS
         simulator.model.parent = @model
         @model << simulator.model
         @processor << simulator
-        
+
         simulator.model
       end
+      alias_method :add_model, :atomic
 
       def select(&block)
         @model.define_singleton_method(:select, &block) if block
@@ -68,6 +64,18 @@ module DEVS
         @model.add_external_input_coupling(*args)
       end
       alias_method :add_input_coupling, :add_external_input_coupling
+
+      def plug(child, opts={})
+        @model.add_internal_coupling(child, opts[:with], opts[:from], opts[:to])
+      end
+
+      def plug_output_port(port, opts={})
+        @model.add_external_output_coupling(opts[:with_child], port, opts[:and_child_port])
+      end
+
+      def plug_input_port(port, opts={})
+        @model.add_external_input_coupling(opts[:with_child], port, opts[:and_child_port])
+      end
     end
   end
 end

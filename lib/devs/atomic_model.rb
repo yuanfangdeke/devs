@@ -1,7 +1,7 @@
 module DEVS
   # This class represent a DEVS atomic model.
   class AtomicModel < Model
-    attr_accessor :elapsed, :time, :sigma
+    attr_accessor :elapsed, :time, :sigma, :next_activation
 
     # @!attribute sigma
     #   Sigma is a convenient variable introduced to simplify modeling phase
@@ -98,6 +98,14 @@ module DEVS
       @elapsed = 0.0
       @sigma = INFINITY
       @time = 0
+    end
+
+    def next_activation
+      @sigma
+    end
+
+    def next_activation=(value)
+      @sigma = value
     end
 
     # Returns a boolean indicating if <tt>self</tt> is an atomic model
