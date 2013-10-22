@@ -41,32 +41,29 @@ require 'devs'
 DEVS.simulate do
   duration 50
 
-  atomic do
+  add_model do
     name :traffic_light
     add_output_port :out
 
     init do
       @state = :red
-      self.sigma = 0
+      self.next_activation = 0
     end
 
-    time_advance { self.sigma }
+    time_advance { self.next_activation }
 
     output do
-      post(@state, output_ports.first)
+      post @state, :out
     end
 
-    internal_transition do
-      case @state
+    after_output do
+      @state, @sigma = case @state
       when :red
-        @state = :green
-        self.sigma = 5
+        [:green, 5]
       when :green
-        @state = :orange
-        self.sigma = 20
+        [:orange, 20]
       when :orange
-        @state = :red
-        self.sigma = 2
+        [:red, 2]
       end
     end
   end
