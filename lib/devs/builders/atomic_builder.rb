@@ -1,6 +1,8 @@
 module DEVS
   module Builders
-    class AtomicBuilder < BaseBuilder
+    class AtomicBuilder
+      include BaseBuilder
+
       def initialize(namespace, klass, name=nil, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = AtomicModel.new
@@ -25,7 +27,7 @@ module DEVS
       def external_transition(&block)
         @model.define_singleton_method(:external_transition, &block) if block
       end
-      alias_method :when_input, :external_transition
+      alias_method :when_input_received, :external_transition
 
       def internal_transition(&block)
         @model.define_singleton_method(:internal_transition, &block) if block

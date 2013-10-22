@@ -9,7 +9,7 @@ DEVS.simulate do
 
   # algorithm [:classic, :parallel, :time_warp]
 
-  nest do
+  add_coupled_model do
     name :generator
     add_model DEVS::Models::Generators::RandomGenerator, with_params: [0, 5], :name => :random
     plug_output_port :output, :with_child => :random, :and_child_port => :output
@@ -25,7 +25,7 @@ DEVS.simulate do
       @ruissellement = 0
     end
 
-    when_input do |*messages|
+    when_input_received do |*messages|
       messages.each do |message|
         value = message.payload
         @pluviometrie += value unless value.nil?
@@ -56,7 +56,7 @@ DEVS.simulate do
     end
   end
 
-  nest do
+  add_coupled_model do
     name :collector
 
     #add_model DEVS::Models::Collectors::PlotCollector, :name => :plot_output

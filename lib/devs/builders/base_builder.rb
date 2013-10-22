@@ -1,6 +1,6 @@
 module DEVS
   module Builders
-    class BaseBuilder
+    module BaseBuilder
       attr_reader :model, :processor
 
       def add_input_port(*args)

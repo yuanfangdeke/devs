@@ -1,6 +1,8 @@
 module DEVS
   module Builders
-    class CoupledBuilder < BaseBuilder
+    class CoupledBuilder
+      include BaseBuilder
+
       def initialize(namespace, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = CoupledModel.new
@@ -18,7 +20,7 @@ module DEVS
       end
 
       # @return [CoupledModel] the new coupled model
-      def coupled(*args, &block)
+      def add_coupled_model(*args, &block)
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
@@ -30,10 +32,9 @@ module DEVS
 
         coordinator.model
       end
-      alias_method :nest, :coupled
 
       # @return [AtomicModel] the new atomic model
-      def atomic(type=nil, opts={}, &block)
+      def add_model(type=nil, opts={}, &block)
         simulator = AtomicBuilder.new(@namespace, type, opts[:name], *opts[:with_params], &block).processor
         simulator.parent = @processor
         simulator.model.parent = @model
@@ -42,7 +43,6 @@ module DEVS
 
         simulator.model
       end
-      alias_method :add_model, :atomic
 
       def select(&block)
         @model.define_singleton_method(:select, &block) if block
@@ -67,7 +67,6 @@ module DEVS
       end
 
       def plug_output_port(port, opts={})
-        # def add_external_output_coupling(child, output_port = nil, child_port = nil)
         @model.add_external_output_coupling(opts[:with_child], port, opts[:and_child_port])
       end
 
