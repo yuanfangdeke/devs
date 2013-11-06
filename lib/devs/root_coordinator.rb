@@ -82,13 +82,13 @@ module DEVS
 
     def percentage
       case status
-      when :waiting then 0.0
-      when :done    then 1.0
+      when :waiting then 0.0 * 100
+      when :done    then 1.0 * 100
       when :running
         if @time > @duration
-          1.0
+          1.0 * 100
         else
-          @time.to_f / @duration.to_f
+          @time.to_f / @duration.to_f * 100
         end
       end
     end
