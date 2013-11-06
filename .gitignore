@@ -1,8 +1,9 @@
 *.gem
 *.rbc
 *.iml
+*.jar
+*.bundle
 .rbx
-.bundle
 .config
 .yardoc
 .idea
