@@ -25,7 +25,7 @@ DEVS.simulate do
       @ruissellement = 0
     end
 
-    when_input_received do |*messages|
+    when_input_received do |messages|
       messages.each do |message|
         value = message.payload
         @pluviometrie += value unless value.nil?

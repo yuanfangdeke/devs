@@ -18,7 +18,7 @@ DEVS.simulate do
       add_input_port :in_1
     end
 
-    when_input_received do |*messages|
+    when_input_received do |messages|
       messages.each do |message|
         value = message.payload
         @result = value ** value
