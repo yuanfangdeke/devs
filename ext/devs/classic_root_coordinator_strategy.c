@@ -19,6 +19,7 @@ static VALUE
 run(VALUE self) {
     VALUE time = rb_iv_get(self, "@time");
     VALUE child = rb_iv_get(self, "@child");
+    VALUE mutex = rb_iv_get(self, "@lock");
     double duration = NUM2DBL(rb_iv_get(self, "@duration"));
 
     VALUE ev = rb_funcall(
@@ -31,7 +32,9 @@ run(VALUE self) {
     rb_funcall(child, rb_intern("dispatch"), 1, ev);
 
     time = rb_funcall(child, rb_intern("time_next"), 0);
+    rb_funcall(mutex, rb_intern("lock"), 0);
     rb_iv_set(self, "@time", time);
+    rb_funcall(mutex, rb_intern("unlock"), 0);
 
     while(NUM2DBL(time) < duration) {
         // debug "* Tick at: #{@time}, #{Time.now - @start_time} secs elapsed"
@@ -47,7 +50,9 @@ run(VALUE self) {
         rb_funcall(child, rb_intern("dispatch"), 1, ev);
 
         time = rb_funcall(child, rb_intern("time_next"), 0);
+        rb_funcall(mutex, rb_intern("lock"), 0);
         rb_iv_set(self, "@time", time);
+        rb_funcall(mutex, rb_intern("unlock"), 0);
     }
 
     return Qnil;

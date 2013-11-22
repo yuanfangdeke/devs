@@ -11,9 +11,7 @@ module DEVS
     # The default duration of the simulation if argument omitted
     DEFAULT_DURATION = 60
 
-    attr_reader :time, :duration, :child, :start_time, :final_time
-
-    alias_method :clock, :time
+    attr_reader :time, :duration, :start_time, :final_time
 
     # @!attribute [r] time
     #   @return [Numeric] Returns the current simulation time
@@ -23,11 +21,6 @@ module DEVS
 
     # @!attribute [r] duration
     #   @return [Numeric] Returns the total duration of the simulation time
-
-    # @!attribute [r] child
-    #   Returns the coordinator which <tt>self</tt> is managing.
-    #   @return [Coordinator] Returns the coordinator associated with the
-    #     <i>self</i>
 
     # Returns a new {RootCoordinator} instance.
     #
@@ -41,13 +34,31 @@ module DEVS
       @duration = duration
       @time = 0
       @child = child
+      @lock = Mutex.new
+    end
+
+    def time
+      @lock.synchronize { @time }
+    end
+    alias_method :clock, :time
+
+    def duration=(v)
+      @duration = v if waiting?
+    end
+
+    def start_time
+      @lock.synchronize { @start_time }
+    end
+
+    def final_time
+      @lock.synchronize { @final_time }
     end
 
     # Returns <tt>true</tt> if the simulation is done, <tt>false</tt> otherwise.
     #
     # @return [Boolean]
     def done?
-      @time >= @duration
+      @lock.synchronize { @time >= @duration }
     end
 
     # Returns <tt>true</tt> if the simulation is currently running,
@@ -55,7 +66,7 @@ module DEVS
     #
     # @return [Boolean]
     def running?
-      defined?(@start_time) && !done?
+      @lock.synchronize { defined?(@start_time) } && !done?
     end
 
     # Returns <tt>true</tt> if the simulation is waiting to be started,
@@ -63,7 +74,7 @@ module DEVS
     #
     # @return [Boolean]
     def waiting?
-      !defined?(@start_time)
+      @lock.synchronize { !defined?(@start_time) }
     end
 
     # Returns the simulation status: <tt>waiting</tt>, <tt>running</tt> or
@@ -85,10 +96,12 @@ module DEVS
       when :waiting then 0.0 * 100
       when :done    then 1.0 * 100
       when :running
-        if @time > @duration
-          1.0 * 100
-        else
-          @time.to_f / @duration.to_f * 100
+        @lock.synchronize do
+          if @time > @duration
+            1.0 * 100
+          else
+            @time.to_f / @duration.to_f * 100
+          end
         end
       end
     end
@@ -108,8 +121,8 @@ module DEVS
     #
     # @return [Hash<Symbol, Fixnum>]
     def stats
-      unless waiting?
-        stats = child.stats
+      if done?
+        stats = @child.stats
         total = Hash.new(0)
         stats.values.each { |h| h.each { |k, v| total[k] += v }}
         stats[:TOTAL] = total
@@ -117,25 +130,35 @@ module DEVS
       end
     end
 
-    # Run the simulation
+    # Wait the simulation to finish
+    def wait
+      @thread.join
+    end
+
+    # Run the simulation in a new thread
     def simulate
       if waiting?
-        @start_time = Time.now
-        info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+        @thread = Thread.new do
+          @lock.synchronize do
+            @start_time = Time.now
+            info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+          end
 
-        # root coordinator strategy
-        run
+          # root coordinator strategy
+          run
 
-        @final_time = Time.now
-        info "*** Simulation ended at #{@final_time} after #{elapsed_secs} secs."
+          final_time = Time.now
+          @lock.synchronize { @final_time = final_time }
+          info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
 
-        info "* Events stats : {"
-        stats.each { |k, v| info "    #{k} => #{v}" }
-        info "* }"
+          info "* Events stats : {"
+          stats.each { |k, v| info "    #{k} => #{v}" }
+          info "* }"
 
-        info "* Calling post simulation hooks"
-        changed
-        notify_observers(:post_simulation)
+          info "* Calling post simulation hooks"
+          changed
+          notify_observers(:post_simulation)
+        end
       else
         if running?
           error "The simulation already started at #{@start_time} and is currently running."
@@ -151,5 +174,9 @@ module DEVS
 
     private
     attr_writer :time
+
+    def time=(v)
+      @lock.synchronize { @time = v }
+    end
   end
 end

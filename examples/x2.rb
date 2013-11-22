@@ -5,7 +5,7 @@ require 'devs/models'
 DEVS.logger = Logger.new(STDOUT)
 #DEVS.logger.level = Logger::INFO
 
-DEVS.simulate do
+obj = DEVS.simulate do
   duration DEVS::INFINITY
 
   add_model DEVS::Models::Generators::SequenceGenerator, :name => :sequence
@@ -50,3 +50,12 @@ DEVS.simulate do
   #plug :sequence, :with => :collector, :from => :value, :to => :a
   plug 'x^x', :with => :collector, :from => :out_1, :to => :a
 end
+
+# status = obj.status
+# while status != :done
+#   puts "status: #{status}"
+#   puts "percentage: #{obj.percentage}"
+#   status = obj.status
+# end
+
+obj.wait
