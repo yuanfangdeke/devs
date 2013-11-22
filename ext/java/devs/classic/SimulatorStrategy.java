@@ -71,7 +71,9 @@ public class SimulatorStrategy extends RubyModule {
             // debug "    received #{event.message}"
             msg = callMethod(context, "ensure_input_message", msg);
             msg.setFrozen(true);
-            model.callMethod(context, "external_transition", msg);
+            RubyArray msgs = RubyArray.newEmptyArray(rb);
+            msgs.append(msg);
+            model.callMethod(context, "external_transition", msgs);
 
             model.setInstanceVariable("@time", RubyFloat.newFloat(rb, eventTime));
             setInstanceVariable("@time_last", RubyFloat.newFloat(rb, eventTime));

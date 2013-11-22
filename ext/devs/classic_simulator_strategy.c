@@ -69,7 +69,7 @@ handle_input_event(VALUE self, VALUE event) {
         DEVS_DEBUG("received %s", RSTRING_PTR(rb_any_to_s(msg)));
         msg = devs_simulator_ensure_input_message(self, msg);
         OBJ_FREEZE(msg);
-        rb_funcall(model, rb_intern("external_transition"), 1, msg);
+        rb_funcall(model, rb_intern("external_transition"), 1, rb_ary_new3(1, msg));
 
         rb_iv_set(model, "@time", rb_float_new(ev_time));
         rb_iv_set(self, "@time_last", rb_float_new(ev_time));

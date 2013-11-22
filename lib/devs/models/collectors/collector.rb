@@ -7,7 +7,7 @@ module DEVS
           @results = {}
         end
 
-        external_transition do |*messages|
+        external_transition do |messages|
           messages.each do |message|
             value, port = *message
 

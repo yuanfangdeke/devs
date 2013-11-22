@@ -28,7 +28,7 @@ module DEVS
       #
       # @see #external_transition
       # @example
-      #   external_transition do |*messages|
+      #   external_transition do |messages|
       #     messages.each { |msg| }
       #       puts "#{msg.port} => #{msg.payload}"
       #     end
@@ -246,7 +246,7 @@ module DEVS
     #     self.sigma = 0
     #   end
     # @return [void]
-    def external_transition(*messages); end
+    def external_transition(messages); end
 
     # Internal transition function (δint), called when the model should be
     # activated, e.g when {#elapsed} reaches {#time_advance}
