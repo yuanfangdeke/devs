@@ -145,6 +145,7 @@ module DEVS
     def post(value, port)
       ensure_output_port(port).drop_off(value)
     end
+    protected :post
 
     # Yield outgoing messages added by the DEVS lambda (λ) function for the
     # current state
