@@ -1,7 +1,7 @@
 module DEVS
   # This class represent a simulator associated with an {CoupledModel},
   # responsible to route events to proper children
-  class Coordinator < Simulator
+  class Coordinator < Processor
     attr_reader :children
 
     # @!attribute [r] children

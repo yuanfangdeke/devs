@@ -7,7 +7,7 @@
 
 #include <ruby.h>
 
-#include <simulator.h>
+#include <processor.h>
 #include <coordinator.h>
 #include <coupled_model.h>
 #include <classic_simulator_strategy.h>

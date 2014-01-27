@@ -65,7 +65,7 @@ Init_devs() {
     cDEVSEvent = rb_define_class_under(mDEVS, "Event", rb_cObject);
     cDEVSMessage = rb_define_class_under(mDEVS, "Message", rb_cObject);
 
-    init_devs_simulator();
+    init_devs_processor();
     init_devs_coordinator();
     init_devs_coupled_model();
     init_devs_classic_simulator_strategy();

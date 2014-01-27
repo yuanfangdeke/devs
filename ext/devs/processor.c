@@ -1,6 +1,6 @@
-#include <simulator.h>
+#include <processor.h>
 
-VALUE cDEVSSimulator;
+VALUE cDEVSProcessor;
 
 static VALUE dispatch(VALUE self, VALUE event);
 
@@ -8,15 +8,15 @@ static VALUE dispatch(VALUE self, VALUE event);
 * Document-class: DEVS::Simulator
 */
 void
-init_devs_simulator() {
-    VALUE klass = rb_define_class_under(mDEVS, "Simulator", rb_cObject);
-    cDEVSSimulator = klass;
+init_devs_processor() {
+    VALUE klass = rb_define_class_under(mDEVS, "Processor", rb_cObject);
+    cDEVSProcessor = klass;
 
     rb_define_method(klass, "dispatch", dispatch, 1);
     rb_define_protected_method(
         klass,
         "ensure_input_message",
-        devs_simulator_ensure_input_message,
+        devs_processor_ensure_input_message,
         1
     );
 }
@@ -76,7 +76,7 @@ dispatch(VALUE self, VALUE event) {
 * @raise [InvalidPortTypeError] if the {Message#port} is not an input port
 */
 VALUE
-devs_simulator_ensure_input_message(VALUE self, VALUE msg) {
+devs_processor_ensure_input_message(VALUE self, VALUE msg) {
     VALUE model = rb_iv_get(self, "@model");
     VALUE port = rb_iv_get(msg, "@port");
     VALUE host = rb_iv_get(port, "@host");
