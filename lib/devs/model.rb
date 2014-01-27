@@ -5,8 +5,10 @@ module DEVS
     attr_reader :input_ports, :output_ports
 
     # Returns a new {Model} instance.
-    def initialize
-      @name = "#{self.class}_#{self.object_id}"
+    #
+    # @param name [String, Symbol] the name of the model
+    def initialize(name = nil)
+      @name = name unless name.nil?
       @input_ports = []
       @output_ports = []
     end

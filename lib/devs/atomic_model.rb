@@ -92,8 +92,10 @@ module DEVS
     end
 
     # Returns a new instance of {AtomicModel}
-    def initialize
-      super
+    #
+    # @param name [String, Symbol] the name of the model
+    def initialize(name = nil)
+      super(name)
 
       @elapsed = 0.0
       @sigma = INFINITY

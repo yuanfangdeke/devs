@@ -41,8 +41,10 @@ module DEVS
     #     <i>external output couplings</i> (EOC)
 
     # Returns a new instance of {CoupledModel}
-    def initialize
-      super
+    #
+    # @param name [String, Symbol] the name of the model
+    def initialize(name = nil)
+      super(name)
       @children = []
       @internal_couplings = []
       @input_couplings = []
