@@ -2,7 +2,7 @@
 
 VALUE cDEVSClassicRootCoordinatorStrategy;
 
-static VALUE run(VALUE self);
+static VALUE run(VALUE self, VALUE rc);
 
 /*
 * Document-module: DEVS::Classic::RootCoordinatorStrategy
@@ -12,15 +12,15 @@ init_devs_classic_root_coordinator_strategy() {
     VALUE mod = rb_define_module_under(mDEVSClassic, "RootCoordinatorStrategy");
     cDEVSClassicRootCoordinatorStrategy = mod;
 
-    rb_define_method(mod, "run", run, 0);
+    rb_define_module_function(mod, "run", run, 1);
 }
 
 static VALUE
-run(VALUE self) {
-    VALUE time = rb_iv_get(self, "@time");
-    VALUE child = rb_iv_get(self, "@child");
-    VALUE mutex = rb_iv_get(self, "@lock");
-    double duration = NUM2DBL(rb_iv_get(self, "@duration"));
+run(VALUE self, VALUE rc) {
+    VALUE time = rb_iv_get(rc, "@time");
+    VALUE child = rb_iv_get(rc, "@child");
+    VALUE mutex = rb_iv_get(rc, "@lock");
+    double duration = NUM2DBL(rb_iv_get(rc, "@duration"));
 
     VALUE ev = rb_funcall(
         cDEVSEvent,
@@ -33,7 +33,7 @@ run(VALUE self) {
 
     time = rb_funcall(child, rb_intern("time_next"), 0);
     rb_funcall(mutex, rb_intern("lock"), 0);
-    rb_iv_set(self, "@time", time);
+    rb_iv_set(rc, "@time", time);
     rb_funcall(mutex, rb_intern("unlock"), 0);
 
     while(NUM2DBL(time) < duration) {
@@ -51,7 +51,7 @@ run(VALUE self) {
 
         time = rb_funcall(child, rb_intern("time_next"), 0);
         rb_funcall(mutex, rb_intern("lock"), 0);
-        rb_iv_set(self, "@time", time);
+        rb_iv_set(rc, "@time", time);
         rb_funcall(mutex, rb_intern("unlock"), 0);
     }
 

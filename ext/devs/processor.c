@@ -37,24 +37,16 @@ dispatch(VALUE self, VALUE event) {
     VALUE type = rb_iv_get(event, "@type");
     VALUE hsh = rb_iv_get(self, "@events_count");
     VALUE model = rb_iv_get(self, "@model");
+    VALUE strategy = rb_iv_get(self, "@strategy");
     int count = NUM2INT(rb_hash_aref(hsh, type));
 
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
     DEVS_DEBUG("%s received %s", RSTRING_PTR(rb_any_to_s(model)), RSTRING_PTR(rb_any_to_s(event)));
 
-    VALUE m = rb_str_new2("handle_");
-    rb_str_cat2(m, rb_id2name(SYM2ID(type)));
-    rb_str_cat2(m, "_event");
-
-    ID handler = rb_intern(RSTRING_PTR(m));
-    if (rb_respond_to(self, handler)) {
-        result = rb_funcall(self, handler, 1, event);
+    if (strategy != Qnil) {
+        result = rb_funcall(strategy, rb_intern("dispatch"), 2, self, event);
     } else {
-        rb_raise(
-            rb_eRuntimeError,
-            "processor doesn't handle %s events",
-            rb_id2name(SYM2ID(type))
-        );
+        rb_raise(rb_eRuntimeError, "processor strategy not set");
     }
 
     return result;

@@ -2,9 +2,10 @@
 
 VALUE cDEVSClassicSimulatorStrategy;
 
-static VALUE handle_init_event(VALUE self, VALUE event);
-static VALUE handle_input_event(VALUE self, VALUE event);
-static VALUE handle_internal_event(VALUE self, VALUE event);
+static VALUE dispatch(VALUE self, VALUE processor, VALUE event);
+static VALUE handle_init_event(VALUE processor, VALUE event);
+static VALUE handle_input_event(VALUE processor, VALUE event);
+static VALUE handle_internal_event(VALUE processor, VALUE event);
 
 /*
 * Document-module: DEVS::Classic::SimulatorStrategy
@@ -14,9 +15,39 @@ init_devs_classic_simulator_strategy() {
     VALUE mod = rb_define_module_under(mDEVSClassic, "SimulatorStrategy");
     cDEVSClassicSimulatorStrategy = mod;
 
-    rb_define_method(mod, "handle_init_event", handle_init_event, 1);
-    rb_define_method(mod, "handle_input_event", handle_input_event, 1);
-    rb_define_method(mod, "handle_internal_event", handle_internal_event, 1);
+    rb_define_module_function(mod, "dispatch", dispatch, 2);
+}
+
+/*
+* call-seq:
+*   dispatch(event)
+*
+* Handles an incoming event
+*
+* @param event [Event] the incoming event
+* @raise [RuntimeError] if the processor cannot handle the given event
+*   ({Event#type})
+*/
+static VALUE
+dispatch(VALUE self, VALUE processor, VALUE event) {
+    ID type = SYM2ID(rb_iv_get(event, "@type"));
+    VALUE res;
+
+    if (type == rb_intern("init")) {
+        res = handle_init_event(processor, event);
+    } else if (type == rb_intern("input")) {
+        res = handle_input_event(processor, event);
+    } else if (type == rb_intern("internal")) {
+        res = handle_internal_event(processor, event);
+    } else {
+        rb_raise(
+            rb_eRuntimeError,
+            "ClassicSimulatorStrategy doesn't handle %s events",
+            rb_id2name(SYM2ID(type))
+        );
+    }
+
+    return res;
 }
 
 /*
@@ -28,16 +59,16 @@ init_devs_classic_simulator_strategy() {
 * @param event [Event] the init event
 */
 static VALUE
-handle_init_event(VALUE self, VALUE event) {
-    VALUE model = rb_iv_get(self, "@model");
-    double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
+handle_init_event(VALUE processor, VALUE event) {
+    VALUE model = rb_iv_get(processor, "@model");
+    double time_next = NUM2DBL(rb_iv_get(processor, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
 
     rb_iv_set(model, "@time", rb_float_new(ev_time));
-    rb_iv_set(self, "@time_last", rb_float_new(ev_time));
+    rb_iv_set(processor, "@time_last", rb_float_new(ev_time));
 
     double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
-    rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
+    rb_iv_set(processor, "@time_next", rb_float_new(ev_time + ta));
 
     // debug "    time_last: #{@time_last} | time_next: #{@time_next}"
     DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
@@ -56,26 +87,26 @@ handle_init_event(VALUE self, VALUE event) {
 *   range, e.g isn't between {Simulator#time_last} and {Simulator#time_next}
 */
 static VALUE
-handle_input_event(VALUE self, VALUE event) {
-    VALUE model = rb_iv_get(self, "@model");
+handle_input_event(VALUE processor, VALUE event) {
+    VALUE model = rb_iv_get(processor, "@model");
     VALUE msg = rb_iv_get(event, "@message");
-    double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
-    double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
+    double time_last = NUM2DBL(rb_iv_get(processor, "@time_last"));
+    double time_next = NUM2DBL(rb_iv_get(processor, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
 
     if (ev_time >= time_last && ev_time <= time_next) {
         rb_iv_set(model, "@elapsed", rb_float_new(ev_time - time_last));
         // debug "    received #{event.message}"
         DEVS_DEBUG("received %s", RSTRING_PTR(rb_any_to_s(msg)));
-        msg = rb_funcall(self, rb_intern("ensure_input_message"), 1, msg);
-        // msg = devs_simulator_ensure_input_message(self, msg);
+        msg = rb_funcall(processor, rb_intern("ensure_input_message"), 1, msg);
+        // msg = devs_simulator_ensure_input_message(processor, msg);
         OBJ_FREEZE(msg);
         rb_funcall(model, rb_intern("external_transition"), 1, rb_ary_new3(1, msg));
 
         rb_iv_set(model, "@time", rb_float_new(ev_time));
-        rb_iv_set(self, "@time_last", rb_float_new(ev_time));
+        rb_iv_set(processor, "@time_last", rb_float_new(ev_time));
         double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
-        rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
+        rb_iv_set(processor, "@time_next", rb_float_new(ev_time + ta));
         DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
     } else {
         rb_raise(
@@ -101,11 +132,11 @@ handle_input_event(VALUE self, VALUE event) {
 *   {Simulator#time_next}
 */
 static VALUE
-handle_internal_event(VALUE self, VALUE event) {
-    VALUE model = rb_iv_get(self, "@model");
-    VALUE parent = rb_iv_get(self, "@parent");
+handle_internal_event(VALUE processor, VALUE event) {
+    VALUE model = rb_iv_get(processor, "@model");
+    VALUE parent = rb_iv_get(processor, "@parent");
     VALUE ret;
-    double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
+    double time_next = NUM2DBL(rb_iv_get(processor, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
     int i;
 
@@ -138,9 +169,9 @@ handle_internal_event(VALUE self, VALUE event) {
     rb_funcall(model, rb_intern("internal_transition"), 0);
 
     rb_iv_set(model, "@time", rb_float_new(ev_time));
-    rb_iv_set(self, "@time_last", rb_float_new(ev_time));
+    rb_iv_set(processor, "@time_last", rb_float_new(ev_time));
     double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
-    rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
+    rb_iv_set(processor, "@time_next", rb_float_new(ev_time + ta));
     // debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
     DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
 

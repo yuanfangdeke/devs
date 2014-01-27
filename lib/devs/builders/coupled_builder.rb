@@ -11,8 +11,7 @@ module DEVS
         end
 
         @namespace = namespace
-        @processor = Coordinator.new(@model)
-        @processor.singleton_class.send(:include, namespace::CoordinatorStrategy)
+        @processor = Coordinator.new(@model, namespace::CoordinatorStrategy)
         @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor

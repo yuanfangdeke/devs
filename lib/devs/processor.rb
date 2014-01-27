@@ -21,8 +21,11 @@ module DEVS
     # Returns a new {Processor} instance.
     #
     # @param model [Model] the model associated with this processor
-    def initialize(model)
+    # @param strategy [Module]
+    def initialize(model, strategy)
       @model = model
+      @strategy = strategy
+      @strategy
       @time_next = 0
       @time_last = 0
       @events_count = Hash.new(0)

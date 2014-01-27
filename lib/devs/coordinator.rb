@@ -13,8 +13,9 @@ module DEVS
     # Returns a new instance of {Coordinator}
     #
     # @param model [CoupledModel] the managed coupled model
-    def initialize(model)
-      super(model)
+    # @param strategy [Module]
+    def initialize(model, strategy)
+      super(model, strategy)
       @children = []
     end
 
