@@ -12,7 +12,7 @@ static VALUE imminent_children(VALUE self);
 */
 void
 init_devs_coordinator() {
-    VALUE klass = rb_define_class_under(cDEVSProcessor, "Coordinator", cDEVSSimulator);
+    VALUE klass = rb_define_class_under(mDEVS, "Coordinator", cDEVSProcessor);
     cDEVSCoordinator = klass;
 
     rb_define_method(klass, "min_time_next", min_time_next, 0);
