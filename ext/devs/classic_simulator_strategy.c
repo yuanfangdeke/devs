@@ -67,7 +67,8 @@ handle_input_event(VALUE self, VALUE event) {
         rb_iv_set(model, "@elapsed", rb_float_new(ev_time - time_last));
         // debug "    received #{event.message}"
         DEVS_DEBUG("received %s", RSTRING_PTR(rb_any_to_s(msg)));
-        msg = devs_simulator_ensure_input_message(self, msg);
+        msg = rb_funcall(self, rb_intern("ensure_input_message"), 1, msg);
+        // msg = devs_simulator_ensure_input_message(self, msg);
         OBJ_FREEZE(msg);
         rb_funcall(model, rb_intern("external_transition"), 1, rb_ary_new3(1, msg));
 

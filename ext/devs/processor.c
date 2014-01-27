@@ -39,12 +39,7 @@ dispatch(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
     int count = NUM2INT(rb_hash_aref(hsh, type));
 
-    // VALUE str = rb_str_new2(RSTRING_PTR(rb_any_to_s(model)));
-    // rb_str_cat2(str, " received ");
-    // rb_str_cat2(str, RSTRING_PTR(rb_any_to_s(event)));
-
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
-//    rb_funcall(self, rb_intern("debug"), 1, str);
     DEVS_DEBUG("%s received %s", RSTRING_PTR(rb_any_to_s(model)), RSTRING_PTR(rb_any_to_s(event)));
 
     VALUE m = rb_str_new2("handle_");
@@ -57,7 +52,7 @@ dispatch(VALUE self, VALUE event) {
     } else {
         rb_raise(
             rb_eRuntimeError,
-            "simulator doesn't handle %s events",
+            "processor doesn't handle %s events",
             rb_id2name(SYM2ID(type))
         );
     }
