@@ -13,9 +13,11 @@ module DEVS
     # Returns a new instance of {Coordinator}
     #
     # @param model [CoupledModel] the managed coupled model
-    # @param strategy [Module]
-    def initialize(model, strategy)
-      super(model, strategy)
+    # @param namespace [Module] the namespace providing template method
+    #   implementation
+    def initialize(model, namespace)
+      super(model)
+      extend namespace::CoordinatorImpl
       @children = []
     end
 

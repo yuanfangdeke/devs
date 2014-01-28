@@ -25,17 +25,18 @@ module DEVS
     # Returns a new {RootCoordinator} instance.
     #
     # @param child [Coordinator] the child coordinator
-    # @param strategy [Module]
+    # @param namespace [Module] the namespace providing template method
+    #   implementation
     # @param duration [Numeric] the duration of the simulation
     # @raise [ArgumentError] if the child is not a coordinator
-    def initialize(child, strategy, duration = DEFAULT_DURATION)
+    def initialize(child, namespace, duration = DEFAULT_DURATION)
       unless child.is_a?(Coordinator)
         raise ArgumentError, 'child must be of Coordinator type'
       end
+      extend namespace::RootCoordinatorImpl
       @duration = duration
       @time = 0
       @child = child
-      @strategy = strategy
       @lock = Mutex.new
     end
 
@@ -146,7 +147,7 @@ module DEVS
             info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
           end
 
-          @strategy.run(self)
+          run     # implemented in RootCoordinatorImpl
 
           final_time = Time.now
           @lock.synchronize { @final_time = final_time }

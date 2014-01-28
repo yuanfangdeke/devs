@@ -1,56 +1,24 @@
-#include <classic_coordinator_strategy.h>
+#include <classic_coordinator_impl.h>
 
-VALUE cDEVSClassicCoordinatorStrategy;
+VALUE cDEVSClassicCoordinatorImpl;
 
-static VALUE dispatch(VALUE self, VALUE processor, VALUE event);
-static VALUE handle_init_event(VALUE processor, VALUE event);
-static VALUE handle_input_event(VALUE processor, VALUE event);
-static VALUE handle_output_event(VALUE processor, VALUE event);
-static VALUE handle_internal_event(VALUE processor, VALUE event);
+static VALUE handle_init_event(VALUE self, VALUE event);
+static VALUE handle_input_event(VALUE self, VALUE event);
+static VALUE handle_output_event(VALUE self, VALUE event);
+static VALUE handle_internal_event(VALUE self, VALUE event);
 
 /*
-* Document-module: DEVS::Classic::CoordinatorStrategy
+* Document-module: DEVS::Classic::CoordinatorImpl
 */
 void
-init_devs_classic_coordinator_strategy() {
-    VALUE mod = rb_define_module_under(mDEVSClassic, "CoordinatorStrategy");
-    cDEVSClassicCoordinatorStrategy = mod;
+init_devs_classic_coordinator_impl() {
+    VALUE mod = rb_define_module_under(mDEVSClassic, "CoordinatorImpl");
+    cDEVSClassicCoordinatorImpl = mod;
 
-    rb_define_module_function(mod, "dispatch", dispatch, 2);
-}
-
-/*
-* call-seq:
-*   dispatch(event)
-*
-* Handles an incoming event
-*
-* @param event [Event] the incoming event
-* @raise [RuntimeError] if the processor cannot handle the given event
-*   ({Event#type})
-*/
-static VALUE
-dispatch(VALUE self, VALUE processor, VALUE event) {
-    ID type = SYM2ID(rb_iv_get(event, "@type"));
-    VALUE res;
-
-    if (type == rb_intern("init")) {
-        res = handle_init_event(processor, event);
-    } else if (type == rb_intern("input")) {
-        res = handle_input_event(processor, event);
-    } else if (type == rb_intern("output")) {
-        res = handle_output_event(processor, event);
-    } else if (type == rb_intern("internal")) {
-        res = handle_internal_event(processor, event);
-    } else {
-        rb_raise(
-            rb_eRuntimeError,
-            "ClassicSimulatorStrategy doesn't handle %s events",
-            rb_id2name(SYM2ID(type))
-        );
-    }
-
-    return res;
+    rb_define_method(mod, "handle_init_event", handle_init_event, 1);
+    rb_define_method(mod, "handle_input_event", handle_input_event, 1);
+    rb_define_method(mod, "handle_output_event", handle_output_event, 1);
+    rb_define_method(mod, "handle_internal_event", handle_internal_event, 1);
 }
 
 /*
@@ -62,9 +30,9 @@ dispatch(VALUE self, VALUE processor, VALUE event) {
 * @param event [Event] the init event
 */
 static VALUE
-handle_init_event(VALUE processor, VALUE event) {
-    VALUE children = rb_iv_get(processor, "@children");
-    VALUE model = rb_iv_get(processor, "@model");
+handle_init_event(VALUE self, VALUE event) {
+    VALUE children = rb_iv_get(self, "@children");
+    VALUE model = rb_iv_get(self, "@model");
     int i;
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
@@ -72,10 +40,10 @@ handle_init_event(VALUE processor, VALUE event) {
         rb_funcall(child, rb_intern("dispatch"), 1, event);
     }
 
-    VALUE tl = rb_funcall(processor, rb_intern("max_time_last"), 0);
-    VALUE tn = rb_funcall(processor, rb_intern("min_time_next"), 0);
-    rb_iv_set(processor, "@time_last", tl);
-    rb_iv_set(processor, "@time_next", tn);
+    VALUE tl = rb_funcall(self, rb_intern("max_time_last"), 0);
+    VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);
+    rb_iv_set(self, "@time_last", tl);
+    rb_iv_set(self, "@time_next", tn);
 
     // debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
     DEVS_DEBUG("set tl: %f; tn: %f", NUM2DBL(tl), NUM2DBL(tn));
@@ -94,13 +62,13 @@ handle_init_event(VALUE processor, VALUE event) {
 *   {Coordinator#time_next}
 */
 static VALUE
-handle_input_event(VALUE processor, VALUE event) {
-    VALUE model = rb_iv_get(processor, "@model");
+handle_input_event(VALUE self, VALUE event) {
+    VALUE model = rb_iv_get(self, "@model");
     VALUE msg = rb_iv_get(event, "@message");
     VALUE port = rb_iv_get(msg, "@port");
     VALUE payload = rb_iv_get(msg, "@payload");
-    double time_last = NUM2DBL(rb_iv_get(processor, "@time_last"));
-    double time_next = NUM2DBL(rb_iv_get(processor, "@time_next"));
+    double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
+    double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
 
     if (ev_time >= time_last && ev_time <= time_next) {
@@ -134,9 +102,9 @@ handle_input_event(VALUE processor, VALUE event) {
             rb_funcall(child, rb_intern("dispatch"), 1, ev);
         }
 
-        rb_iv_set(processor, "@time_last", rb_float_new(ev_time));
-        VALUE tn = rb_funcall(processor, rb_intern("min_time_next"), 0);
-        rb_iv_set(processor, "@time_next", tn);
+        rb_iv_set(self, "@time_last", rb_float_new(ev_time));
+        VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);
+        rb_iv_set(self, "@time_next", tn);
         //   debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
         DEVS_DEBUG("time_last: %f | time_next: %f", ev_time, NUM2DBL(tn));
     } else {
@@ -161,12 +129,12 @@ handle_input_event(VALUE processor, VALUE event) {
 * @param event [Event] the output event
 */
 static VALUE
-handle_output_event(VALUE processor, VALUE event) {
-    VALUE model = rb_iv_get(processor, "@model");
+handle_output_event(VALUE self, VALUE event) {
+    VALUE model = rb_iv_get(self, "@model");
     VALUE msg = rb_iv_get(event, "@message");
     VALUE port = rb_iv_get(msg, "@port");
     VALUE payload = rb_iv_get(msg, "@payload");
-    VALUE parent = rb_iv_get(processor, "@parent");
+    VALUE parent = rb_iv_get(self, "@parent");
     VALUE time = rb_iv_get(event, "@time");
     int i;
     VALUE ret = rb_funcall(model, rb_intern("each_output_coupling"), 1, port);
@@ -236,10 +204,10 @@ handle_output_event(VALUE processor, VALUE event) {
 *   {Coordinator#time_next}
 */
 static VALUE
-handle_internal_event(VALUE processor, VALUE event) {
-    double time_next = NUM2DBL(rb_iv_get(processor, "@time_next"));
+handle_internal_event(VALUE self, VALUE event) {
+    double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
-    VALUE model = rb_iv_get(processor, "@model");
+    VALUE model = rb_iv_get(self, "@model");
     int i, index;
 
     if (ev_time != time_next) {
@@ -251,7 +219,7 @@ handle_internal_event(VALUE processor, VALUE event) {
         );
     }
 
-    VALUE children = rb_funcall(processor, rb_intern("imminent_children"), 0);
+    VALUE children = rb_funcall(self, rb_intern("imminent_children"), 0);
     VALUE children_models = rb_ary_new2(RARRAY_LEN(children));
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
@@ -269,9 +237,9 @@ handle_internal_event(VALUE processor, VALUE event) {
 
     rb_funcall(child, rb_intern("dispatch"), 1, event);
 
-    rb_iv_set(processor, "@time_last", rb_float_new(ev_time));
-    VALUE tn = rb_funcall(processor, rb_intern("min_time_next"), 0);
-    rb_iv_set(processor, "@time_next", tn);
+    rb_iv_set(self, "@time_last", rb_float_new(ev_time));
+    VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);
+    rb_iv_set(self, "@time_next", tn);
 
     DEVS_DEBUG("time_last: %f | time_next: %f", ev_time, NUM2DBL(tn));
 

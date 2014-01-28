@@ -68,7 +68,7 @@ Init_devs() {
     init_devs_processor();
     init_devs_coordinator();
     init_devs_coupled_model();
-    init_devs_classic_simulator_strategy();
-    init_devs_classic_coordinator_strategy();
-    init_devs_classic_root_coordinator_strategy();
+    init_devs_classic_simulator_impl();
+    init_devs_classic_coordinator_impl();
+    init_devs_classic_root_coordinator_impl();
 }

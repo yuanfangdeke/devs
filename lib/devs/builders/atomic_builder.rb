@@ -10,7 +10,7 @@ module DEVS
           @model = klass.new(*args)
         end
 
-        @processor = Simulator.new(@model, namespace::SimulatorStrategy)
+        @processor = Simulator.new(@model, namespace)
         @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
