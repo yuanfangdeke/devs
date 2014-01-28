@@ -34,6 +34,8 @@ init_devs_processor() {
 */
 static VALUE
 dispatch(VALUE self, VALUE event) {
+    static const char* prefix = "handle_";
+    static const char* suffix = "_event";
     VALUE type = rb_iv_get(event, "@type");
     VALUE hsh = rb_iv_get(self, "@events_count");
     VALUE model = rb_iv_get(self, "@model");
@@ -42,13 +44,13 @@ dispatch(VALUE self, VALUE event) {
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
     DEVS_DEBUG("%s received %s", RSTRING_PTR(rb_any_to_s(model)), RSTRING_PTR(rb_any_to_s(event)));
 
-    VALUE m = rb_str_new2("handle_");
-    rb_str_cat2(m, rb_id2name(SYM2ID(type)));
-    rb_str_cat2(m, "_event");
+    const char* type_name = rb_id2name(SYM2ID(type));
+    char str[strlen(prefix) + strlen(suffix) + strlen(type_name) + 1];
+    strcpy(str, prefix);
+    strcat(str, type_name);
+    strcat(str, suffix);
 
-    ID handler = rb_intern(RSTRING_PTR(m));
-
-    return rb_funcall(self, handler, 1, event);
+    return rb_funcall(self, rb_intern(str), 1, event);
 }
 
 /*
