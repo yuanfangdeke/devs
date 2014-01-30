@@ -18,7 +18,7 @@ module DEVS
 
         instance_eval(&block) if block
 
-        @root_coordinator = RootCoordinator.new(@processor, namespace, @duration)
+        @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
         @root_coordinator.after_initialize if @root_coordinator.respond_to?(:after_initialize)
 
         hooks.each { |observer| @root_coordinator.add_observer(observer) }

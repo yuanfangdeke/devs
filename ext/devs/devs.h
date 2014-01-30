@@ -12,7 +12,7 @@
 #include <coupled_model.h>
 #include <classic_simulator_impl.h>
 #include <classic_coordinator_impl.h>
-#include <classic_root_coordinator_impl.h>
+#include <classic_root_coordinator_strategy.h>
 
 extern VALUE mDEVS;
 extern VALUE mDEVSClassic;

@@ -70,5 +70,5 @@ Init_devs() {
     init_devs_coupled_model();
     init_devs_classic_simulator_impl();
     init_devs_classic_coordinator_impl();
-    init_devs_classic_root_coordinator_impl();
+    init_devs_classic_root_coordinator_strategy();
 }
