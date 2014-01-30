@@ -34,7 +34,7 @@ module DEVS
 
       # @return [AtomicModel] the new atomic model
       def add_model(type=nil, opts={}, &block)
-        simulator = AtomicBuilder.new(@namespace, type, opts[:name], *opts[:with_params], &block).processor
+        simulator = AtomicBuilder.new(@namespace, type, opts[:name], *opts[:with_args], &block).processor
         simulator.parent = @processor
         simulator.model.parent = @model
         @model << simulator.model
@@ -47,30 +47,36 @@ module DEVS
         @model.define_singleton_method(:select, &block) if block
       end
 
-      def add_internal_coupling(*args)
-        @model.add_internal_coupling(*args)
-      end
-
-      def add_external_output_coupling(*args)
-        @model.add_external_output_coupling(*args)
-      end
-      alias_method :add_output_coupling, :add_external_output_coupling
-
-      def add_external_input_coupling(*args)
-        @model.add_external_input_coupling(*args)
-      end
-      alias_method :add_input_coupling, :add_external_input_coupling
-
       def plug(child, opts={})
-        @model.add_internal_coupling(child, opts[:with], opts[:from], opts[:to])
+        a, from = child.split('@')
+        b, to = opts[:with].split('@')
+        @model.add_internal_coupling(a.to_sym, b.to_sym, from.to_sym, to.to_sym)
       end
 
       def plug_output_port(port, opts={})
-        @model.add_external_output_coupling(opts[:with_child], port, opts[:and_child_port])
+        blk = Proc.new do |id|
+          child, child_port = id.split('@')
+          @model.add_external_output_coupling(child.to_sym, port.to_sym, child_port.to_sym)
+        end
+
+        if opts.has_key?(:with_children)
+          opts[:with_children].each { |id| blk.(id) }
+        else
+          blk.(opts[:with_child])
+        end
       end
 
       def plug_input_port(port, opts={})
-        @model.add_external_input_coupling(opts[:with_child], port, opts[:and_child_port])
+        blk = Proc.new do |id|
+          child, child_port = id.split('@')
+          @model.add_external_input_coupling(child.to_sym, port.to_sym, child_port.to_sym)
+        end
+
+        if opts.has_key?(:with_children)
+          opts[:with_children].each { |id| blk.(id) }
+        else
+          blk.(opts[:with_child])
+        end
       end
     end
   end

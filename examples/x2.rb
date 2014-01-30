@@ -1,5 +1,5 @@
 require 'devs'
-require 'devs/parallel'
+#require 'devs/parallel'
 require 'devs/models'
 
 DEVS.logger = Logger.new(STDOUT)
@@ -8,10 +8,11 @@ DEVS.logger = Logger.new(STDOUT)
 obj = DEVS.simulate do
   duration DEVS::INFINITY
 
-  add_model DEVS::Models::Generators::SequenceGenerator, :name => :sequence
+  add_model DEVS::Models::Generators::SequenceGenerator, with_args: [1, 5, 1], :name => :sequence
 
   add_model do
     name 'x^x'
+    # reverse_confluent_transition!
 
     init do
       add_output_port :out_1
@@ -31,7 +32,7 @@ obj = DEVS.simulate do
     end
 
     after_output { @sigma = DEVS::INFINITY }
-    time_advance { @sigma }
+    # time_advance { @sigma }
   end
 
   add_coupled_model do
@@ -40,15 +41,13 @@ obj = DEVS.simulate do
     add_model DEVS::Models::Collectors::PlotCollector, :name => :plot
     add_model DEVS::Models::Collectors::CSVCollector, :name => :csv
 
-    plug_input_port :a, :with_child => :csv, :and_child_port => 'x'
-    plug_input_port :a, :with_child => :plot, :and_child_port => 'x'
-    plug_input_port :b, :with_child => :csv, :and_child_port => 'x^x'
-    plug_input_port :b, :with_child => :plot, :and_child_port => 'x^x'
+    plug_input_port :a, with_children: ['csv@x', 'plot@x']
+    plug_input_port :b, :with_children ['csv@x^x', 'plot@x^x']
   end
 
-  plug :sequence, :with => 'x^x', :from => :value, :to => :in_1
-  #plug :sequence, :with => :collector, :from => :value, :to => :a
-  plug 'x^x', :with => :collector, :from => :out_1, :to => :a
+  plug 'sequence@value', with: 'x^x@in_1'
+  # plug 'sequence@value', with: 'collector@a'
+  plug 'x^x@out_1', with: 'collector@a'
 end
 
 # status = obj.status

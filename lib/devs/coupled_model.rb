@@ -224,8 +224,8 @@ module DEVS
     private
 
     def ensure_child(child)
-      if !child.respond_to?(:name)
-        child = self[child]
+      if !child.is_a?(Model)
+        child = self[child.to_sym]
       end
       raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
       child

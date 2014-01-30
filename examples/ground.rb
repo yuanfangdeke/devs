@@ -1,39 +1,39 @@
-$:.push File.expand_path('../../lib', __FILE__)
-
-# require 'pry'
-# require 'pry-nav'
-# require 'pry-stack_explorer'
-
 require 'devs'
+#require 'devs/parallel'
 require 'devs/models'
+require 'ruby-progressbar'
 
-DEVS.logger = Logger.new(STDOUT)
-DEVS.logger.level = Logger::INFO
+Thread.abort_on_exception = true
 
-# require 'perftools'
-# PerfTools::CpuProfiler.start("/tmp/ground_simulation") do
-DEVS.simulate do
-  duration 100
+DEVS.logger = Logger.new('logfile.log')
+#DEVS.logger.level = Logger::INFO
 
-  coupled do
+obj = DEVS.simulate do
+  duration 10000
+
+  # algorithm [:classic, :parallel, :time_warp]
+
+  add_coupled_model do
     name :generator
-    atomic(DEVS::Models::Generators::RandomGenerator, 0, 5) { name :random }
-    add_external_output_coupling(:random, :output, :output)
+    add_model DEVS::Models::Generators::RandomGenerator, with_args: [0, 5], :name => :random
+    plug_output_port :output, :with_child => 'random@output'
   end
 
-  select { |imm| imm.sample }
-
-  atomic do
+  add_model do
     name :ground
 
     init do
+      add_output_port :pluviometrie
+      add_output_port :ruissellement
+      add_input_port :input
+
       @pluviometrie = 0
       @cc = 40.0
       @out_flow = 5.0
       @ruissellement = 0
     end
 
-    external_transition do |*messages|
+    when_input_received do |messages|
       messages.each do |message|
         value = message.payload
         @pluviometrie += value unless value.nil?
@@ -46,36 +46,40 @@ DEVS.simulate do
         @pluviometrie = @cc
       end
 
-      self.sigma = 0
+      @sigma = 1
     end
-
-    internal_transition {
-      @ruissellement = 0
-      self.sigma = DEVS::INFINITY
-    }
 
     output do
-      post(@pluviometrie, output_ports.first)
-      post(@ruissellement, output_ports.last)
+      post @pluviometrie, :pluviometrie
+      post @ruissellement, :ruissellement
     end
 
-    time_advance { self.sigma }
+    after_output do
+      @ruissellement = 0
+      @sigma = DEVS::INFINITY
+    end
+
+    # if_transition_collides do |*messages|
+    #   external_transition *messages
+    #   internal_transition
+    # end
+
+    time_advance { @sigma }
   end
 
-  coupled do
+  add_coupled_model do
     name :collector
 
-    atomic(DEVS::Models::Collectors::PlotCollector) { name :plot_output }
-    atomic(DEVS::Models::Collectors::CSVCollector) { name :csv_output }
+    add_model DEVS::Models::Collectors::PlotCollector, :name => :plot_output
+    add_model DEVS::Models::Collectors::CSVCollector, :name => :csv_output
 
-    add_external_input_coupling(:plot_output, :pluviometrie, :pluviometrie)
-    add_external_input_coupling(:csv_output, :pluviometrie, :pluviometrie)
-    add_external_input_coupling(:plot_output, :ruissellement, :ruissellement)
-    add_external_input_coupling(:csv_output, :ruissellement, :ruissellement)
+    plug_input_port :pluviometrie, with_children: ['csv_output@pluviometrie', 'plot_output@pluviometrie']
+    plug_input_port :ruissellement, with_children: ['csv_output@ruissellement', 'plot_output@ruissellement']
   end
 
-  add_internal_coupling(:generator, :ground, :output, :input)
-  add_internal_coupling(:ground, :collector, :pluviometrie, :pluviometrie)
-  add_internal_coupling(:ground, :collector, :ruissellement, :ruissellement)
+  plug 'generator@output', with: 'ground@input'
+  plug 'ground@pluviometrie', with: 'collector@pluviometrie'
+  plug 'ground@ruissellement', with: 'collector@ruissellement'
 end
-#end
+
+obj.wait
