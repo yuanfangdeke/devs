@@ -42,7 +42,13 @@ dispatch(VALUE self, VALUE event) {
     int count = NUM2INT(rb_hash_aref(hsh, type));
 
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
-    DEVS_DEBUG("%s received %s", RSTRING_PTR(rb_any_to_s(model)), RSTRING_PTR(rb_any_to_s(event)));
+
+#ifdef DEBUG
+    DEVS_DEBUG("%s received %s",
+        RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+        RSTRING_PTR(rb_funcall(event, rb_intern("to_s"), 0))
+    );
+#endif
 
     const char* type_name = rb_id2name(SYM2ID(type));
     char str[strlen(prefix) + strlen(suffix) + strlen(type_name) + 1];

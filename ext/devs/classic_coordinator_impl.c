@@ -45,7 +45,6 @@ handle_init_event(VALUE self, VALUE event) {
     rb_iv_set(self, "@time_last", tl);
     rb_iv_set(self, "@time_next", tn);
 
-    // debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
     DEVS_DEBUG("set tl: %f; tn: %f", NUM2DBL(tl), NUM2DBL(tn));
     return Qnil;
 }
@@ -81,8 +80,12 @@ handle_input_event(VALUE self, VALUE event) {
             VALUE child = rb_funcall(mdl_dst, rb_intern("processor"), 0);
             VALUE prt_dst = rb_iv_get(coupling, "@destination_port");
 
-            // debug "    #{model} found external input coupling #{coupling}"
-            DEVS_DEBUG("found external input coupling");
+#ifdef DEBUG
+            DEVS_DEBUG("%s found external input coupling %s",
+                RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+                RSTRING_PTR(rb_funcall(coupling, rb_intern("to_s"), 0))
+            );
+#endif
 
             VALUE msg2 = rb_funcall(
                 cDEVSMessage,
@@ -105,8 +108,14 @@ handle_input_event(VALUE self, VALUE event) {
         rb_iv_set(self, "@time_last", rb_float_new(ev_time));
         VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);
         rb_iv_set(self, "@time_next", tn);
-        //   debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
-        DEVS_DEBUG("time_last: %f | time_next: %f", ev_time, NUM2DBL(tn));
+
+#ifdef DEBUG
+        DEVS_DEBUG("%s time_last: %f | time_next: %f",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            ev_time,
+            NUM2DBL(tn)
+        );
+#endif
     } else {
         rb_raise(
             cDEVSBadSynchronisationError,
@@ -142,8 +151,13 @@ handle_output_event(VALUE self, VALUE event) {
     for (i = 0; i < RARRAY_LEN(ret); i++) {
         VALUE coupling = rb_ary_entry(ret, i);
         VALUE prt_dst = rb_iv_get(coupling, "@destination_port");
-        // debug "    found external output coupling #{coupling}"
-        DEVS_DEBUG("found external output coupling");
+
+#ifdef DEBUG
+        DEVS_DEBUG("%s found external output coupling %s",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(coupling, rb_intern("to_s"), 0))
+        );
+#endif
 
         VALUE msg2 = rb_funcall(
             cDEVSMessage,
@@ -170,7 +184,12 @@ handle_output_event(VALUE self, VALUE event) {
         VALUE child = rb_funcall(mdl_dst, rb_intern("processor"), 0);
         VALUE prt_dst = rb_iv_get(coupling, "@destination_port");
 
-        DEVS_DEBUG("found internal coupling");
+#ifdef DEBUG
+        DEVS_DEBUG("%s found internal coupling %s",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(coupling, rb_intern("to_s"), 0))
+        );
+#endif
 
         VALUE msg2 = rb_funcall(
             cDEVSMessage,
@@ -226,7 +245,6 @@ handle_internal_event(VALUE self, VALUE event) {
         rb_ary_push(children_models, rb_iv_get(child, "@model"));
     }
     VALUE child_model = rb_funcall(model, rb_intern("select"), 1, children_models);
-    //   debug "    selected #{child_model} in #{children_models.map(&:name)}"
 
     for (index = 0; index < RARRAY_LEN(children); index++) {
         if (child_model == rb_ary_entry(children_models, index)) {
@@ -241,7 +259,13 @@ handle_internal_event(VALUE self, VALUE event) {
     VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);
     rb_iv_set(self, "@time_next", tn);
 
-    DEVS_DEBUG("time_last: %f | time_next: %f", ev_time, NUM2DBL(tn));
+#ifdef DEBUG
+    DEVS_DEBUG("%s time_last: %f | time_next: %f",
+        RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+        ev_time,
+        NUM2DBL(tn)
+    );
+#endif
 
     return Qnil;
 }

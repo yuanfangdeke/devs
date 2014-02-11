@@ -39,8 +39,12 @@ handle_init_event(VALUE self, VALUE event) {
     double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
     rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
 
-    // debug "    time_last: #{@time_last} | time_next: #{@time_next}"
-    DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
+#ifdef DEBUG
+        DEVS_DEBUG("%s time_last: %f | time_next: %f",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            ev_time,
+            ev_time + ta);
+#endif
 
     return Qnil;
 }
@@ -65,10 +69,8 @@ handle_input_event(VALUE self, VALUE event) {
 
     if (ev_time >= time_last && ev_time <= time_next) {
         rb_iv_set(model, "@elapsed", rb_float_new(ev_time - time_last));
-        // debug "    received #{event.message}"
-        DEVS_DEBUG("received %s", RSTRING_PTR(rb_any_to_s(msg)));
+
         msg = rb_funcall(self, rb_intern("ensure_input_message"), 1, msg);
-        // msg = devs_simulator_ensure_input_message(self, msg);
         OBJ_FREEZE(msg);
         rb_funcall(model, rb_intern("external_transition"), 1, rb_ary_new3(1, msg));
 
@@ -76,7 +78,13 @@ handle_input_event(VALUE self, VALUE event) {
         rb_iv_set(self, "@time_last", rb_float_new(ev_time));
         double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
         rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
-        DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
+
+#ifdef DEBUG
+        DEVS_DEBUG("%s time_last: %f | time_next: %f",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            ev_time,
+            ev_time + ta);
+#endif
     } else {
         rb_raise(
             cDEVSBadSynchronisationError,
@@ -130,8 +138,12 @@ handle_internal_event(VALUE self, VALUE event) {
             rb_float_new(ev_time),
             msg
         );
-        // debug "    sent #{message}"
-        DEVS_DEBUG("sent %s", RSTRING_PTR(rb_any_to_s(msg)));
+
+#ifdef DEBUG
+        DEVS_DEBUG("%s sent %s",
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(msg, rb_intern("to_s"), 0)));
+#endif
         rb_funcall(parent, rb_intern("dispatch"), 1, ev);
     }
 
@@ -141,8 +153,13 @@ handle_internal_event(VALUE self, VALUE event) {
     rb_iv_set(self, "@time_last", rb_float_new(ev_time));
     double ta = NUM2DBL(rb_funcall(model, rb_intern("time_advance"), 0));
     rb_iv_set(self, "@time_next", rb_float_new(ev_time + ta));
-    // debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
-    DEVS_DEBUG("    time_last: %f | time_next: %f", ev_time, ev_time + ta);
+
+#ifdef DEBUG
+    DEVS_DEBUG("%s time_last: %f | time_next: %f",
+        RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
+        ev_time,
+        ev_time + ta);
+#endif
 
     return Qnil;
 }
