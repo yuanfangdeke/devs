@@ -16,7 +16,7 @@ end
 
 Rake::TestTask.new do |t|
   t.libs = ['lib', 'spec', 'test']
-  t.test_files = FileList['test/*_test.rb']
+  t.test_files = FileList['test/**/*_test.rb']
 end
 
 desc "Clean, compile and run tests"
