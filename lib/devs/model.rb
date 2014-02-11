@@ -4,13 +4,37 @@ module DEVS
     attr_accessor :name, :parent, :processor
     attr_reader :input_ports, :output_ports
 
+    # @!attribute name
+    #   This attribute represent the name of the model.
+    #   @return [Symbol] Returns the name of the model
+
+    # @!attribute parent
+    #   This attribute represent the parent {CoupledModel}.
+    #   @return [CoupledModel] Returns the parent model.
+
+    # @!attribute parent
+    #   This attribute represent the associated {Processor}.
+    #   @return [Processor] Returns the associated processor.
+
+    # @!attribute [r] input_ports
+    #   This attribute represent the list of input {Port}s.
+    #   @return [Array<Port>] Returns the array of input ports.
+
+    # @!attribute [r] output_ports
+    #   This attribute represent the list of output {Port}s.
+    #   @return [Array<Port>] Returns the array of output ports.
+
     # Returns a new {Model} instance.
     #
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
-      @name = name unless name.nil?
+      @name = name.to_sym unless name.nil?
       @input_ports = []
       @output_ports = []
+    end
+
+    def name=(name)
+      @name = name.to_sym unless name.nil?
     end
 
     # Returns a boolean indicating if <tt>self</tt> is an atomic model
