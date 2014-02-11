@@ -83,7 +83,7 @@ module DEVS
     # @param name [String, Symbol] the component name
     # @return [Model] the matching component, nil otherwise
     def [](name)
-      @children.find { |model| model.name == name }
+      @children.find { |model| model.name == name.to_sym }
     end
     alias_method :find_child_by_name, :[]
 
@@ -225,7 +225,7 @@ module DEVS
 
     def ensure_child(child)
       if !child.is_a?(Model)
-        child = self[child.to_sym]
+        child = self[child]
       end
       raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
       child
