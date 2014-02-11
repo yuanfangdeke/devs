@@ -33,6 +33,18 @@ module DEVS
       end
       alias_method :after_output, :internal_transition
 
+      def confluent_transition(&block)
+        @model.define_singleton_method(:confluent_transition, &block) if block
+      end
+      alias_method :if_transition_collides, :confluent_transition
+
+      def reverse_confluent_transition!
+        @model.define_singleton_method(:confluent_transition) do |messages|
+          external_transition(messages)
+          internal_transition
+        end
+      end
+
       def time_advance(&block)
         @model.define_singleton_method(:time_advance, &block) if block
       end

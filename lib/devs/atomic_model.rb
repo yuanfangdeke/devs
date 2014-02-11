@@ -51,6 +51,36 @@ module DEVS
         define_method(:internal_transition, &block) if block
       end
 
+      # Defines the confluent transition function (δcon) using the given block
+      # as body.
+      #
+      # @see #confluent_transition
+      # @example
+      #   confluent_transition do |messages|
+      #     internal_transition
+      #     external_transition(messages)
+      #   end
+      # @return [void]
+      def confluent_transition(&block)
+        define_method(:confluent_transition, &block) if block
+      end
+
+      # Defines the opposite behavior of the default confluent transition
+      # function (δcon).
+      #
+      # @see #confluent_transition
+      # @example
+      #   class MyModel < AtomicModel
+      #     reverse_confluent_transition!
+      #     # ...
+      #   end
+      def reverse_confluent_transition!
+        define_method(:confluent_transition) do |messages|
+          external_transition(messages)
+          internal_transition
+        end
+      end
+
       # Defines the time advance function (ta) using the given block as body.
       #
       # @see #time_advance
@@ -273,6 +303,22 @@ module DEVS
     # @return [Numeric] the time to wait before the model will be activated
     def time_advance
       @sigma
+    end
+
+    # This is the default definition of the confluent transition. Here the
+    # internal transition is allowed to occur and this is followed by the
+    # effect of the external transition on the resulting state.
+    #
+    # Override this method to obtain a different behavior. For example, the
+    # opposite order of effects (external transition before internal
+    # transition). Of course you can override without reference to the other
+    # transitions.
+    #
+    # @see AtomicModel.reverse_confluent_transition!
+    # @todo see elapsed time reset
+    def confluent_transition(messages)
+      internal_transition
+      external_transition(messages) unless messages.nil? || messages.empty?
     end
 
     # The output function (λ)
