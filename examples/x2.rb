@@ -42,12 +42,12 @@ obj = DEVS.simulate do
     add_model DEVS::Models::Collectors::CSVCollector, :name => :csv
 
     plug_input_port :a, with_children: ['csv@x', 'plot@x']
-    plug_input_port :b, :with_children ['csv@x^x', 'plot@x^x']
+    plug_input_port :b, with_children: ['csv@x^x', 'plot@x^x']
   end
 
   plug 'sequence@value', with: 'x^x@in_1'
-  # plug 'sequence@value', with: 'collector@a'
-  plug 'x^x@out_1', with: 'collector@a'
+  plug 'sequence@value', with: 'collector@a'
+  plug 'x^x@out_1', with: 'collector@b'
 end
 
 # status = obj.status
