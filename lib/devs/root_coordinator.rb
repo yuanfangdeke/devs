@@ -11,7 +11,8 @@ module DEVS
     # The default duration of the simulation if argument omitted
     DEFAULT_DURATION = 60
 
-    attr_reader :time, :duration, :start_time, :final_time
+    attr_reader :duration, :start_time, :final_time, :child
+    attr_accessor :time
 
     # @!attribute [r] time
     #   @return [Numeric] Returns the current simulation time
@@ -43,6 +44,10 @@ module DEVS
       @lock.synchronize { @time }
     end
     alias_method :clock, :time
+
+    def time=(v)
+      @lock.synchronize { @time = v }
+    end
 
     def duration=(v)
       @duration = v if waiting?
@@ -172,13 +177,6 @@ module DEVS
       end
 
       self
-    end
-
-    private
-    attr_writer :time
-
-    def time=(v)
-      @lock.synchronize { @time = v }
     end
   end
 end
