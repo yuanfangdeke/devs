@@ -15,17 +15,15 @@ VALUE cDEVSMessage;
 
 void
 devs_debug(const char *file, int lines, char *fmt, ...) {
-    if (strlen(fmt) < 255) {
-        int ret;
-        char buffer[255];
-        va_list arg_ptr;
+    int ret;
+    char buffer[2048];
+    va_list arg_ptr;
 
-        va_start(arg_ptr, fmt);
-        ret = vsprintf(buffer, fmt, arg_ptr);
-        va_end(arg_ptr);
+    va_start(arg_ptr, fmt);
+    ret = vsprintf(buffer, fmt, arg_ptr);
+    va_end(arg_ptr);
 
-        fprintf(stdout, "devs-ext: %s:%d - %s\n", file, lines, buffer);
-    }
+    fprintf(stdout, "devs-ext: %s:%d - %s\n", file, lines, buffer);
 }
 
 void

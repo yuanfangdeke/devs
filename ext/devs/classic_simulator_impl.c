@@ -62,7 +62,7 @@ handle_init_event(VALUE self, VALUE event) {
 static VALUE
 handle_input_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
-    VALUE msg = rb_iv_get(event, "@message");
+    VALUE msg = rb_ary_entry(rb_iv_get(event, "@bag"), 0);
     double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
@@ -136,7 +136,7 @@ handle_internal_event(VALUE self, VALUE event) {
             3,
             ID2SYM(rb_intern("output")),
             rb_float_new(ev_time),
-            msg
+            rb_ary_new_from_args(1, msg)
         );
 
 #ifdef DEBUG
@@ -144,6 +144,7 @@ handle_internal_event(VALUE self, VALUE event) {
             RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
             RSTRING_PTR(rb_funcall(msg, rb_intern("to_s"), 0)));
 #endif
+
         rb_funcall(parent, rb_intern("dispatch"), 1, ev);
     }
 

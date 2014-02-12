@@ -3,7 +3,7 @@ module DEVS
   # to implement the DEVS communication protocol
   class Event
     include Comparable
-    attr_reader :type, :time, :message
+    attr_reader :type, :time, :bag
 
     # @!attribute [r] type
     #   Represent the type of event exchanged between a parent simulation
@@ -12,16 +12,16 @@ module DEVS
     # @!attribute [r] time
     #   @return [Numeric] Returns the simulation time at which the event was
     #     emitted
-    # @!attribute [r] message
-    #   @return [Message] Returns the message associated with this event
+    # @!attribute [r] bag
+    #   @return [Array<Message>] Returns the bag associated with this event
 
     # Returns a new {Event} instance.
     #
     # @param type [Symbol] the type of event
     # @param time [Numeric] the time at which the event was emitted
-    # @param message [Message] the message carrying the payload
+    # @param bag [Array<Message>] the bag carrying the messages
     # @raise [ArgumentError] if the given time is not in a correct range
-    def initialize(type, time, message = nil)
+    def initialize(type, time, bag = nil)
       @type = type
 
       if (0..INFINITY).include?(time)
@@ -30,7 +30,7 @@ module DEVS
         raise ArgumentError, "time attribute must be within 0 and INFINITY"
       end
 
-      @message = message
+      @bag = bag || []
     end
 
     # Comparison - Returns an integer (-1, 0 or +1) if this event is less than,
@@ -47,9 +47,20 @@ module DEVS
       @type == other.type && @time == other.time
     end
 
+    def bag
+      @bag.dup
+    end
+
+    # Append the given message(s) on to the bag
+    #
+    # @param args [Message] a variable list of messages
+    def <<(*args)
+      @bag.push(*args)
+    end
+
     def to_s
       s = "event #{@type} at #{@time}"
-      s = "#{s} with #{@message}" if message
+      s = "#{s} with #{@bag.map{|m|m.payload}}" unless @bag.empty?
       s
     end
   end

@@ -188,16 +188,16 @@ module DEVS
     # @return [Array<Message>]
     def fetch_output!
       self.output
-      messages = []
+      bag = []
 
       @output_ports.each do |port|
         value = port.pick_up
         msg = Message.new(value, port)
         yield(msg) if !value.nil? && block_given?
-        messages << msg
+        bag << msg
       end
 
-      messages
+      bag
     end
 
     # Returns a {Port} given a name or an instance and checks it.

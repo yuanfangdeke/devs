@@ -37,7 +37,7 @@ module DEVS
 
     # @return [String]
     def to_s
-      "message #{@payload}"
+      @payload.to_s
     end
   end
 end

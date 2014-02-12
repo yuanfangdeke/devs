@@ -63,7 +63,7 @@ handle_init_event(VALUE self, VALUE event) {
 static VALUE
 handle_input_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
-    VALUE msg = rb_iv_get(event, "@message");
+    VALUE msg = rb_ary_entry(rb_iv_get(event, "@bag"), 0);
     VALUE port = rb_iv_get(msg, "@port");
     VALUE payload = rb_iv_get(msg, "@payload");
     double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
@@ -100,7 +100,7 @@ handle_input_event(VALUE self, VALUE event) {
                 3,
                 ID2SYM(rb_intern("input")),
                 rb_float_new(ev_time),
-                msg2
+                rb_ary_new_from_args(1, msg2)
             );
             rb_funcall(child, rb_intern("dispatch"), 1, ev);
         }
@@ -140,14 +140,14 @@ handle_input_event(VALUE self, VALUE event) {
 static VALUE
 handle_output_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
-    VALUE msg = rb_iv_get(event, "@message");
+    VALUE msg = rb_ary_entry(rb_iv_get(event, "@bag"), 0);
     VALUE port = rb_iv_get(msg, "@port");
     VALUE payload = rb_iv_get(msg, "@payload");
     VALUE parent = rb_iv_get(self, "@parent");
     VALUE time = rb_iv_get(event, "@time");
     int i;
-    VALUE ret = rb_funcall(model, rb_intern("each_output_coupling"), 1, port);
 
+    VALUE ret = rb_funcall(model, rb_intern("each_output_coupling"), 1, port);
     for (i = 0; i < RARRAY_LEN(ret); i++) {
         VALUE coupling = rb_ary_entry(ret, i);
         VALUE prt_dst = rb_iv_get(coupling, "@destination_port");
@@ -172,8 +172,9 @@ handle_output_event(VALUE self, VALUE event) {
             3,
             ID2SYM(rb_intern("output")),
             time,
-            msg2
+            rb_ary_new3(1, msg2)
         );
+
         rb_funcall(parent, rb_intern("dispatch"), 1, ev);
     }
 
@@ -204,8 +205,9 @@ handle_output_event(VALUE self, VALUE event) {
             3,
             ID2SYM(rb_intern("input")),
             time,
-            msg2
+            rb_ary_new_from_args(1, msg2)
         );
+
         rb_funcall(child, rb_intern("dispatch"), 1, ev);
     }
 

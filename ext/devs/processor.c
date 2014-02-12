@@ -79,8 +79,10 @@ ensure_input_message(VALUE self, VALUE msg) {
     if (host != model) {
         rb_raise(
             cDEVSInvalidPortHostError,
-            "the port associated with the given msg %s doesn't belong to this model",
-            RSTRING_PTR(rb_any_to_s(msg))
+            "the port %s associated with the given msg %s doesn't belong to model %s",
+            RSTRING_PTR(rb_funcall(port, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(msg, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0))
         );
     }
 
@@ -88,8 +90,9 @@ ensure_input_message(VALUE self, VALUE msg) {
     if (ret == Qfalse) {
         rb_raise(
             cDEVSInvalidPortTypeError,
-            "the port associated with the given msg %s should be an input port",
-            RSTRING_PTR(rb_any_to_s(msg))
+            "the port %s associated with the given msg %s should be an input port",
+            RSTRING_PTR(rb_funcall(port, rb_intern("to_s"), 0)),
+            RSTRING_PTR(rb_funcall(msg, rb_intern("to_s"), 0))
         );
     }
 
