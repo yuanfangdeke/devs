@@ -34,10 +34,9 @@ each_coupling(VALUE self, VALUE ary, VALUE port) {
 
             if (port_src == port) {
                 rb_ary_push(couplings, coupling);
-            }
-
-            if (rb_block_given_p()) {
-                rb_yield(coupling);
+                if (rb_block_given_p()) {
+                    rb_yield(coupling);
+                }
             }
         }
     }
