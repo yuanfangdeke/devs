@@ -25,7 +25,7 @@ require 'devs/builders'
 require 'devs/concurrency'
 require 'devs/notifications'
 
-require 'devs/classic'
+require 'devs/parallel'
 
 module DEVS
   # Returns the current version of the gem
