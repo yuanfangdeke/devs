@@ -1,17 +1,13 @@
 require 'devs'
-#require 'devs/parallel'
 require 'devs/models'
 require 'ruby-progressbar'
 
 Thread.abort_on_exception = true
 
-DEVS.logger = Logger.new('logfile.log')
-#DEVS.logger.level = Logger::INFO
+DEVS.logger = Logger.new(STDOUT)
 
 obj = DEVS.simulate do
-  duration 10000
-
-  # algorithm [:classic, :parallel, :time_warp]
+  duration 100
 
   add_coupled_model do
     name :generator
@@ -70,11 +66,11 @@ obj = DEVS.simulate do
   add_coupled_model do
     name :collector
 
-    add_model DEVS::Models::Collectors::PlotCollector, :name => :plot_output
-    add_model DEVS::Models::Collectors::CSVCollector, :name => :csv_output
+    add_model DEVS::Models::Collectors::PlotCollector, :name => :plot
+    add_model DEVS::Models::Collectors::CSVCollector, :name => :csv
 
-    plug_input_port :pluviometrie, with_children: ['csv_output@pluviometrie', 'plot_output@pluviometrie']
-    plug_input_port :ruissellement, with_children: ['csv_output@ruissellement', 'plot_output@ruissellement']
+    plug_input_port :pluviometrie, with_children: ['csv@pluviometrie', 'plot@pluviometrie']
+    plug_input_port :ruissellement, with_children: ['csv@ruissellement', 'plot@ruissellement']
   end
 
   plug 'generator@output', with: 'ground@input'

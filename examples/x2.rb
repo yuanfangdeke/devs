@@ -1,5 +1,4 @@
 require 'devs'
-#require 'devs/parallel'
 require 'devs/models'
 
 DEVS.logger = Logger.new(STDOUT)
@@ -8,7 +7,7 @@ DEVS.logger = Logger.new(STDOUT)
 obj = DEVS.simulate do
   duration DEVS::INFINITY
 
-  add_model DEVS::Models::Generators::SequenceGenerator, with_args: [1, 5, 1], :name => :sequence
+  add_model DEVS::Models::Generators::SequenceGenerator, with_args: [1, 20, 1], :name => :sequence
 
   add_model do
     name 'x^x'
