@@ -44,7 +44,7 @@ dispatch(VALUE self, VALUE event) {
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
 
 #ifdef DEBUG
-    DEVS_DEBUG("%s received %s",
+    DEVS_DEBUG("* %s received %s",
         RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
         RSTRING_PTR(rb_funcall(event, rb_intern("to_s"), 0))
     );

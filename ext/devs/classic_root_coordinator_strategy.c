@@ -40,7 +40,7 @@ run(VALUE self, VALUE rc) {
     rb_funcall(mutex, rb_intern("unlock"), 0);
 
     while(NUM2DBL(t) < duration) {
-        DEVS_DEBUG("tick at: %f, %d secs elapsed", NUM2DBL(t),
+        DEVS_DEBUG("*** Tick at: %f, %d secs elapsed", NUM2DBL(t),
             time(NULL) - start_time);
 
         ev = rb_funcall(

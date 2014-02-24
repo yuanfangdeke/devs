@@ -29,7 +29,7 @@ extern VALUE cDEVSMessage;
 
 void devs_debug(const char *file, int lines, char *fmt, ...);
 
- #define DEBUG
+// #define DEBUG
 
 #define FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 

@@ -23,7 +23,7 @@ devs_debug(const char *file, int lines, char *fmt, ...) {
     ret = vsprintf(buffer, fmt, arg_ptr);
     va_end(arg_ptr);
 
-    fprintf(stdout, "%40s:%d\t-\t%s\n", file, lines, buffer);
+    fprintf(stdout, "%40s:%d\t %s\n", file, lines, buffer);
 }
 
 void
