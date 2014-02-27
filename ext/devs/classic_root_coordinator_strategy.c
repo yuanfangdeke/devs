@@ -17,9 +17,8 @@ init_devs_classic_root_coordinator_strategy() {
 
 static VALUE
 run(VALUE self, VALUE rc) {
-    VALUE t = rb_iv_get(rc, "@time");
+    VALUE t = rb_funcall(rc, rb_intern("time"), 0);
     VALUE child = rb_iv_get(rc, "@child");
-    VALUE mutex = rb_iv_get(rc, "@lock");
     double duration = NUM2DBL(rb_iv_get(rc, "@duration"));
     int start_time = NUM2INT(
         rb_funcall(rb_iv_get(rc, "@start_time"), rb_intern("to_i"), 0)
@@ -35,9 +34,7 @@ run(VALUE self, VALUE rc) {
     rb_funcall(child, rb_intern("dispatch"), 1, ev);
 
     t = rb_funcall(child, rb_intern("time_next"), 0);
-    rb_funcall(mutex, rb_intern("lock"), 0);
-    rb_iv_set(rc, "@time", t);
-    rb_funcall(mutex, rb_intern("unlock"), 0);
+    rb_funcall(rc, rb_intern("time="), 1, t);
 
     while(NUM2DBL(t) < duration) {
         DEVS_DEBUG("*** Tick at: %f, %d secs elapsed", NUM2DBL(t),
@@ -53,9 +50,7 @@ run(VALUE self, VALUE rc) {
         rb_funcall(child, rb_intern("dispatch"), 1, ev);
 
         t = rb_funcall(child, rb_intern("time_next"), 0);
-        rb_funcall(mutex, rb_intern("lock"), 0);
-        rb_iv_set(rc, "@time", t);
-        rb_funcall(mutex, rb_intern("unlock"), 0);
+        rb_funcall(rc, rb_intern("time="), 1, t);
     }
 
     return Qnil;
