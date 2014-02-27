@@ -120,17 +120,17 @@ handle_internal_event(VALUE self, VALUE event) {
     if (fneq(ev_time, time_next, EPSILON)) {
         if (RARRAY_LEN(bag) > 0) {
 #ifdef DEBUG
-            DEVS_DEBUG("\t\t%s internal transition",
-                RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)));
-#endif
-            rb_funcall(model, rb_intern("internal_transition"), 0);
-        } else {
-#ifdef DEBUG
             DEVS_DEBUG("\t\t%s confluent transition",
                 RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)));
 #endif
             rb_funcall(model, rb_intern("confluent_transition"), 1, frozen_bag(self, bag));
-            rb_funcall(bag, rb_intern("clear"), 0);
+            rb_ary_clear(bag);
+        } else {
+            #ifdef DEBUG
+            DEVS_DEBUG("\t\t%s internal transition",
+                RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)));
+#endif
+            rb_funcall(model, rb_intern("internal_transition"), 0);
         }
     } else if (synced && RARRAY_LEN(bag) > 0) {
 #ifdef DEBUG
@@ -139,7 +139,7 @@ handle_internal_event(VALUE self, VALUE event) {
 #endif
         rb_iv_set(model, "@elapsed", rb_float_new(ev_time - time_last));
         rb_funcall(model, rb_intern("external_transition"), 1, frozen_bag(self, bag));
-        rb_funcall(bag, rb_intern("clear"), 0);
+        rb_ary_clear(bag);
     } else if (!synced) {
         rb_raise(
             cDEVSBadSynchronisationError,
