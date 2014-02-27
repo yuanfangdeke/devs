@@ -238,6 +238,8 @@ handle_internal_event(VALUE self, VALUE event) {
             ev_time,
             time_next
         );
+
+        return Qnil;
     }
 
     VALUE children = rb_funcall(self, rb_intern("imminent_children"), 0);

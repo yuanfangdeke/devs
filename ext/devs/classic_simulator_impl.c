@@ -124,6 +124,8 @@ handle_internal_event(VALUE self, VALUE event) {
             ev_time,
             time_next
         );
+
+        return Qnil;
     }
 
     ret = rb_funcall(model, rb_intern("fetch_output!"), 0);
