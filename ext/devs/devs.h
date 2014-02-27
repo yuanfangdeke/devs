@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <float.h>
 
 #include <ruby.h>
 
@@ -13,9 +15,15 @@
 #include <classic_simulator_impl.h>
 #include <classic_coordinator_impl.h>
 #include <classic_root_coordinator_strategy.h>
+#include <parallel_simulator_impl.h>
+#include <parallel_coordinator_impl.h>
+#include <parallel_root_coordinator_strategy.h>
+
+extern const float EPSILON;
 
 extern VALUE mDEVS;
 extern VALUE mDEVSClassic;
+extern VALUE mDEVSParallel;
 
 extern VALUE cDEVSNoSuchChildError;
 extern VALUE cDEVSBadSynchronisationError;
@@ -29,7 +37,10 @@ extern VALUE cDEVSMessage;
 
 void devs_debug(const char *file, int lines, char *fmt, ...);
 
-// #define DEBUG
+// compare floating point numbers
+bool fneq(const double a, const double b, const float epsilon);
+
+#define DEBUG
 
 #define FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 
