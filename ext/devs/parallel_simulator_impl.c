@@ -115,7 +115,7 @@ handle_internal_event(VALUE self, VALUE event) {
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
-    int synced = ev_time >= time_last && ev_time <= time_next;
+    bool synced = ev_time >= time_last && ev_time <= time_next;
 
     if (fneq(ev_time, time_next, EPSILON)) {
         if (RARRAY_LEN(bag) > 0) {
