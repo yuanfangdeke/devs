@@ -34,7 +34,7 @@ imminent_children(VALUE self) {
     VALUE children = rb_iv_get(self, "@children");
     VALUE imminent = rb_ary_new();
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
@@ -60,7 +60,7 @@ static VALUE
 min_time_next(VALUE self) {
     VALUE children = rb_iv_get(self, "@children");
     double min = INFINITY;
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
@@ -86,7 +86,7 @@ static VALUE
 max_time_last(VALUE self) {
     VALUE children = rb_iv_get(self, "@children");
     double max = -INFINITY;
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);

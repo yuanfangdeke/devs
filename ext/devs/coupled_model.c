@@ -21,7 +21,7 @@ init_devs_coupled_model() {
 static VALUE
 each_coupling(VALUE self, VALUE ary, VALUE port) {
     VALUE couplings;
-    int i;
+    long i;
 
     if (NIL_P(port)) {
         couplings = ary;

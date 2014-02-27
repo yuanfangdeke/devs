@@ -33,7 +33,7 @@ static VALUE
 handle_init_event(VALUE self, VALUE event) {
     VALUE children = rb_iv_get(self, "@children");
     VALUE model = rb_iv_get(self, "@model");
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
@@ -72,7 +72,7 @@ handle_input_event(VALUE self, VALUE event) {
 
     if (ev_time >= time_last && ev_time <= time_next) {
         VALUE ret = rb_funcall(model, rb_intern("each_input_coupling"), 1, port);
-        int i;
+        long i;
 
         for (i = 0; i < RARRAY_LEN(ret); i++) {
             VALUE coupling = rb_ary_entry(ret, i);
@@ -145,7 +145,7 @@ handle_output_event(VALUE self, VALUE event) {
     VALUE payload = rb_iv_get(msg, "@payload");
     VALUE parent = rb_iv_get(self, "@parent");
     VALUE time = rb_iv_get(event, "@time");
-    int i;
+    long i;
 
     VALUE ret = rb_funcall(model, rb_intern("each_output_coupling"), 1, port);
     for (i = 0; i < RARRAY_LEN(ret); i++) {
@@ -229,7 +229,7 @@ handle_internal_event(VALUE self, VALUE event) {
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
     VALUE model = rb_iv_get(self, "@model");
-    int i, index;
+    long i, index;
 
     if (ev_time != time_next) {
         rb_raise(

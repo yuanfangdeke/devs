@@ -35,7 +35,7 @@ handle_collect_event(VALUE self, VALUE event) {
     VALUE sync = rb_iv_get(self, "@synchronize");
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
-    int i;
+    long i;
 
     if (fneq(ev_time, time_next, EPSILON)) {
         rb_iv_set(self, "@time_last", rb_float_new(ev_time));
@@ -81,7 +81,7 @@ handle_input_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
     VALUE bag = rb_iv_get(self, "@bag");
     VALUE sub_bag = rb_iv_get(event, "@bag");
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(sub_bag); i++) {
         VALUE msg = rb_ary_entry(sub_bag, i);
@@ -108,10 +108,10 @@ handle_output_event(VALUE self, VALUE event) {
     VALUE bag = rb_iv_get(event, "@bag");
     VALUE sync = rb_iv_get(self, "@synchronize");
     VALUE ev_time = rb_iv_get(event, "@time");
-    int bag_size = RARRAY_LEN(bag);
+    long bag_size = RARRAY_LEN(bag);
     VALUE parent_bag = rb_ary_new();
     VALUE child_bags = rb_hash_new();
-    int i, j;
+    long i, j;
 
     for (i = 0; i < bag_size; i++) {
         VALUE message = rb_ary_entry(bag, i);
@@ -235,7 +235,7 @@ handle_internal_event(VALUE self, VALUE event) {
     double time_last = NUM2DBL(rb_iv_get(self, "@time_last"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
     int synced = ev_time >= time_last && ev_time <= time_next;
-    int i, j;
+    long i, j;
 
     if (synced) {
         for (i = 0; i < RARRAY_LEN(bag); i++) {

@@ -81,7 +81,7 @@ handle_input_event(VALUE self, VALUE event) {
     VALUE model = rb_iv_get(self, "@model");
     VALUE bag = rb_iv_get(self, "@bag");
     VALUE sub_bag = rb_iv_get(event, "@bag");
-    int i;
+    long i;
 
     for (i = 0; i < RARRAY_LEN(sub_bag); i++) {
         VALUE msg = rb_ary_entry(sub_bag, i);
@@ -167,7 +167,7 @@ handle_internal_event(VALUE self, VALUE event) {
 
 static VALUE
 frozen_bag(VALUE self, VALUE bag) {
-    int i;
+    long i;
     VALUE ret = rb_ary_new_capa(RARRAY_LEN(bag));
 
     for (i = 0; i < RARRAY_LEN(bag); i++) {

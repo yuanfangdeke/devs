@@ -115,7 +115,7 @@ handle_internal_event(VALUE self, VALUE event) {
     VALUE ret;
     double time_next = NUM2DBL(rb_iv_get(self, "@time_next"));
     double ev_time = NUM2DBL(rb_iv_get(event, "@time"));
-    int i;
+    long i;
 
     if (ev_time != time_next) {
         rb_raise(

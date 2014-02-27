@@ -39,7 +39,7 @@ dispatch(VALUE self, VALUE event) {
     VALUE type = rb_iv_get(event, "@type");
     VALUE hsh = rb_iv_get(self, "@events_count");
     VALUE model = rb_iv_get(self, "@model");
-    int count = NUM2INT(rb_hash_aref(hsh, type));
+    long count = NUM2INT(rb_hash_aref(hsh, type));
 
     rb_hash_aset(hsh, type, INT2NUM(count + 1));
 
