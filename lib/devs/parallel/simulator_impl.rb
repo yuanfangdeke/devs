@@ -19,7 +19,7 @@ module DEVS
       end
 
       def handle_input_event(event)
-        debug "    #{model} adding #{event.bag.map{|m|m.payload}} to bag"
+        debug "\t\t#{model} adding #{event.bag.map{|m|m.payload}} to bag"
         @bag.push(*event.bag)
       end
 
@@ -28,15 +28,15 @@ module DEVS
 
         if event.time == @time_next
           if @bag.empty?
-            debug "   #{model} internal transition"
+            debug "\t\t#{model} internal transition"
             model.internal_transition
           else
-            debug "   #{model} confluent transition"
+            debug "\t\t#{model} confluent transition"
             model.confluent_transition(frozen_bag)
             @bag.clear
           end
         elsif synced && !@bag.empty?
-          debug "    #{model} external transition"
+          debug "\t\t#{model} external transition"
           model.elapsed = event.time - @time_last
           model.external_transition(frozen_bag)
           @bag.clear
@@ -46,7 +46,7 @@ module DEVS
 
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        debug "#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "\t\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
       end
 
       def frozen_bag
