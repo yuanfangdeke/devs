@@ -147,7 +147,7 @@ handle_internal_event(VALUE self, VALUE event) {
             RSTRING_PTR(rb_funcall(msg, rb_intern("to_s"), 0)));
 #endif
 
-        rb_funcall(parent, rb_intern("dispatch"), 1, ev);
+        rb_funcall(parent, DISPATCH_ID, 1, ev);
     }
 
     rb_funcall(model, rb_intern("internal_transition"), 0);

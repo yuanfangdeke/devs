@@ -31,7 +31,7 @@ run(VALUE self, VALUE rc) {
         ID2SYM(rb_intern("init")),
         t
     );
-    rb_funcall(child, rb_intern("dispatch"), 1, ev);
+    rb_funcall(child, DISPATCH_ID, 1, ev);
 
     t = rb_funcall(child, rb_intern("time_next"), 0);
     rb_funcall(rc, rb_intern("time="), 1, t);
@@ -47,7 +47,7 @@ run(VALUE self, VALUE rc) {
             ID2SYM(rb_intern("internal")),
             t
         );
-        rb_funcall(child, rb_intern("dispatch"), 1, ev);
+        rb_funcall(child, DISPATCH_ID, 1, ev);
 
         t = rb_funcall(child, rb_intern("time_next"), 0);
         rb_funcall(rc, rb_intern("time="), 1, t);

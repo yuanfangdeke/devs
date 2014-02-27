@@ -52,7 +52,7 @@ handle_collect_event(VALUE self, VALUE event) {
                 RSTRING_PTR(rb_funcall(model, rb_intern("to_s"), 0)),
                 RSTRING_PTR(rb_funcall(ev, rb_intern("to_s"), 0)));
 #endif
-            rb_funcall(parent, rb_intern("dispatch"), 1, ev);
+            rb_funcall(parent, DISPATCH_ID, 1, ev);
         }
     } else {
         rb_raise(

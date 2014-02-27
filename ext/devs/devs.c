@@ -2,6 +2,8 @@
 
 const float EPSILON = 0.00000001f;
 
+ID DISPATCH_ID;
+
 VALUE mDEVS;
 VALUE mDEVSClassic;
 VALUE mDEVSParallel;
@@ -84,6 +86,8 @@ Init_devs() {
     );
     cDEVSEvent = rb_define_class_under(mDEVS, "Event", rb_cObject);
     cDEVSMessage = rb_define_class_under(mDEVS, "Message", rb_cObject);
+
+    DISPATCH_ID = rb_intern("dispatch");
 
     init_devs_processor();
     init_devs_coordinator();

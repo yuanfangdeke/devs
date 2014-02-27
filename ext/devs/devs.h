@@ -21,6 +21,8 @@
 
 extern const float EPSILON;
 
+extern ID DISPATCH_ID;
+
 extern VALUE mDEVS;
 extern VALUE mDEVSClassic;
 extern VALUE mDEVSParallel;

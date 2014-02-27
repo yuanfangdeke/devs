@@ -49,7 +49,7 @@ handle_collect_event(VALUE self, VALUE event) {
                 RSTRING_PTR(rb_funcall(event, rb_intern("to_s"), 0))
             );
 #endif
-            rb_funcall(child, rb_intern("dispatch"), 1, event);
+            rb_funcall(child, DISPATCH_ID, 1, event);
 
             if (!rb_ary_includes(sync, child)) {
                 rb_ary_push(sync, child);
@@ -189,7 +189,7 @@ handle_output_event(VALUE self, VALUE event) {
         );
 #endif
 
-        rb_funcall(receiver, rb_intern("dispatch"), 1, ev);
+        rb_funcall(receiver, DISPATCH_ID, 1, ev);
     }
 
     if (RARRAY_LEN(parent_bag) > 0) {
@@ -209,7 +209,7 @@ handle_output_event(VALUE self, VALUE event) {
         );
 #endif
 
-        rb_funcall(parent, rb_intern("dispatch"), 1, ev);
+        rb_funcall(parent, DISPATCH_ID, 1, ev);
     }
 
     return Qnil;
@@ -296,7 +296,7 @@ handle_internal_event(VALUE self, VALUE event) {
             );
 #endif
 
-            rb_funcall(receiver, rb_intern("dispatch"), 1, ev);
+            rb_funcall(receiver, DISPATCH_ID, 1, ev);
         }
         rb_ary_clear(bag);
 
@@ -309,7 +309,7 @@ handle_internal_event(VALUE self, VALUE event) {
                 ID2SYM(rb_intern("internal")),
                 rb_float_new(ev_time)
             );
-            rb_funcall(child, rb_intern("dispatch"), 1, ev);
+            rb_funcall(child, DISPATCH_ID, 1, ev);
         }
         rb_ary_clear(sync);
 

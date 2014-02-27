@@ -37,7 +37,7 @@ handle_init_event(VALUE self, VALUE event) {
 
     for (i = 0; i < RARRAY_LEN(children); i++) {
         VALUE child = rb_ary_entry(children, i);
-        rb_funcall(child, rb_intern("dispatch"), 1, event);
+        rb_funcall(child, DISPATCH_ID, 1, event);
     }
 
     VALUE tl = rb_funcall(self, rb_intern("max_time_last"), 0);
@@ -102,7 +102,7 @@ handle_input_event(VALUE self, VALUE event) {
                 rb_float_new(ev_time),
                 rb_ary_new_from_args(1, msg2)
             );
-            rb_funcall(child, rb_intern("dispatch"), 1, ev);
+            rb_funcall(child, DISPATCH_ID, 1, ev);
         }
 
         rb_iv_set(self, "@time_last", rb_float_new(ev_time));
@@ -175,7 +175,7 @@ handle_output_event(VALUE self, VALUE event) {
             rb_ary_new3(1, msg2)
         );
 
-        rb_funcall(parent, rb_intern("dispatch"), 1, ev);
+        rb_funcall(parent, DISPATCH_ID, 1, ev);
     }
 
     ret = rb_funcall(model, rb_intern("each_internal_coupling"), 1, port);
@@ -208,7 +208,7 @@ handle_output_event(VALUE self, VALUE event) {
             rb_ary_new_from_args(1, msg2)
         );
 
-        rb_funcall(child, rb_intern("dispatch"), 1, ev);
+        rb_funcall(child, DISPATCH_ID, 1, ev);
     }
 
     return Qnil;
@@ -257,7 +257,7 @@ handle_internal_event(VALUE self, VALUE event) {
     }
     VALUE child = rb_ary_entry(children, index);
 
-    rb_funcall(child, rb_intern("dispatch"), 1, event);
+    rb_funcall(child, DISPATCH_ID, 1, event);
 
     rb_iv_set(self, "@time_last", rb_float_new(ev_time));
     VALUE tn = rb_funcall(self, rb_intern("min_time_next"), 0);

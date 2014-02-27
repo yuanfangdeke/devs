@@ -15,21 +15,6 @@ init_devs_parallel_root_coordinator_strategy() {
     rb_define_module_function(mod, "run", run, 1);
 }
 
-
-/*
-      def run(rc)
-        rc.time = rc.child.time_next
-
-        loop do
-          rc.send :debug, "* Tick at: #{@time}, #{Time.now - rc.start_time} secs elapsed"
-          rc.child.dispatch(Event.new(:collect, rc.time))
-          rc.child.dispatch(Event.new(:internal, rc.time))
-          rc.time = rc.child.time_next
-          break if rc.time >= rc.duration
-        end
-      end
-*/
-
 static VALUE
 run(VALUE self, VALUE rc) {
     VALUE child = rb_iv_get(rc, "@child");
@@ -52,7 +37,7 @@ run(VALUE self, VALUE rc) {
             ID2SYM(rb_intern("collect")),
             t
         );
-        rb_funcall(child, rb_intern("dispatch"), 1, ev);
+        rb_funcall(child, DISPATCH_ID, 1, ev);
 
         ev = rb_funcall(
             cDEVSEvent,
@@ -61,7 +46,7 @@ run(VALUE self, VALUE rc) {
             ID2SYM(rb_intern("internal")),
             t
         );
-        rb_funcall(child, rb_intern("dispatch"), 1, ev);
+        rb_funcall(child, DISPATCH_ID, 1, ev);
 
         t = rb_funcall(child, rb_intern("time_next"), 0);
         rb_funcall(rc, rb_intern("time="), 1, t);
