@@ -54,22 +54,22 @@ module DEVS
       end
 
       def plug_output_port(port, opts={})
-        blk = Proc.new do |id|
-          child, child_port = id.split('@')
-          @model.add_external_output_coupling(child.to_sym, port.to_sym, child_port.to_sym)
-        end
-
-        if opts.has_key?(:with_children)
-          opts[:with_children].each { |id| blk.(id) }
-        else
-          blk.(opts[:with_child])
-        end
+        plug_port(port, :output, opts)
       end
 
       def plug_input_port(port, opts={})
+        plug_port(port, :input, opts)
+      end
+
+      def plug_port(port, type, opts)
         blk = Proc.new do |id|
           child, child_port = id.split('@')
-          @model.add_external_input_coupling(child.to_sym, port.to_sym, child_port.to_sym)
+
+          if type == :input
+            @model.add_external_input_coupling(child.to_sym, port.to_sym, child_port.to_sym)
+          elsif type == :output
+            @model.add_external_output_coupling(child.to_sym, port.to_sym, child_port.to_sym)
+          end
         end
 
         if opts.has_key?(:with_children)
@@ -78,6 +78,7 @@ module DEVS
           blk.(opts[:with_child])
         end
       end
+      private :plug_port
     end
   end
 end
