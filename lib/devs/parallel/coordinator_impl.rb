@@ -81,6 +81,7 @@ module DEVS
           end
           @bag.clear
 
+          @synchronize.uniq!
           @synchronize.each do |child|
             new_event = Event.new(:internal, event.time)
             debug "    #{model} dispatching #{new_event}"
