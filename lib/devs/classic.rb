@@ -1,12 +1,8 @@
+require 'devs/classic/simulator_impl'
+require 'devs/classic/coordinator_impl'
+require 'devs/classic/root_coordinator_strategy'
+
 module DEVS
-  # Runs a simulation
-  # @todo
-  # @example
-  #   simulate do
-  #     duration = 200
-  #
-  #   end
-  #
   def simulate(&block)
     Builders::SimulationBuilder.new(Classic, &block).root_coordinator.simulate
   end

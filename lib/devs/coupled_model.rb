@@ -230,5 +230,20 @@ module DEVS
       raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
       child
     end
+
+    def each_coupling(ary, port = nil)
+      if port.nil?
+        ary
+      else
+        couplings = []
+        ary.each do |coupling|
+          if coupling.port_source == port
+            couplings << coupling
+            yield(coupling) if block_given?
+          end
+        end
+        couplings
+      end
+    end
   end
 end

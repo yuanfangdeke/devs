@@ -9,6 +9,7 @@ end
 
 require 'devs/version'
 require 'devs/logging'
+require 'devs/errors'
 require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
