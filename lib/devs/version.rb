@@ -1,8 +1,8 @@
 module DEVS
   # The major version number
-  MAJOR = 1
+  MAJOR = 0
   # The minor version number
-  MINOR = 0
+  MINOR = 5
   # The patch version number
   PATCH = 0
   # The build version number
