@@ -25,8 +25,28 @@ require 'devs/builders'
 require 'devs/concurrency'
 require 'devs/notifications'
 require 'devs/parallel'
+require 'devs/classic'
 
 module DEVS
+  # Runs a simulation
+  #
+  # @param formalism [Symbol] the formalism to use, either <tt>:pdevs</tt>
+  #   for parallel devs (default) or <tt>:devs</tt> for classic devs
+  # @example
+  #   simulate do
+  #     duration = 200
+  #
+  #   end
+  def simulate(formalism=:pdevs, &block)
+    namespace = case formalism
+    when :pdevs then Parallel
+    when :devs then Classic
+    end
+
+    Builders::SimulationBuilder.new(namespace, &block).root_coordinator.simulate
+  end
+  module_function :simulate
+
   # Returns the current version of the gem
   #
   # @return [String] the string representation of the version
