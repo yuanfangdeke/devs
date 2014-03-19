@@ -137,35 +137,28 @@ module DEVS
       end
     end
 
-    # Wait the simulation to finish
-    def wait
-      @thread.join
-    end
-
     # Run the simulation in a new thread
     def simulate
       if waiting?
-        @thread = Thread.new do
-          @lock.synchronize do
-            @start_time = Time.now
-            info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
-          end
-
-          # Calling the core algorithm
-          @strategy.run(self)
-
-          final_time = Time.now
-          @lock.synchronize { @final_time = final_time }
-          info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
-
-          info "* Events stats : {"
-          stats.each { |k, v| info "    #{k} => #{v}" }
-          info "* }"
-
-          info "* Calling post simulation hooks"
-          changed
-          notify_observers(:post_simulation)
+        @lock.synchronize do
+          @start_time = Time.now
+          info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
         end
+
+        # Calling the core algorithm
+        @strategy.run(self)
+
+        final_time = Time.now
+        @lock.synchronize { @final_time = final_time }
+        info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
+
+        info "* Events stats : {"
+        stats.each { |k, v| info "    #{k} => #{v}" }
+        info "* }"
+
+        info "* Calling post simulation hooks"
+        changed
+        notify_observers(:post_simulation)
       else
         if running?
           error "The simulation already started at #{@start_time} and is currently running."
