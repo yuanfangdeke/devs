@@ -23,15 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake')
   spec.add_development_dependency('gnuplot', '~> 2.6')
   spec.add_development_dependency('minitest')
-  spec.add_development_dependency('rake-compiler', '~> 0.9')
   spec.add_development_dependency('pry', '~> 0.9')
   spec.add_development_dependency('ruby-progressbar', '~> 1.2')
-
-  if RUBY_PLATFORM =~ /java/
-    spec.platform = "java"
-  else
-    spec.extensions = ['ext/devs/extconf.rb']
-    spec.add_development_dependency('pry-nav')
-    spec.add_development_dependency('pry-stack_explorer')
-  end
 end
