@@ -23,5 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake')
   spec.add_development_dependency('minitest')
   spec.add_development_dependency('pry', '~> 0.9')
-  spec.add_development_dependency('ruby-progressbar', '~> 1.2')
+
+  spec.required_ruby_version = '>= 1.9.2'
 end
