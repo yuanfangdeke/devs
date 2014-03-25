@@ -84,13 +84,14 @@ module DEVS
           @synchronize.uniq!
           @synchronize.each do |child|
             new_event = Event.new(:internal, event.time)
-            debug "    #{model} dispatching #{new_event}"
+            debug "\t#{model} dispatching #{new_event}"
             child.dispatch(new_event)
           end
           @synchronize.clear
 
           @time_last = event.time
           @time_next = min_time_next
+          debug "\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
         else
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
