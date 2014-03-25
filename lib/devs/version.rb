@@ -4,7 +4,7 @@ module DEVS
   # The minor version number
   MINOR = 5
   # The patch version number
-  PATCH = 0
+  PATCH = 1
   # The build version number
   BUILD = nil
 
