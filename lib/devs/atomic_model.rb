@@ -192,9 +192,11 @@ module DEVS
 
       @output_ports.each do |port|
         value = port.pick_up
-        msg = Message.new(value, port)
-        yield(msg) if !value.nil? && block_given?
-        bag << msg
+        unless value.nil?
+          msg = Message.new(value, port)
+          yield(msg) if block_given?
+          bag << msg
+        end
       end
 
       bag
