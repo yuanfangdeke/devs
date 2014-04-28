@@ -43,7 +43,12 @@ module DEVS
     when :devs then Classic
     end
 
-    Builders::SimulationBuilder.new(namespace, &block).root_coordinator.simulate
+    start_time = Time.now
+    DEVS.logger.info "*** Initializing simulation at #{start_time}"
+    builder = Builders::SimulationBuilder.new(namespace, &block)
+    init_time = Time.now - start_time
+    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{init_time - start_time} secs."
+    builder.root_coordinator.simulate
   end
   module_function :simulate
 
