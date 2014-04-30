@@ -3,7 +3,7 @@ module DEVS
     class CoupledBuilder
       include BaseBuilder
 
-      def initialize(namespace, klass, *args, &block)
+      def initialize(namespace, dsl_type, klass, *args, &block)
         if klass.nil? || !klass.respond_to?(:new)
           @model = CoupledModel.new
         else
@@ -11,11 +11,16 @@ module DEVS
         end
 
         @namespace = namespace
+        @dsl_type = dsl_type
         @processor = Coordinator.new(@model, namespace)
         @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
         @model.processor = @processor
-        instance_eval(&block) if block
+
+        case dsl_type
+        when :eval then instance_eval(&block)
+        when :yield then block.call(self)
+        end if block
       end
 
       # @return [CoupledModel] the new coupled model
@@ -23,7 +28,7 @@ module DEVS
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
-        coordinator = CoupledBuilder.new(@namespace, type, *args, &block).processor
+        coordinator = CoupledBuilder.new(@namespace, @dsl_type, type, *args, &block).processor
         coordinator.parent = @processor
         coordinator.model.parent = @model
         @model << coordinator.model
@@ -34,7 +39,7 @@ module DEVS
 
       # @return [AtomicModel] the new atomic model
       def add_model(type=nil, opts={}, &block)
-        simulator = AtomicBuilder.new(@namespace, type, opts[:name], *opts[:with_args], &block).processor
+        simulator = AtomicBuilder.new(@namespace, @dsl_type, type, opts[:name], *opts[:with_args], &block).processor
         simulator.parent = @processor
         simulator.model.parent = @model
         @model << simulator.model

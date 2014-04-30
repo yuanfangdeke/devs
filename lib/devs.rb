@@ -37,7 +37,7 @@ module DEVS
   #     duration = 200
   #
   #   end
-  def simulate(formalism=:pdevs, &block)
+  def simulate(formalism=:pdevs, dsl_type=:eval, &block)
     namespace = case formalism
     when :pdevs then Parallel
     when :devs then Classic
@@ -45,8 +45,8 @@ module DEVS
 
     start_time = Time.now
     DEVS.logger.info "*** Initializing simulation at #{start_time}"
-    builder = Builders::SimulationBuilder.new(namespace, &block)
-    init_time = Time.now - start_time
+    builder = Builders::SimulationBuilder.new(namespace, dsl_type, &block)
+    init_time = Time.now
     DEVS.logger.info "*** Initialized simulation at #{init_time} after #{init_time - start_time} secs."
     builder.root_coordinator.simulate
   end

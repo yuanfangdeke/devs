@@ -4,11 +4,13 @@ module DEVS
       attr_accessor :duration
       attr_reader :root_coordinator
 
-      def initialize(namespace, &block)
+      def initialize(namespace, dsl_type, &block)
+        @namespace = namespace
+        @dsl_type = dsl_type
+
         @model = CoupledModel.new
         @model.name = :RootCoupledModel
 
-        @namespace = namespace
         @processor = Coordinator.new(@model, namespace)
         @processor.after_initialize if @processor.respond_to?(:after_initialize)
 
@@ -16,10 +18,12 @@ module DEVS
 
         @duration = RootCoordinator::DEFAULT_DURATION
 
-        instance_eval(&block) if block
+        case dsl_type
+        when :eval then instance_eval(&block)
+        when :yield then block.call(self)
+        end
 
         @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
-        @root_coordinator.after_initialize if @root_coordinator.respond_to?(:after_initialize)
 
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
