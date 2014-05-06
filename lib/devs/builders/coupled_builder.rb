@@ -29,8 +29,6 @@ module DEVS
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
         coordinator = CoupledBuilder.new(@namespace, @dsl_type, type, *args, &block).processor
-        coordinator.parent = @processor
-        coordinator.model.parent = @model
         @model << coordinator.model
         @processor << coordinator
 
@@ -40,8 +38,6 @@ module DEVS
       # @return [AtomicModel] the new atomic model
       def add_model(type=nil, opts={}, &block)
         simulator = AtomicBuilder.new(@namespace, @dsl_type, type, opts[:name], *opts[:with_args], &block).processor
-        simulator.parent = @processor
-        simulator.model.parent = @model
         @model << simulator.model
         @processor << simulator
 
