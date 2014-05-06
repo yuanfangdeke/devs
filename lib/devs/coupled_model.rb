@@ -71,6 +71,18 @@ module DEVS
     end
     alias_method :add_child, :<<
 
+    # Deletes the specified child from children list
+    #
+    # @param child [Model] the child to remove
+    # @return [Model] the deleted child
+    def remove_child(child)
+      if @children.include?(child)
+        @children.delete(child)
+        child.parent = nil
+      end
+      child
+    end
+
     # Returns the children names
     #
     # @return [Array<String, Symbol>] the children names

@@ -36,6 +36,9 @@ module DEVS
 
     # Append a child to {#children} list, ensuring that the child now has
     # self as parent.
+    #
+    # @param child [Processor] the processor to append
+    # @return [Processor] the newly added processor
     def <<(child)
       unless @children.include?(child)
         @children << child
@@ -44,6 +47,18 @@ module DEVS
       child
     end
     alias_method :add_child, :<<
+
+    # Deletes the specified child from {#children} list
+    #
+    # @param child [Processor] the child to remove
+    # @return [Processor] the deleted child
+    def remove_child(child)
+      if @children.include?(child)
+        @children.delete(child)
+        child.parent = nil
+      end
+      child
+    end
 
     # Returns a subset of {#children} including imminent children, e.g with
     # a time next value matching {#time_next}.
