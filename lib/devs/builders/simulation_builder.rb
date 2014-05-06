@@ -40,6 +40,48 @@ module DEVS
         end
         observers
       end
+      private :hooks
+
+      # Flatten the hierarchy recursively using direct connection algorithm
+      def flatten(rm = @model, cm = @model)
+        cm.each do |child|
+          if child.coupled?
+            # recursive invoke to direct connect all atomics
+            flatten(cm, child)
+          else
+            # add the atomic of cm to the rm
+            unless rm.include?(child)
+              simulator = child.processor
+              simulator.parent = rm.processor
+              child.parent = rm
+
+              rm << child
+              rm.processor << simulator
+            end
+          end
+        end
+
+        # copy each internal couplings of cm to rm
+        rm.internal_couplings.push(*cm.internal_couplings)
+
+        # adjust ports
+        cm.external_input_couplings.map do |eic|
+          cm.each_internal_coupling do |ic|
+            if ic.destination_port == eic.port_source
+              rm.add_internal_coupling(ic.source, eic.destination,
+                                       ic.port_source, eic.destination_port)
+            end
+          end
+        end
+        cm.external_output_couplings.map do |eoc|
+          cm.each_internal_coupling do |ic|
+            if ic.port_source == eoc.destination_port
+              rm.add_internal_coupling(eoc.source, ic.destination,
+                                       eoc.port_source, ic.destination_port)
+            end
+          end
+        end
+      end
     end
   end
 end
