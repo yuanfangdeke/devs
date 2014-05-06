@@ -245,6 +245,7 @@ module DEVS
 
     def each_coupling(ary, port = nil)
       if port.nil?
+        ary.each { |coupling| yield(coupling) } if block_given?
         ary
       else
         couplings = []
