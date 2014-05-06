@@ -25,6 +25,7 @@ module DEVS
 
         @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
 
+        flatten!
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
 
@@ -42,22 +43,23 @@ module DEVS
       end
       private :hooks
 
+      def flatten!
+        rm = @model
+        rm.find_all { |m| m.coupled? }
+          .each { |cm| _flatten!(rm, cm) }
+      end
+      private :flatten!
+
       # Flatten the hierarchy recursively using direct connection algorithm
-      def flatten(rm = @model, cm = @model)
+      def _flatten!(rm, cm)
         cm.each do |child|
           if child.coupled?
             # recursive invoke to direct connect all atomics
-            flatten(cm, child)
+            _flatten!(rm, child)
           else
             # add the atomic of cm to the rm
-            unless rm.include?(child)
-              simulator = child.processor
-              simulator.parent = rm.processor
-              child.parent = rm
-
-              rm << child
-              rm.processor << simulator
-            end
+            rm << child
+            rm.processor << child.processor
           end
         end
 
@@ -65,23 +67,34 @@ module DEVS
         rm.internal_couplings.push(*cm.internal_couplings)
 
         # adjust ports
-        cm.external_input_couplings.map do |eic|
-          cm.each_internal_coupling do |ic|
+        parent = cm.parent
+        cm.each_input_coupling do |eic|
+          parent.each_internal_coupling do |ic|
             if ic.destination_port == eic.port_source
               rm.add_internal_coupling(ic.source, eic.destination,
                                        ic.port_source, eic.destination_port)
             end
           end
         end
-        cm.external_output_couplings.map do |eoc|
-          cm.each_internal_coupling do |ic|
+        cm.each_output_coupling do |eoc|
+          parent.each_internal_coupling do |ic|
             if ic.port_source == eoc.destination_port
               rm.add_internal_coupling(eoc.source, ic.destination,
                                        eoc.port_source, ic.destination_port)
             end
           end
         end
+
+        # remove cm childs
+        cm.each do |child|
+          cm.remove_child(child)
+          cm.processor.remove_child(child)
+        end
+        # remove cm
+        rm.remove_child(cm)
+        rm.processor.remove_child(cm.processor)
       end
+      private :_flatten!
     end
   end
 end
