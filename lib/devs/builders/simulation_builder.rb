@@ -5,6 +5,11 @@ module DEVS
       attr_reader :root_coordinator
 
       def initialize(namespace, dsl_type, &block)
+        @maintain_hierarchy = false
+        @generate_graph = false
+        @graph_file = 'model_hierarchy'
+        @graph_format = 'png'
+
         @namespace = namespace
         @dsl_type = dsl_type
 
@@ -25,8 +30,19 @@ module DEVS
 
         @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
 
-        flatten!
+        flatten! unless @maintain_hierarchy
+        generate_graph if @generate_graph
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
+      end
+
+      def generate_graph!(file = nil, format = nil)
+        @graph_file = file if file
+        @graph_format = format if format
+        @generate_graph = true
+      end
+
+      def maintain_hierarchy!
+        @maintain_hierarchy = true
       end
 
       def duration(duration)
@@ -95,6 +111,33 @@ module DEVS
         rm.processor.remove_child(cm.processor)
       end
       private :_flatten!
+
+      def generate_graph(file, format)
+        # require optional dependency
+        require 'graph'
+        graph = Graph.new
+        graph.boxes
+        fill_graph(graph, @model)
+        graph.save(file, format)
+      rescue LoadError
+        DEVS.logger.warn  "Unable to generate a graph representation of the model"
+                        + " hierarchy. Please install graphviz on your system and"
+                        + " 'gem install graph'."
+      end
+      private :generate_graph
+
+      def fill_graph(graph, cm)
+        cm.each do |model|
+          if model.coupled?
+            subgraph = graph.cluster(model.name.to_s)
+            subgraph.label model.name.to_s
+            fill_graph(subgraph, model)
+          else
+            graph.node(model.name.to_s)
+          end
+        end
+      end
+      private :fill_graph
     end
   end
 end
