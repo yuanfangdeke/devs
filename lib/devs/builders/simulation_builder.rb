@@ -46,12 +46,23 @@ module DEVS
         @duration = duration
       end
 
-      def hooks(observers = [], model = @model)
-        if model.coupled?
-          model.each { |child| hooks(observers, child) }
-        else
-          observers << model if model.observer?
+      def hooks
+        models = Array.new(@model.components)
+        observers = []
+        index = 0
+
+        while index < models.count
+          model = models[index]
+
+          if model.atomic? && model.observer?
+            observers << model
+          elsif model.coupled?
+            model.concat(model.components)
+          end
+
+          index += 1
         end
+
         observers
       end
       private :hooks
