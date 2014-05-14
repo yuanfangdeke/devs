@@ -3,17 +3,17 @@ module DEVS
     class AtomicBuilder
       include BaseBuilder
 
-      def initialize(namespace, dsl_type, klass, name=nil, *args, &block)
-        if klass.nil? || !klass.respond_to?(:new)
-          @model = AtomicModel.new
+      def initialize(parent, namespace, dsl_type, klass, name=nil, *args, &block)
+        @model = if klass.nil? || !klass.respond_to?(:new)
+          AtomicModel.new
         else
-          @model = klass.new(*args)
+          klass.new(*args)
         end
+        parent.model << @model
 
         @processor = Simulator.new(@model, namespace)
-        @processor.after_initialize if @processor.respond_to?(:after_initialize)
+        parent.processor << @processor
 
-        @model.processor = @processor
         @model.name = name
 
         case dsl_type

@@ -17,9 +17,6 @@ module DEVS
         @model.name = :RootCoupledModel
 
         @processor = Coordinator.new(@model, namespace)
-        @processor.after_initialize if @processor.respond_to?(:after_initialize)
-
-        @model.processor = @processor
 
         @duration = RootCoordinator::DEFAULT_DURATION
 
@@ -50,7 +47,7 @@ module DEVS
       end
 
       def hooks(observers = [], model = @model)
-        if model.is_a? CoupledModel
+        if model.coupled?
           model.each { |child| hooks(observers, child) }
         else
           observers << model if model.observer?

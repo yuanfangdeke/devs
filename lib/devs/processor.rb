@@ -23,6 +23,7 @@ module DEVS
     # @param model [Model] the model associated with this processor
     def initialize(model)
       @model = model
+      @model.processor = self
       @time_next = 0
       @time_last = 0
       @events_count = Hash.new(0)

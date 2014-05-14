@@ -8,6 +8,7 @@ module DEVS
     def initialize(model, namespace)
       super(model)
       extend namespace::SimulatorImpl
+      after_initialize if respond_to?(:after_initialize)
     end
   end
 end

@@ -3,19 +3,18 @@ module DEVS
     class CoupledBuilder
       include BaseBuilder
 
-      def initialize(namespace, dsl_type, klass, *args, &block)
-        if klass.nil? || !klass.respond_to?(:new)
-          @model = CoupledModel.new
+      def initialize(parent, namespace, dsl_type, klass, *args, &block)
+        @model = if klass.nil? || !klass.respond_to?(:new)
+          CoupledModel.new
         else
-          @model = klass.new(*args)
+          klass.new(*args)
         end
+        parent.model << @model
 
         @namespace = namespace
         @dsl_type = dsl_type
         @processor = Coordinator.new(@model, namespace)
-        @processor.after_initialize if @processor.respond_to?(:after_initialize)
-
-        @model.processor = @processor
+        parent.processor << @processor
 
         case dsl_type
         when :eval then instance_eval(&block)
@@ -28,20 +27,12 @@ module DEVS
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
-        coordinator = CoupledBuilder.new(@namespace, @dsl_type, type, *args, &block).processor
-        @model << coordinator.model
-        @processor << coordinator
-
-        coordinator.model
+        CoupledBuilder.new(self, @namespace, @dsl_type, type, *args, &block).model
       end
 
       # @return [AtomicModel] the new atomic model
       def add_model(type=nil, opts={}, &block)
-        simulator = AtomicBuilder.new(@namespace, @dsl_type, type, opts[:name], *opts[:with_args], &block).processor
-        @model << simulator.model
-        @processor << simulator
-
-        simulator.model
+        AtomicBuilder.new(self, @namespace, @dsl_type, type, opts[:name], *opts[:with_args], &block).model
       end
 
       def select(&block)

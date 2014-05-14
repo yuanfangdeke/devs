@@ -19,6 +19,7 @@ module DEVS
       super(model)
       extend namespace::CoordinatorImpl
       @children = []
+      after_initialize if respond_to?(:after_initialize)
     end
 
     def stats
