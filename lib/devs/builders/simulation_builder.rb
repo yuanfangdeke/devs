@@ -57,7 +57,7 @@ module DEVS
           if model.atomic? && model.observer?
             observers << model
           elsif model.coupled?
-            model.concat(model.components)
+            models.concat(model.components)
           end
 
           index += 1
