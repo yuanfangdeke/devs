@@ -27,8 +27,8 @@ module DEVS
 
         @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
 
-        flatten! unless @maintain_hierarchy
-        generate_graph if @generate_graph
+        direct_connect! unless @maintain_hierarchy
+        generate_graph(@graph_file, @graph_format) if @generate_graph
         hooks.each { |observer| @root_coordinator.add_observer(observer) }
       end
 
@@ -56,82 +56,157 @@ module DEVS
       end
       private :hooks
 
-      def flatten!
+      def direct_connect!
         rm = @model
-        rm.find_all { |m| m.coupled? }
-          .each { |cm| _flatten!(rm, cm) }
-      end
-      private :flatten!
+        folded = rm.children.dup
+        unfolded = []
+        i = 0
 
-      # Flatten the hierarchy recursively using direct connection algorithm
-      def _flatten!(rm, cm)
-        cm.each do |child|
-          if child.coupled?
-            # recursive invoke to direct connect all atomics
-            _flatten!(rm, child)
+        while i < folded.count
+          m = folded[i]
+
+          if m.coupled?
+            folded.concat(m.children)
           else
-            # add the atomic of cm to the rm
-            rm << child
-            rm.processor << child.processor
+            unfolded << m
           end
+
+          i += 1
         end
 
-        # copy each internal couplings of cm to rm
-        rm.internal_couplings.push(*cm.internal_couplings)
+        adjust_couplings!(rm, rm.internal_couplings)
 
-        # adjust ports
-        parent = cm.parent
-        cm.each_input_coupling do |eic|
-          parent.each_internal_coupling do |ic|
-            if ic.destination_port == eic.port_source
-              rm.add_internal_coupling(ic.source, eic.destination,
-                                       ic.port_source, eic.destination_port)
-            end
+        rm.children.dup.each do |m|
+          if m.coupled?
+            rm.remove_child(m)
+            rm.processor.remove_child(m.processor)
           end
         end
-        cm.each_output_coupling do |eoc|
-          parent.each_internal_coupling do |ic|
-            if ic.port_source == eoc.destination_port
-              rm.add_internal_coupling(eoc.source, ic.destination,
-                                       eoc.port_source, ic.destination_port)
-            end
-          end
-        end
-
-        # remove cm childs
-        cm.each do |child|
-          cm.remove_child(child)
-          cm.processor.remove_child(child)
-        end
-        # remove cm
-        rm.remove_child(cm)
-        rm.processor.remove_child(cm.processor)
+        rm.couplings.each { |c| rm.remove_coupling(c) if c.source.coupled? || c.destination.coupled? }
+        unfolded.each { |m| rm << m; rm.processor << m.processor }
       end
-      private :_flatten!
+      private :direct_connect!
+
+      def adjust_couplings!(rm, couplings)
+        couplings = Array.new(couplings)
+        j = 0
+
+        while j < couplings.count
+          c1 = couplings[j]
+          if c1.source.coupled? # eoc
+            i = 0
+            route = [c1]
+            while i < route.count
+              tmp = route[i]
+              src = tmp.source
+              port_source = tmp.port_source
+
+              src.each_coupling(src.internal_couplings + src.output_couplings, nil) do |ci|
+                if ci.destination_port == port_source
+                  if ci.source.coupled?
+                    route << ci
+                  else
+                    if c1.destination.coupled?
+                      couplings << Coupling.new(ci.port_source, c1.destination_port, :ic)
+                    else
+                      rm.add_internal_coupling(ci.source, c1.destination, ci.port_source, c1.destination_port)
+                    end
+                  end
+                end
+              end
+
+              i += 1
+            end
+          elsif c1.destination.coupled? # eic
+            i = 0
+            route = [c1]
+            while i < route.count
+              tmp = route[i]
+              dest = tmp.destination
+
+              dest.each_coupling(dest.internal_couplings + dest.input_couplings, tmp.destination_port) do |ci|
+                if ci.destination.coupled?
+                  route << ci
+                else
+                  if c1.source.coupled?
+                    couplings << Coupling.new(c1.port_source, ci.destination_port, :ic)
+                  else
+                    rm.add_internal_coupling(c1.source, ci.destination, c1.port_source, ci.destination_port)
+                  end
+                end
+              end
+
+              i += 1
+            end
+          end
+          j += 1
+        end
+      end
+      private :adjust_couplings!
 
       def generate_graph(file, format)
         # require optional dependency
         require 'graph'
         graph = Graph.new
+        graph.graph_attribs << Graph::Attribute.new('compound = true')
         graph.boxes
+        graph.rotate
         fill_graph(graph, @model)
         graph.save(file, format)
       rescue LoadError
-        DEVS.logger.warn  "Unable to generate a graph representation of the model"
-                        + " hierarchy. Please install graphviz on your system and"
-                        + " 'gem install graph'."
+        DEVS.logger.warn "Unable to generate a graph representation of the "\
+                         "model hierarchy. Please install graphviz on your "\
+                         "system and 'gem install graph'."
       end
       private :generate_graph
 
       def fill_graph(graph, cm)
+        port_node = graph.fontsize(9)
+        input_port_node = port_node + graph.midnightblue
+        output_port_node = port_node + graph.tomato
+        port_link = Graph::Attribute.new('arrowhead = none') + Graph::Attribute.new('weight = 10')
+
         cm.each do |model|
+          name = model.to_s
+
           if model.coupled?
-            subgraph = graph.cluster(model.name.to_s)
-            subgraph.label model.name.to_s
+            subgraph = graph.cluster(name)
+            subgraph.label name
             fill_graph(subgraph, model)
           else
-            graph.node(model.name.to_s)
+            graph.node(name)
           end
+
+          (model.input_ports + model.output_ports).each do |port|
+            port_name = "#{name}@#{port.name.to_s}"
+            node = graph.node(port_name)
+            node.attributes << if port.input?
+              input_port_node
+            else
+              output_port_node
+            end
+            node.label "@#{port.name.to_s}"
+            if model.atomic?
+              node.attributes << graph.circle
+              edge = graph.edge(name, port_name)
+              edge.attributes << port_link
+              if port.output?
+                edge.attributes << Graph::Attribute.new('arrowtail = odot') << Graph::Attribute.new('dir = both')
+              end
+            else
+              node.attributes << graph.doublecircle
+            end
+          end
+        end
+
+        # add invisible node
+        graph.invisible << graph.node("#{cm.name}_invisible")
+
+        (cm.internal_couplings + cm.input_couplings + cm.output_couplings).each do |coupling|
+          from = "#{coupling.source.name}@#{coupling.port_source.name.to_s}"
+          to = "#{coupling.destination.name}@#{coupling.destination_port.name.to_s}"
+          edge = graph.edge(from, to)
+          edge.attributes << graph.dashed
         end
       end
       private :fill_graph
