@@ -51,6 +51,13 @@ module DEVS
       @output_couplings = []
     end
 
+    # Returns a list of all its couplings.
+    #
+    # @return [Array<Coupling>] the list of couplings
+    def couplings
+      @internal_couplings.dup.concat(@input_couplings).concat(@output_couplings)
+    end
+
     # Returns a boolean indicating if <tt>self</tt> is a coupled model
     #
     # @return [true]
@@ -177,7 +184,7 @@ module DEVS
         input_port = find_or_create_input_port_if_necessary(input_port)
         child_port = child.find_or_create_input_port_if_necessary(child_port)
 
-        coupling = Coupling.new(input_port, child_port)
+        coupling = Coupling.new(input_port, child_port, :eic)
         @input_couplings << coupling unless @input_couplings.include?(coupling)
       end
     end
@@ -201,7 +208,7 @@ module DEVS
         output_port = find_or_create_output_port_if_necessary(output_port)
         child_port = child.find_or_create_output_port_if_necessary(child_port)
 
-        coupling = Coupling.new(child_port, output_port)
+        coupling = Coupling.new(child_port, output_port, :eoc)
         @output_couplings << coupling unless @output_couplings.include?(coupling)
       end
     end
@@ -229,21 +236,54 @@ module DEVS
       output_port = a.find_or_create_output_port_if_necessary(output_port)
       input_port = b.find_or_create_input_port_if_necessary(input_port)
 
-      coupling = Coupling.new(output_port, input_port)
+      coupling = Coupling.new(output_port, input_port, :ic)
       @internal_couplings << coupling unless @internal_couplings.include?(coupling)
     end
 
-    private
-
-    def ensure_child(child)
-      if !child.is_a?(Model)
-        child = self[child]
-      end
-      raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
-      child
+    # Deletes a coupling from {#couplings}.
+    #
+    # @param coupling [Coupling] the coupling to delete
+    # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
+    def remove_coupling(coupling)
+      case coupling.type
+      when :ic  then @internal_couplings
+      when :eoc then @output_couplings
+      when :eic then @input_couplings
+      end.delete(coupling)
     end
 
-    def each_coupling(ary, port = nil)
+    # Deletes an internal coupling (IC) from {#internal_couplings}.
+    #
+    # @param coupling [Coupling] the coupling to delete
+    # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
+    def remove_internal_coupling(coupling)
+      @internal_couplings.delete(coupling)
+    end
+
+    # Deletes an internal coupling (EIC) from {#input_couplings}.
+    #
+    # @param coupling [Coupling] the coupling to delete
+    # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
+    def remove_input_coupling(coupling)
+      @input_couplings.delete(coupling)
+    end
+
+    # Deletes an internal coupling (EOC) from {#output_couplings}.
+    #
+    # @param coupling [Coupling] the coupling to delete
+    # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
+    def remove_output_coupling(coupling)
+      @output_couplings.delete(coupling)
+    end
+
+    # Calls <tt>block</tt> once for each coupling in passing that element as a
+    # parameter. If a port is given, it is used to filter the couplings having
+    # this port as a source.
+    #
+    # @param ary [Array] the array of couplings, defaults to {#couplings}
+    # @param port [Port, nil] the source port or nil
+    # @yieldparam coupling [Coupling] the coupling that is yielded
+    def each_coupling(ary = self.couplings, port = nil)
       if port.nil?
         ary.each { |coupling| yield(coupling) } if block_given?
         ary
@@ -258,5 +298,14 @@ module DEVS
         couplings
       end
     end
+
+    def ensure_child(child)
+      if !child.is_a?(Model)
+        child = self[child]
+      end
+      raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
+      child
+    end
+    private :ensure_child
   end
 end

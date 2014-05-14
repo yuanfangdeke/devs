@@ -1,7 +1,7 @@
 module DEVS
   # This class represent a coupling between two DEVS models.
   class Coupling
-    attr_reader :source, :destination, :port_source, :destination_port
+    attr_reader :source, :destination, :port_source, :destination_port, :type
 
     # @!attribute [r] source
     #   @return [Model] Returns the source model
@@ -11,6 +11,9 @@ module DEVS
     #   @return [Port] Returns the source port
     # @!attribute [r] destination_port
     #   @return [Port] Returns the receiver port
+    # @!attribute [r] type
+    #   @return [Symbol] Returns the type of coupling: either <tt>:ic</tt>,
+    #     <tt>:eic</tt> or <tt>:eoc</tt>.
 
     # Returns a new {Coupling} instance.
     #
@@ -19,9 +22,34 @@ module DEVS
     #   a model
     # @raise [InvalidPortTypeError] if the port_source is not an output port or
     #   if the destination_port is not an input port
-    def initialize(port_source, destination_port)
+    def initialize(port_source, destination_port, type)
       @port_source = port_source
       @destination_port = destination_port
+      @type = type
+    end
+
+    # Check if <tt>self</tt> is an internal coupling (IC)
+    #
+    # @return [Boolean] <tt>true</tt> if <tt>self</tt> is an internal coupling,
+    #   <tt>false</tt> otherwise
+    def internal?
+      @type == :ic
+    end
+
+    # Check if <tt>self</tt> is an external input coupling (EIC)
+    #
+    # @return [Boolean] <tt>true</tt> if <tt>self</tt> is an external input
+    #   coupling, <tt>false</tt> otherwise
+    def input?
+      @type == :eic
+    end
+
+    # Check if <tt>self</tt> is an external output coupling (EOC)
+    #
+    # @return [Boolean] <tt>true</tt> if <tt>self</tt> is an external output
+    #   coupling, <tt>false</tt> otherwise
+    def output?
+      @type == :eoc
     end
 
     # Returns the model attached to the output source port
@@ -39,7 +67,7 @@ module DEVS
     end
 
     def ==(other)
-      @source == other.source && @destination == other.destination
+      @port_source == other.port_source && @destination_port == other.destination_port
     end
 
     # @return [Array]
