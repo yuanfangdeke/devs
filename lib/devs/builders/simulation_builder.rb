@@ -71,12 +71,16 @@ module DEVS
         rm = @model
         folded = rm.children.dup
         unfolded = []
+        sub_ic = []
         i = 0
 
         while i < folded.count
           m = folded[i]
 
           if m.coupled?
+            sub_ic.concat(m.internal_couplings.select { |c|
+              c.source.atomic? && c.destination.atomic?
+            })
             folded.concat(m.children)
           else
             unfolded << m
@@ -85,7 +89,8 @@ module DEVS
           i += 1
         end
 
-        adjust_couplings!(rm, rm.internal_couplings)
+        unfolded.each { |m| rm << m; rm.processor << m.processor }
+        adjust_couplings!(rm, rm.internal_couplings + sub_ic)
 
         rm.children.dup.each do |m|
           if m.coupled?
@@ -94,7 +99,6 @@ module DEVS
           end
         end
         rm.couplings.each { |c| rm.remove_coupling(c) if c.source.coupled? || c.destination.coupled? }
-        unfolded.each { |m| rm << m; rm.processor << m.processor }
       end
       private :direct_connect!
 
@@ -149,6 +153,10 @@ module DEVS
 
               i += 1
             end
+          else
+            # source and destination are atomics
+            rm.add_internal_coupling(c1.source, c1.destination, c1.port_source,
+                                     c1.destination_port)
           end
           j += 1
         end
