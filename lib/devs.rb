@@ -1,6 +1,7 @@
 require 'set'
 require 'logger'
 require 'observer'
+require 'pqueue'
 
 # @author Romain Franceschini <franceschini.romain@gmail.com>
 module DEVS
@@ -10,6 +11,7 @@ end
 require 'devs/version'
 require 'devs/logging'
 require 'devs/errors'
+require 'devs/scheduler'
 require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
