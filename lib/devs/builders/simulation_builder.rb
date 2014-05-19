@@ -116,7 +116,7 @@ module DEVS
               src = tmp.source
               port_source = tmp.port_source
 
-              src.each_coupling(src.internal_couplings + src.output_couplings, nil) do |ci|
+              (src.internal_couplings + src.output_couplings).each do |ci|
                 if ci.destination_port == port_source
                   if ci.source.coupled?
                     route << ci
