@@ -29,6 +29,10 @@ module DEVS
       @events_count = Hash.new(0)
     end
 
+    def inspect
+      "<#{self.class}: tn=#{@time_next}, tl=#{@time_next}>"
+    end
+
     def stats
       stats = @events_count.dup
       stats[:total] = stats.values.reduce(&:+)

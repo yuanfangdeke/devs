@@ -19,7 +19,12 @@ module DEVS
       super(model)
       extend namespace::CoordinatorImpl
       @children = []
+      @scheduler = Scheduler.new
       after_initialize if respond_to?(:after_initialize)
+    end
+
+    def inspect
+      "<#{self.class}: tn=#{@time_next}, tl=#{@time_next}, components=#{@children.count}>"
     end
 
     def stats
@@ -44,6 +49,7 @@ module DEVS
       unless @children.include?(child)
         @children << child
         child.parent = self
+        @scheduler.schedule(child)
       end
       child
     end
@@ -57,6 +63,7 @@ module DEVS
       if @children.include?(child)
         @children.delete(child)
         child.parent = nil
+        @scheduler.unschedule(child)
       end
       child
     end
@@ -66,14 +73,20 @@ module DEVS
     #
     # @return [Array<Model>] the imminent children
     def imminent_children
-      @children.select { |child| child.time_next == @time_next }
+      #@children.select { |child| child.time_next == @time_next }
+      @scheduler.imminent(@time_next)
+    end
+
+    def read_imminent_children
+      @scheduler.read_imminent(@time_next)
     end
 
     # Returns the minimum time next in all children
     #
     # @return [Numeric] the min time next
     def min_time_next
-      @children.map { |child| child.time_next }.min
+      #@children.map { |child| child.time_next }.min
+      @scheduler.read
     end
 
     # Returns the maximum time last in all children

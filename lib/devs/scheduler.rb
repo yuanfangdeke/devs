@@ -1,8 +1,12 @@
 class PQueue
   def delete(v)
-    idx = @que.index(v)
-    unless idx.nil?
-      @que.delete_at(idx)
+    i = @que.size - 1
+    while i >= 0
+      if @que[i] == v
+        @que.delete_at(i)
+        break
+      end
+      i -= 1
     end
     self
   end
@@ -29,11 +33,11 @@ end
 module DEVS
   class Scheduler
     def initialize(children = nil)
-      @pq = PQueue.new(children) { |a, b| a.time_next > b.time_next }
+      @pq = PQueue.new(children) { |a, b| b.time_next <=> a.time_next }
     end
 
     def schedule(model)
-      @pq << model
+      @pq.push(model)
     end
 
     def unschedule(model)
@@ -50,10 +54,10 @@ module DEVS
     end
 
     def read_imminent(time)
-      @pq.take_while { |m| m.time_next == time }
+      @pq.read_while { |m| m.time_next == time }
     end
 
-    def imminent_children(time)
+    def imminent(time)
       children = []
       children << @pq.pop while @pq.top.time_next == time
       children
