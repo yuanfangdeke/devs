@@ -85,7 +85,10 @@ module DEVS
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:input, event.time, [message])
           debug "\tdispatching #{new_event}"
-          coupling.destination.processor.dispatch(new_event)
+          child = coupling.destination.processor
+          @scheduler.unschedule(child)
+          child.dispatch(new_event)
+          @scheduler.schedule(child)
         end
       end
     end
