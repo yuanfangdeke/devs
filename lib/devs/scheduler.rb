@@ -17,13 +17,14 @@ class PQueue
     i = @que.size - 1
 
     loop do
-      if yield(@que[i])
-        ary << @que[i]
+      elt = @que[i]
+      if yield(elt)
+        ary << elt
+        break if i.zero?
         i -= 1
       else
         break
       end
-      break if i.zero?
     end
 
     ary
