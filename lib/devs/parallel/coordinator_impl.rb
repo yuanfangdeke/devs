@@ -10,7 +10,7 @@ module DEVS
         if event.time == @time_next
           @time_last = event.time
 
-          imminent_children.each do |child|
+          read_imminent_children.each do |child|
             debug "\t#{model} dispatching #{event}"
             child.dispatch(event)
             @synchronize << child
@@ -85,7 +85,9 @@ module DEVS
           @synchronize.each do |child|
             new_event = Event.new(:internal, event.time)
             debug "\t#{model} dispatching #{new_event}"
+            @scheduler.unschedule(child)
             child.dispatch(new_event)
+            @scheduler.schedule(child)
           end
           @synchronize.clear
 
