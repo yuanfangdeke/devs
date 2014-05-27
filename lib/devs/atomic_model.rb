@@ -147,6 +147,10 @@ module DEVS
       true
     end
 
+    def inspect
+      "<#{self.class}: name=#{@name}, time=#{@time}, elapsed=#{@elapsed}>"
+    end
+
     # Returns a boolean indicating if <tt>self</tt> is an observer of hooks
     # events
     #

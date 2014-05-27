@@ -51,6 +51,10 @@ module DEVS
       false
     end
 
+    def inspect
+      "<#{self.class}: name=#{@name}>"
+    end
+
     # Adds an input port to <tt>self</tt>.
     #
     # @param name [String, Symbol]

@@ -63,5 +63,9 @@ module DEVS
       s = "#{s} with #{@bag.map{|m|m.payload}}" unless @bag.empty?
       s
     end
+
+    def inspect
+      "<#{self.class}: type:#{@type}, time:#{@time}>"
+    end
   end
 end

@@ -79,5 +79,9 @@ module DEVS
     def to_s
       "[#{source.name}@#{port_source.name}, #{destination.name}@#{destination_port.name}]"
     end
+
+    def inspect
+      "<#{self.class}: port_src=#{@port_source}, dest_port=#{@destination_port}>"
+    end
   end
 end
