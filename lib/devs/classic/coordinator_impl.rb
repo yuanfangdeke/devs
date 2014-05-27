@@ -25,10 +25,15 @@ module DEVS
         end
 
         children = read_imminent_children
-        children_models = children.map(&:model)
-        child_model = model.select(children_models)
-        debug "\tselected #{child_model} in #{children_models.map(&:name)}"
-        child = children[children_models.index(child_model)]
+
+        child = if children.count > 1
+          children_models = children.map(&:model)
+          child_model = model.select(children_models)
+          debug "\tselected #{child_model} in #{children_models.map(&:name)}"
+          children[children_models.index(child_model)]
+        else
+          children.first
+        end
 
         @scheduler.unschedule(child)
         child.dispatch(event)
