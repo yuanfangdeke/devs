@@ -6,6 +6,13 @@ module DEVS
         @bag = []
       end
 
+      def handle_init_event(event)
+        @children.each { |child| child.dispatch(event) }
+        @time_last = max_time_last
+        @time_next = min_time_next
+        debug "\t#{model} set tl: #{@time_last}; tn: #{@time_next}"
+      end
+
       def handle_collect_event(event)
         if event.time == @time_next
           @time_last = event.time
