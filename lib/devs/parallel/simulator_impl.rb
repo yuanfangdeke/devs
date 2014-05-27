@@ -5,6 +5,12 @@ module DEVS
         @bag = []
       end
 
+      def handle_init_event(event)
+        @time_last = model.time = event.time
+        @time_next = @time_last + model.time_advance
+        debug "\t\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+      end
+
       def handle_collect_event(event)
         if event.time == @time_next
           bag = model.fetch_output!

@@ -2,6 +2,7 @@ module DEVS
   module Parallel
     module RootCoordinatorStrategy
       def run(rc)
+        rc.child.dispatch(Event.new(:init), rc.time)
         rc.time = rc.child.time_next
 
         loop do
