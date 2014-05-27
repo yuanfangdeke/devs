@@ -67,6 +67,10 @@ module DEVS
       input? ? "-->#{name}" : "#{name}-->"
     end
 
+    def inspect
+      "<#{self.class}: name=#{@name}, type=#{@type}, host=#{@host}>"
+    end
+
     # Read the outgoing {Message} if any and empty the mailbox.
     #
     # @return [Message, nil] the outgoing message or <tt>nil</tt>

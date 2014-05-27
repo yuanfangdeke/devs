@@ -39,5 +39,9 @@ module DEVS
     def to_s
       @payload.to_s
     end
+
+    def inspect
+      "<#{self.class}: payload=#{@payload}, port=#{@port}>"
+    end
   end
 end
