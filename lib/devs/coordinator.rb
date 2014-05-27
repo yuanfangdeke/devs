@@ -71,7 +71,6 @@ module DEVS
     #
     # @return [Array<Model>] the imminent children
     def imminent_children
-      #@children.select { |child| child.time_next == @time_next }
       @scheduler.imminent(@time_next)
     end
 
@@ -83,7 +82,6 @@ module DEVS
     #
     # @return [Numeric] the min time next
     def min_time_next
-      #@children.map { |child| child.time_next }.min
       @scheduler.read
     end
 
