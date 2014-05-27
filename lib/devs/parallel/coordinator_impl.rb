@@ -8,6 +8,7 @@ module DEVS
 
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
+        @scheduler = Scheduler.new(@children)
         @time_last = max_time_last
         @time_next = min_time_next
         debug "\t#{model} set tl: #{@time_last}; tn: #{@time_next}"
