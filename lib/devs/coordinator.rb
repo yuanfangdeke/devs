@@ -19,7 +19,7 @@ module DEVS
       super(model)
       extend namespace::CoordinatorImpl
       @children = []
-      @scheduler = Scheduler.new
+      @scheduler = nil
       after_initialize if respond_to?(:after_initialize)
     end
 
@@ -49,7 +49,6 @@ module DEVS
       unless @children.include?(child)
         @children << child
         child.parent = self
-        @scheduler.schedule(child)
       end
       child
     end
@@ -63,7 +62,6 @@ module DEVS
       if @children.include?(child)
         @children.delete(child)
         child.parent = nil
-        @scheduler.unschedule(child)
       end
       child
     end

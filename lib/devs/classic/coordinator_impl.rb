@@ -7,7 +7,7 @@ module DEVS
       # @param event [Event] the init event
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
-        @scheduler.reschedule
+        @scheduler = Scheduler.new(@children)
         @time_last = max_time_last
         @time_next = min_time_next
         debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
