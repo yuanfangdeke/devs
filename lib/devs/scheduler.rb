@@ -1,14 +1,15 @@
 class PQueue
   def delete(v)
     i = @que.size - 1
+    elmt = nil
     while i >= 0
       if @que[i] == v
-        @que.delete_at(i)
+        elmt = @que.delete_at(i)
         break
       end
       i -= 1
     end
-    self
+    elmt
   end
 
   def read_while
