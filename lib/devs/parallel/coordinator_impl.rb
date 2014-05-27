@@ -93,9 +93,10 @@ module DEVS
           @synchronize.each do |child|
             new_event = Event.new(:internal, event.time)
             debug "\t#{model} dispatching #{new_event}"
-            @scheduler.unschedule(child)
+            #@scheduler.unschedule(child)
             child.dispatch(new_event)
-            @scheduler.schedule(child)
+            #@scheduler.schedule(child)
+            @scheduler.reschedule(child)
           end
           @synchronize.clear
 

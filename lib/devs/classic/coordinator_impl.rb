@@ -35,9 +35,8 @@ module DEVS
           children.first
         end
 
-        @scheduler.unschedule(child)
         child.dispatch(event)
-        @scheduler.schedule(child)
+        @scheduler.reschedule(child)
 
         @time_last = event.time
         @time_next = min_time_next
@@ -58,9 +57,8 @@ module DEVS
             debug "\t#{model} found external input coupling #{coupling}"
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
-            @scheduler.unschedule(child)
             child.dispatch(Event.new(:input, event.time, [message]))
-            @scheduler.schedule(child)
+            @scheduler.reschedule(child)
           end
 
           @time_last = event.time
@@ -91,9 +89,8 @@ module DEVS
           new_event = Event.new(:input, event.time, [message])
           debug "\tdispatching #{new_event}"
           child = coupling.destination.processor
-          @scheduler.unschedule(child)
           child.dispatch(new_event)
-          @scheduler.schedule(child)
+          @scheduler.reschedule(child)
         end
       end
     end
