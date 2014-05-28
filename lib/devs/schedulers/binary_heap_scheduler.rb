@@ -1,4 +1,10 @@
 module DEVS
+  # Scheduler with array based heap.
+  #
+  # Each inserted elements is given a certain priority, based on the result of
+  # the comparison. Also, retrieving an element will always return the one with
+  # the highest priority. The internal queue is kept in the reverse order.
+  #
   class BinaryHeapScheduler
     def initialize(elements = nil)
       @que = []
@@ -14,23 +20,23 @@ module DEVS
       @que.size
     end
 
-    def schedule(model)
-      @que << model
+    def schedule(processor)
+      @que << processor
       reheap(@que.size - 1)
       self
     end
 
-    def reschedule(model)
-      idx = index(model)
+    def reschedule(processor)
+      idx = index(processor)
       reheap(idx) unless idx.nil?
       self
     end
 
-    def index(model)
+    def index(processor)
       idx = nil
       i = @que.size - 1
       while i >= 0
-        if @que[i] == model
+        if @que[i] == processor
           idx = i
           break
         end
@@ -40,11 +46,11 @@ module DEVS
     end
     private :index
 
-    def unschedule(model)
+    def unschedule(processor)
       i = @que.size - 1
       elmt = nil
       while i >= 0
-        if @que[i] == model
+        if @que[i] == processor
           elmt = @que.delete_at(i)
           break
         end
@@ -174,6 +180,4 @@ module DEVS
       lower
     end
   end
-
-  Scheduler = BinaryHeapScheduler
 end
