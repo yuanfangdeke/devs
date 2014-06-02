@@ -1,9 +1,9 @@
 language: ruby
 rvm:
   - 1.9.2
-  - 2.1.1
+  - 2.1.2
   - jruby-19mode
-  - rbx-19mode
+  - rbx-2.2.7
 notifications:
   email:
     - franceschini.romain@gmail.com
