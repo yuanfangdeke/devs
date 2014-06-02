@@ -102,13 +102,13 @@ module DEVS
 
     def concat(elements)
       if empty?
-        if elements.kind_of?(PQueue)
+        if elements.kind_of?(BinaryHeapScheduler)
           initialize_copy(elements)
         else
           replace(elements)
         end
       else
-        if elements.kind_of?(PQueue)
+        if elements.kind_of?(BinaryHeapScheduler)
           @que.concat(elements.que)
           reschedule!
         else
@@ -120,7 +120,7 @@ module DEVS
     end
 
     def replace(elements)
-      if elements.kind_of?(PQueue)
+      if elements.kind_of?(BinaryHeapScheduler)
         initialize_copy(elements)
       else
         @que.replace(elements.to_a)
