@@ -10,6 +10,7 @@ end
 require 'devs/version'
 require 'devs/logging'
 require 'devs/errors'
+require 'devs/linked_list'
 require 'devs/event'
 require 'devs/message'
 require 'devs/coupling'
