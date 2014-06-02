@@ -116,11 +116,8 @@ module DEVS
     # @overload each
     #   @return [Enumerator<Model>]
     def each
-      if block_given?
-        @children.each { |child| yield(child) }
-      else
-        @children.each
-      end
+      return @children.enum_for(:each) unless block_given?
+      @children.each { |child| yield(child) }
     end
 
     # Calls <tt>block</tt> once for each external input coupling (EIC) in
