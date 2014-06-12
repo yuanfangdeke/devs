@@ -22,6 +22,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency('rake', '~> 10.1')
   spec.add_development_dependency('yard', '~> 0.8')
   spec.add_development_dependency('pry', '~> 0.9')
+  spec.add_development_dependency('pry-nav', '~> 0.2')
+  spec.add_development_dependency('pry-stack_explorer', '~> 0.4')
   spec.add_development_dependency('minitest', '~> 5.0')
 
   spec.required_ruby_version = '>= 1.9.2'
