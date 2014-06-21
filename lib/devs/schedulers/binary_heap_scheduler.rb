@@ -66,7 +66,7 @@ module DEVS
 
     def imminent(time)
       a = []
-      a << @que.pop while @que.last.time_next == time
+      a << @que.pop while !@que.empty? && @que.last.time_next == time
       a
     end
 

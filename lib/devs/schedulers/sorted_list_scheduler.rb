@@ -22,7 +22,7 @@ module DEVS
 
     def imminent(time)
       a = []
-      a << @ary.pop while @ary.last.time_next == time
+      a << @ary.pop while !@ary.empty? && @ary.last.time_next == time
       a
     end
 

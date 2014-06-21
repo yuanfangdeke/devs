@@ -19,7 +19,7 @@ module DEVS
 
     def imminent(time)
       a = []
-      a << @queue.pop while @queue.peek.time_next == time
+      a << @queue.pop while @queue.size > 0 && @queue.peek.time_next == time
       a
     end
 
