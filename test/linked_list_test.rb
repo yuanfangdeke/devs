@@ -21,7 +21,7 @@ class TestLinkedList < MiniTest::Test
     @list.pop
     assert_equal 5, @list.size
 
-    @list.take
+    @list.shift
     assert_equal 4, @list.size
 
     @list.delete(4)
@@ -29,12 +29,12 @@ class TestLinkedList < MiniTest::Test
 
     @list.pop
     @list.pop
-    @list.take
+    @list.shift
 
     assert_equal 0, @list.size
     @list.pop
     assert_equal 0, @list.size
-    @list.take
+    @list.shift
     assert_equal 0, @list.size
   end
 
@@ -61,13 +61,13 @@ class TestLinkedList < MiniTest::Test
   def test_take
     @list.push(1, 2, 6)
 
-    assert_equal 1, @list.take
+    assert_equal 1, @list.shift
     assert_equal [2, 6], @list.to_a
 
-    assert_equal 2, @list.take
-    assert_equal 6, @list.take
+    assert_equal 2, @list.shift
+    assert_equal 6, @list.shift
 
-    assert_equal nil, @list.take
+    assert_equal nil, @list.shift
     assert_equal [], @list.to_a
   end
 

@@ -6,11 +6,24 @@ module DEVS
 
     Node = Struct.new(:value, :previous, :next)
 
-    def initialize(elements = nil)
+    def initialize(size = 0)
       @head = nil
       @tail = nil
       @size = 0
-      push(*elements)
+
+      if block_given? && size > 0
+        size.times { |i| push(yield(i)) }
+      end
+    end
+
+    def clear
+      @head = nil
+      @tail = nil
+      @size = 0
+    end
+
+    def empty?
+      @size.zero?
     end
 
     # Append (O(1)) — Pushes the given object(s) on to the end of this list. This
@@ -55,7 +68,7 @@ module DEVS
     # list is empty.
     #
     # See also {#push_front} for the opposite effect
-    def take
+    def shift
       return nil if @size.zero?
 
       item = @head.value
@@ -127,6 +140,26 @@ module DEVS
         else
           nil
         end
+      end
+    end
+
+    def concat(list)
+      list.each { |obj| push(obj) }
+    end
+
+    def first
+      if @head
+        @head.value
+      else
+        nil
+      end
+    end
+
+    def last
+      if @last
+        @last.value
+      else
+        nil
       end
     end
 
