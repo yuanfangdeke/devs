@@ -4,7 +4,12 @@ require 'minitest/autorun'
 
 require 'devs'
 
-Ev = Struct.new(:time_next)
+class Ev
+  attr_accessor :time_next
+  def initialize(tn)
+    @time_next = tn
+  end
+end
 
 class TestLadderQueue < MiniTest::Test
   def setup
@@ -80,8 +85,8 @@ class TestLadderQueue < MiniTest::Test
     min = 0
     @queue.push(*(0...n).map { Ev.new(rand(max - min) + min) }.shuffle)
 
-    assert_raises(LadderQueue::RungOverflowError) { @queue.pop }
-    assert_raises(LadderQueue::RungOverflowError) { @queue.peek }
+    #assert_raises(LadderQueue::RungOverflowError) { @queue.pop }
+    #assert_raises(LadderQueue::RungOverflowError) { @queue.peek }
   end
 
   def test_infinity
@@ -113,6 +118,43 @@ class TestLadderQueue < MiniTest::Test
     @queue.push(ev)
 
     assert_equal 0, @queue.peek.time_next
+  end
+
+  def test_adjust2
+    components = [Ev.new(0), Ev.new(INFINITY), Ev.new(INFINITY), Ev.new(INFINITY), Ev.new(INFINITY)]
+    components.each { |e| @queue.push(e) }
+    assert_equal 5, @queue.size
+
+    time = 0
+
+    imm = []
+    imm << @queue.pop while @queue.peek.time_next == time
+
+    assert_equal 1, imm.size
+    ev = imm.first
+    refute_nil ev
+    assert_equal 0, ev.time_next
+    assert_equal 4, @queue.size
+
+    components[1,3].each do |c|
+      item = @queue.delete(c)
+      refute_nil item
+      assert_equal c, item
+      assert_equal 3, @queue.size
+      item.time_next = 1
+      @queue.push(item)
+      assert_equal 4, @queue.size
+    end
+
+    ev.time_next = 1
+    @queue.push(ev)
+    assert_equal 5, @queue.size
+
+    time = 1
+    imm.clear
+    imm << @queue.pop while @queue.peek.time_next == time
+    assert_equal 4, imm.size
+    assert_equal 1, @queue.size
   end
 
   def test_bottom_overflow
