@@ -3,7 +3,7 @@ module DEVS
     class CoupledBuilder
       include BaseBuilder
 
-      def initialize(parent, namespace, dsl_type, klass, *args, &block)
+      def initialize(parent, dsl_type, klass, *args, &block)
         @model = if klass.nil? || !klass.respond_to?(:new)
           CoupledModel.new
         else
@@ -11,9 +11,8 @@ module DEVS
         end
         parent.model << @model
 
-        @namespace = namespace
         @dsl_type = dsl_type
-        @processor = Coordinator.new(@model, namespace)
+        @processor = Coordinator.new(@model)
         parent.processor << @processor
 
         case dsl_type
@@ -27,12 +26,12 @@ module DEVS
         type = nil
         type, *args = *args if args.first != nil && args.first.respond_to?(:new)
 
-        CoupledBuilder.new(self, @namespace, @dsl_type, type, *args, &block).model
+        CoupledBuilder.new(self, @dsl_type, type, *args, &block).model
       end
 
       # @return [AtomicModel] the new atomic model
       def add_model(type=nil, opts={}, &block)
-        AtomicBuilder.new(self, @namespace, @dsl_type, type, opts[:name], *opts[:with_args], &block).model
+        AtomicBuilder.new(self, @dsl_type, type, opts[:name], *opts[:with_args], &block).model
       end
 
       def select(&block)
