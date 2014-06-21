@@ -2,6 +2,7 @@
 
 [![Dependency Status](https://gemnasium.com/romain1189/devs.png)](https://gemnasium.com/romain1189/devs)
 [![Build Status](https://secure.travis-ci.org/devs-ruby/devs.png?branch=master)](http://travis-ci.org/devs-ruby/devs)
+[![Inline docs](http://inch-ci.org/github/devs-ruby/devs.png?branch=master)](http://inch-ci.org/github/devs-ruby/devs)
 [![Code Climate](https://codeclimate.com/github/devs-ruby/devs.png)](https://codeclimate.com/github/devs-ruby/devs)
 [![Coverage Status](https://coveralls.io/repos/romain1189/devs/badge.png)](https://coveralls.io/r/romain1189/devs)
 
