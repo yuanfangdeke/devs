@@ -82,7 +82,7 @@ module DEVS
     #
     # @return [Numeric] the min time next
     def min_time_next
-      @scheduler.read
+      @scheduler.read || DEVS::INFINITY
     end
 
     # Returns the maximum time last in all children
