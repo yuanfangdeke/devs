@@ -8,7 +8,7 @@ module DEVS
 
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
-        @scheduler = Scheduler.new(@children)
+        @scheduler = Scheduler.new(@children.select{ |c| c.time_next < DEVS::INFINITY })
         @time_last = max_time_last
         @time_next = min_time_next
         debug "\t#{model} set tl: #{@time_last}; tn: #{@time_next}"
@@ -18,7 +18,7 @@ module DEVS
         if event.time == @time_next
           @time_last = event.time
 
-          read_imminent_children.each do |child|
+          imminent_children.each do |child|
             debug "\t#{model} dispatching #{event}"
             child.dispatch(event)
             @synchronize << child
@@ -93,10 +93,9 @@ module DEVS
           @synchronize.each do |child|
             new_event = Event.new(:internal, event.time)
             debug "\t#{model} dispatching #{new_event}"
-            #@scheduler.unschedule(child)
+            @scheduler.unschedule(child)
             child.dispatch(new_event)
-            #@scheduler.schedule(child)
-            @scheduler.reschedule(child)
+            @scheduler.schedule(child) if child.time_next < DEVS::INFINITY
           end
           @synchronize.clear
 
