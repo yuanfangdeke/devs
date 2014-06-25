@@ -7,7 +7,7 @@ module DEVS
       # @param event [Event] the init event
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
-        @scheduler = Scheduler.new(@children)
+        @scheduler = Scheduler.new(@children.select{ |c| c.time_next < DEVS::INFINITY })
         @time_last = max_time_last
         @time_next = min_time_next
         debug "#{model} set tl: #{@time_last}; tn: #{@time_next}"
@@ -24,7 +24,7 @@ module DEVS
                 "time: #{event.time} should match time_next: #{@time_next}"
         end
 
-        children = read_imminent_children
+        children = imminent_children
 
         child = if children.count > 1
           children_models = children.map(&:model)
@@ -35,8 +35,9 @@ module DEVS
           children.first
         end
 
+        imminent_children.each { |c| @scheduler.schedule(c) unless c == child }
         child.dispatch(event)
-        @scheduler.reschedule(child)
+        @scheduler.schedule(child)
 
         @time_last = event.time
         @time_next = min_time_next
@@ -57,8 +58,9 @@ module DEVS
             debug "\t#{model} found external input coupling #{coupling}"
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
+            @scheduler.unschedule(child)
             child.dispatch(Event.new(:input, event.time, [message]))
-            @scheduler.reschedule(child)
+            @scheduler.schedule(child)
           end
 
           @time_last = event.time
@@ -89,8 +91,9 @@ module DEVS
           new_event = Event.new(:input, event.time, [message])
           debug "\tdispatching #{new_event}"
           child = coupling.destination.processor
+          @scheduler.unschedule(child)
           child.dispatch(new_event)
-          @scheduler.reschedule(child)
+          @scheduler.schedule(child)
         end
       end
     end
