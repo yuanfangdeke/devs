@@ -80,9 +80,9 @@ module DEVS
 
       def clear_bucket_at(index)
         bucket = @buckets[index]
-        events = bucket.dup
+        events = bucket
         @total_event_count -= bucket.size
-        bucket.clear
+        bucket = []
         events
       end
 
