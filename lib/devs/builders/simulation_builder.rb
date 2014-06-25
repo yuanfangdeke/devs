@@ -10,13 +10,15 @@ module DEVS
         @graph_file = 'model_hierarchy'
         @graph_format = 'png'
 
-        @namespace = namespace
+        Coordinator.send  :include, namespace::CoordinatorImpl
+        Simulator.send    :include, namespace::SimulatorImpl
+
         @dsl_type = dsl_type
 
         @model = CoupledModel.new
         @model.name = :RootCoupledModel
 
-        @processor = Coordinator.new(@model, namespace)
+        @processor = Coordinator.new(@model)
 
         @duration = RootCoordinator::DEFAULT_DURATION
 

@@ -13,11 +13,8 @@ module DEVS
     # Returns a new instance of {Coordinator}
     #
     # @param model [CoupledModel] the managed coupled model
-    # @param namespace [Module] the namespace providing template method
-    #   implementation
-    def initialize(model, namespace)
+    def initialize(model)
       super(model)
-      extend namespace::CoordinatorImpl
       @children = []
       @scheduler = nil
       after_initialize if respond_to?(:after_initialize)

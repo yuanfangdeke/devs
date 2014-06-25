@@ -129,11 +129,12 @@ module DEVS
     # @return [Hash<Symbol, Fixnum>]
     def stats
       if done?
-        stats = @child.stats
-        total = Hash.new(0)
-        stats.values.each { |h| h.each { |k, v| total[k] += v }}
-        stats[:TOTAL] = total
-        stats
+        @stats ||= (stats = @child.stats
+          total = Hash.new(0)
+          stats.values.each { |h| h.each { |k, v| total[k] += v }}
+          stats[:TOTAL] = total
+          stats
+        )
       end
     end
 

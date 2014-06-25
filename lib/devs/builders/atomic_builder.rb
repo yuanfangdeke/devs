@@ -3,7 +3,7 @@ module DEVS
     class AtomicBuilder
       include BaseBuilder
 
-      def initialize(parent, namespace, dsl_type, klass, name=nil, *args, &block)
+      def initialize(parent, dsl_type, klass, name=nil, *args, &block)
         @model = if klass.nil? || !klass.respond_to?(:new)
           AtomicModel.new
         else
@@ -11,7 +11,7 @@ module DEVS
         end
         parent.model << @model
 
-        @processor = Simulator.new(@model, namespace)
+        @processor = Simulator.new(@model)
         parent.processor << @processor
 
         @model.name = name
