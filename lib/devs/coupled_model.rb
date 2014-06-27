@@ -46,16 +46,31 @@ module DEVS
     def initialize(name = nil)
       super(name)
       @children = []
-      @internal_couplings = []
-      @input_couplings = []
-      @output_couplings = []
+      @internal_couplings = Hash.new { |h, k| h[k] = [] }
+      @input_couplings = Hash.new { |h, k| h[k] = [] }
+      @output_couplings = Hash.new { |h, k| h[k] = [] }
     end
 
     # Returns a list of all its couplings.
     #
     # @return [Array<Coupling>] the list of couplings
     def couplings
-      @internal_couplings.dup.concat(@input_couplings).concat(@output_couplings)
+      @internal_couplings.values
+        .concat(@input_couplings.values)
+        .concat(@output_couplings.values)
+        .flatten! || []
+    end
+
+    def internal_couplings
+      @internal_couplings.values.flatten! || []
+    end
+
+    def output_couplings
+      @output_couplings.values.flatten! || []
+    end
+
+    def input_couplings
+      @input_couplings.values.flatten! || []
     end
 
     # Returns a boolean indicating if <tt>self</tt> is a coupled model
@@ -182,7 +197,8 @@ module DEVS
         child_port = child.find_or_create_input_port_if_necessary(child_port)
 
         coupling = Coupling.new(input_port, child_port, :eic)
-        @input_couplings << coupling unless @input_couplings.include?(coupling)
+        ary = @input_couplings[input_port]
+        ary << coupling unless ary.include?(coupling)
       end
     end
     alias_method :add_external_input, :add_external_input_coupling
@@ -206,7 +222,8 @@ module DEVS
         child_port = child.find_or_create_output_port_if_necessary(child_port)
 
         coupling = Coupling.new(child_port, output_port, :eoc)
-        @output_couplings << coupling unless @output_couplings.include?(coupling)
+        ary = @output_couplings[child_port]
+        ary << coupling unless ary.include?(coupling)
       end
     end
     alias_method :add_external_output, :add_external_output_coupling
@@ -234,7 +251,8 @@ module DEVS
       input_port = b.find_or_create_input_port_if_necessary(input_port)
 
       coupling = Coupling.new(output_port, input_port, :ic)
-      @internal_couplings << coupling unless @internal_couplings.include?(coupling)
+      ary = @internal_couplings[output_port]
+      ary << coupling unless ary.include?(coupling)
     end
 
     # Deletes a coupling from {#couplings}.
@@ -246,7 +264,7 @@ module DEVS
       when :ic  then @internal_couplings
       when :eoc then @output_couplings
       when :eic then @input_couplings
-      end.delete(coupling)
+      end[coupling.port_source].delete(coupling)
     end
 
     # Deletes an internal coupling (IC) from {#internal_couplings}.
@@ -254,7 +272,7 @@ module DEVS
     # @param coupling [Coupling] the coupling to delete
     # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
     def remove_internal_coupling(coupling)
-      @internal_couplings.delete(coupling)
+      @internal_couplings[coupling.port_source].delete(coupling)
     end
 
     # Deletes an internal coupling (EIC) from {#input_couplings}.
@@ -262,7 +280,7 @@ module DEVS
     # @param coupling [Coupling] the coupling to delete
     # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
     def remove_input_coupling(coupling)
-      @input_couplings.delete(coupling)
+      @input_couplings[coupling.port_source].delete(coupling)
     end
 
     # Deletes an internal coupling (EOC) from {#output_couplings}.
@@ -270,7 +288,7 @@ module DEVS
     # @param coupling [Coupling] the coupling to delete
     # @return [Coupling, nil] the deleted coupling or <tt>nil</tt> if not found
     def remove_output_coupling(coupling)
-      @output_couplings.delete(coupling)
+      @output_couplings[coupling.port_source].delete(coupling)
     end
 
     # Calls <tt>block</tt> once for each coupling in passing that element as a
@@ -280,11 +298,18 @@ module DEVS
     # @param ary [Array] the array of couplings, defaults to {#couplings}
     # @param port [Port, nil] the source port or nil
     # @yieldparam coupling [Coupling] the coupling that is yielded
-    def each_coupling(ary = self.couplings, port = nil)
-      if port.nil?
-        ary.each { |coupling| yield(coupling) } if block_given?
-        ary
+    def each_coupling(ary_or_hash = self.couplings, port = nil)
+      check = false
+      ary = if port.nil? && ary_or_hash.kind_of?(Hash)
+        ary_or_hash.values.flatten!
+      elsif !port.nil? && ary_or_hash.kind_of?(Hash)
+        ary_or_hash[port]
       else
+        check = true unless port.nil?
+        ary_or_hash
+      end
+
+      if check
         couplings = []
         ary.each do |coupling|
           if coupling.port_source == port
@@ -293,6 +318,9 @@ module DEVS
           end
         end
         couplings
+      else
+        ary.each { |coupling| yield(coupling) } if block_given?
+        ary
       end
     end
 
