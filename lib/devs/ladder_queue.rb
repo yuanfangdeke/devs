@@ -324,11 +324,18 @@ module DEVS
         if @active_rungs > 0
           rung = @rungs[@active_rungs - 1]
           bucket = rung[recurse_rungs]
+          size = bucket.size
 
           # sort bucket into bottom
-          bucket.each { |obj| push_bottom(obj) }
+          i = 0
+          while i < size
+            @bottom.push(bucket[i])
+            i += 1
+          end
+          @bottom.sort! { |a,b| a.time_next <=> b.time_next }
+
           # update counts
-          rung.total_event_count -= bucket.size
+          rung.total_event_count -= size
           bucket.clear
 
           # invalidate rung if empty
@@ -370,14 +377,15 @@ module DEVS
         index = 0
         max = @bottom.size - 1
         item = @bottom[index]
+        tn = obj.time_next
 
-        while item.time_next < obj.time_next
+        while item.time_next < tn
           break if index == max
           index += 1
           item = @bottom[index]
         end
 
-        if item.time_next < obj.time_next && index == max
+        if item.time_next < tn && index == max
           @bottom.push(obj)
         else
           @bottom.insert(index, obj)
@@ -408,7 +416,13 @@ module DEVS
         if event_count > @threshold
           events = lowest.clear_bucket_at(lowest.current_bucket)
           if @active_rungs == @max_rungs
-            events.each { |obj| push_bottom(obj) }
+            i = 0
+            while i < events.count
+              @bottom.push(events[i])
+              i += 1
+            end
+            @bottom.sort! { |a,b| a.time_next <=> b.time_next }
+
             found = true
           else
             rung = add_rung(event_count)
