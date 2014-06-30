@@ -12,7 +12,7 @@ module DEVS
     DEFAULT_DURATION = 60
 
     attr_reader :duration, :start_time, :final_time, :child
-    attr_accessor :time
+    attr_accessor :time, :init_time
 
     # @!attribute [r] time
     #   @return [Numeric] Returns the current simulation time
@@ -22,6 +22,9 @@ module DEVS
 
     # @!attribute [r] duration
     #   @return [Numeric] Returns the total duration of the simulation time
+
+    # @!attribute [rw] init_time
+    #   @return [Numeric] Returns the duration of the initialization
 
     # Returns a new {RootCoordinator} instance.
     #

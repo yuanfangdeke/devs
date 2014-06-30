@@ -46,8 +46,11 @@ module DEVS
     DEVS.logger.info "*** Initializing simulation at #{start_time}"
     builder = Builders::SimulationBuilder.new(namespace, dsl_type, &block)
     init_time = Time.now
-    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{init_time - start_time} secs."
-    builder.root_coordinator.simulate
+    elapsed = init_time - start_time
+    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{elapsed} secs."
+    root_coordinator = builder.root_coordinator
+    root_coordinator.init_time = elapsed
+    root_coordinator.simulate
   end
   module_function :simulate
 
