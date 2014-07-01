@@ -2,7 +2,7 @@ module DEVS
   module Parallel
     module CoordinatorImpl
       def after_initialize
-        @synchronize = []
+        @synchronize = Hash.new(false)
         @bag = []
       end
 
@@ -20,7 +20,7 @@ module DEVS
           imminent_children.each do |child|
             debug "\t#{model} dispatching #{event}"
             child.dispatch(event)
-            @synchronize << child
+            @synchronize[child] = true
           end
         else
           raise BadSynchronisationError,
@@ -41,7 +41,7 @@ module DEVS
           model.each_internal_coupling(port) do |coupling|
             receiver = coupling.destination.processor
             child_bags[receiver] << Message.new(payload, coupling.destination_port)
-            @synchronize << receiver
+            @synchronize[receiver] = true
           end
 
           # check external coupling to form sub-bag of parent output
@@ -64,7 +64,12 @@ module DEVS
       end
 
       def handle_input_event(event)
-        @bag.push(*event.bag)
+        bag = event.bag
+        i = 0
+        while i < bag.size
+          @bag.push(bag[i])
+          i += 1
+        end
       end
 
       def handle_internal_event(event)
@@ -76,7 +81,7 @@ module DEVS
             model.each_input_coupling(port) do |coupling|
               receiver = coupling.destination.processor
               child_bags[receiver] << Message.new(payload, coupling.destination_port)
-              @synchronize << receiver
+              @synchronize[receiver] = true
             end
           end
 
@@ -88,8 +93,7 @@ module DEVS
           end
           @bag.clear
 
-          @synchronize.uniq!
-          @synchronize.each do |child|
+          @synchronize.each_key do |child|
             new_event = Event.new(:internal, event.time)
             debug "\t#{model} dispatching #{new_event}"
             child.dispatch(new_event)
