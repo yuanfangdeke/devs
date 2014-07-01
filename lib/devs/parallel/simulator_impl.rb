@@ -25,8 +25,14 @@ module DEVS
       end
 
       def handle_input_event(event)
-        debug "\t\t#{model} adding #{event.bag.map{|m|m.payload}} to bag"
-        @bag.push(*event.bag)
+        bag = event.bag
+        debug "\t\t#{model} adding #{bag.map{|m|m.payload}} to bag"
+
+        i = 0
+        while i < bag.size
+          @bag.push(bag[i])
+          i += 1
+        end
       end
 
       def handle_internal_event(event)
