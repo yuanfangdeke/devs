@@ -46,10 +46,17 @@ module DEVS
     #   ({Event#type})
     def dispatch(event)
       @events_count[event.type] += 1
-      debug "* #{model} received #{event}"
 
-      method_name = "handle_#{event.type}_event".to_sym
-      __send__(method_name, event)
+      case event.type
+      when :internal then handle_internal_event(event)
+      when :collect then handle_collect_event(event)
+      when :input then handle_input_event(event)
+      when :output then handle_output_event(event)
+      when :init then handle_init_event(event)
+      else
+        method_name = "handle_#{event.type}_event".to_sym
+        __send__(method_name, event)
+      end
     end
 
     # Ensure the given {Message} is an input {Port} and belongs to {#model}.

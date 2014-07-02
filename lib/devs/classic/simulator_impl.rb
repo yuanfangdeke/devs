@@ -7,7 +7,7 @@ module DEVS
       def handle_init_event(event)
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}"
+        debug "\t#{model} initialization (time_last: #{@time_last}, time_next: #{@time_next})" if DEVS.logger
       end
 
       # Handles internal events (* messages)
@@ -21,15 +21,15 @@ module DEVS
         end
 
         model.fetch_output! do |message|
-          debug "\t\tsent #{message}"
           parent.dispatch(Event.new(:output, event.time, [message]))
         end
 
+        debug "\tinternal transition: #{model}" if DEVS.logger
         model.internal_transition
 
         @time_last = model.time = event.time
         @time_next = event.time + model.time_advance
-        debug "\t\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}" if DEVS.logger
       end
 
       # Handles input events (x messages)
@@ -41,12 +41,12 @@ module DEVS
       def handle_input_event(event)
         if (@time_last..@time_next).include?(event.time)
           model.elapsed = event.time - @time_last
-          debug "\t\t#{model} external transition"
+          debug "\texternal transition: #{model}" if DEVS.logger
           bag = event.bag.map { |msg| ensure_input_message(msg).freeze }
           model.external_transition(bag)
           @time_last = model.time = event.time
           @time_next = event.time + model.time_advance
-          debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}"
+          debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}" if DEVS.logger
         else
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end

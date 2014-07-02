@@ -8,16 +8,13 @@ module DEVS
       def handle_init_event(event)
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        debug "\t\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "\t#{model} initialization (time_last: #{@time_last}, time_next: #{@time_next})" if DEVS.logger
       end
 
       def handle_collect_event(event)
         if event.time == @time_next
           bag = model.fetch_output!
-          unless bag.empty?
-            debug "\t\t#{model} sends bag #{bag.map{|m|m.payload}}"
-            parent.dispatch(Event.new(:output, event.time, bag))
-          end
+          parent.dispatch(Event.new(:output, event.time, bag)) unless bag.empty?
         else
           raise BadSynchronisationError,
                 "time: #{event.time} should match time_next: #{@time_next}"
@@ -25,14 +22,7 @@ module DEVS
       end
 
       def handle_input_event(event)
-        bag = event.bag
-        debug "\t\t#{model} adding #{bag.map{|m|m.payload}} to bag"
-
-        i = 0
-        while i < bag.size
-          @bag.push(bag[i])
-          i += 1
-        end
+        @bag.concat(event.bag)
       end
 
       def handle_internal_event(event)
@@ -40,17 +30,21 @@ module DEVS
 
         if event.time == @time_next
           if @bag.empty?
-            debug "\t\t#{model} internal transition"
+            debug "\tinternal transition: #{model}" if DEVS.logger
             model.internal_transition
           else
-            debug "\t\t#{model} confluent transition"
-            model.confluent_transition(frozen_bag)
+            debug "\tconfluent transition: #{model}" if DEVS.logger
+            model.confluent_transition(@bag.map { |message|
+              ensure_input_message(message)
+            })
             @bag.clear
           end
         elsif synced && !@bag.empty?
-          debug "\t\t#{model} external transition"
+          debug "\texternal transition: #{model}" if DEVS.logger
           model.elapsed = event.time - @time_last
-          model.external_transition(frozen_bag)
+          model.external_transition(@bag.map { |message|
+            ensure_input_message(message)
+          })
           @bag.clear
         elsif !synced
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
@@ -58,13 +52,8 @@ module DEVS
 
         @time_last = model.time = event.time
         @time_next = @time_last + model.time_advance
-        debug "\t\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
+        debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}" if DEVS.logger
       end
-
-      def frozen_bag
-        @bag.map { |message| ensure_input_message(message).freeze }
-      end
-      protected :frozen_bag
     end
   end
 end

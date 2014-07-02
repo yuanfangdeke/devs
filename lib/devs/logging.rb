@@ -10,7 +10,6 @@ module DEVS
   class << self
     attr_accessor :logger
   end
-  @logger = NullLogger.new
 
   module Logging
     # Send a debug message
