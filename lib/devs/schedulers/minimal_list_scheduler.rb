@@ -12,8 +12,11 @@ module DEVS
     end
 
     def unschedule(processor)
-      @ary.delete(processor)
-      search_min! if processor.time_next == @min
+      index = @ary.index(processor)
+      if index
+        @ary.delete_at(index)
+        search_min! if processor.time_next == @min
+      end
     end
 
     def reschedule!
