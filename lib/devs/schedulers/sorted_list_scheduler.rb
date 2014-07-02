@@ -16,7 +16,7 @@ module DEVS
     end
 
     def read
-      return nil if empty?
+      return nil if @ary.empty?
       @ary.last.time_next
     end
 
@@ -61,10 +61,9 @@ module DEVS
       elmt
     end
 
-    def reschedule(processor = nil)
+    def reschedule!
       @ary.sort! { |a,b| b.time_next <=> a.time_next }
       self
     end
-    alias_method :reschedule!, :reschedule
   end
 end

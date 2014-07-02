@@ -30,5 +30,7 @@ module DEVS
     def unschedule(processor)
       @queue.delete(processor)
     end
+
+    def reschedule!; end
   end
 end

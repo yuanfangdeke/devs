@@ -1,21 +1,21 @@
 module DEVS
   class MinimalListScheduler
     def initialize(elements = nil)
-      @ary = elements.dup if elements
+      @ary = elements || []
       @min = DEVS::INFINITY
       reschedule!
     end
 
     def schedule(processor)
       @ary << processor
-      @min = processor.time_next if @min > processor.time_next
+      @min = processor.time_next if processor.time_next < min
     end
 
     def unschedule(processor)
       index = @ary.index(processor)
-      if index
+      unless index.nil?
         @ary.delete_at(index)
-        search_min! if processor.time_next == @min
+        reschedule! if processor.time_next == @min
       end
     end
 
@@ -39,7 +39,7 @@ module DEVS
       i = 0
       while i < @ary.size
         p = @ary[i]
-        a << p if p.time_next == time
+        a.push(p) if p.time_next == time
         i += 1
       end
       a
@@ -50,7 +50,7 @@ module DEVS
       i = 0
       while i < @ary.size
         p = @ary[i]
-        a << @ary.delete_at(i) if p.time_next == time
+        a.push(@ary.delete_at(i)) if p.time_next == time
         i += 1
       end
       a

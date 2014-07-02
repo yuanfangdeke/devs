@@ -13,7 +13,7 @@ module DEVS
         while i < children.size
           child = children[i]
           child.dispatch(event)
-          selected << child if child.time_next < DEVS::INFINITY
+          selected.push(child) if child.time_next < DEVS::INFINITY
           i += 1
         end
         @scheduler = Scheduler.new(selected)
