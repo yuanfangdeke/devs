@@ -146,7 +146,7 @@ module DEVS
       if waiting?
         @lock.synchronize do
           @start_time = Time.now
-          info "*** Beginning simulation at #{@start_time} with duration: #{@duration}"
+          info "*** Beginning simulation at #{@start_time} with duration: #{@duration}" if DEVS.logger
         end
 
         # Calling the core algorithm
@@ -154,13 +154,15 @@ module DEVS
 
         final_time = Time.now
         @lock.synchronize { @final_time = final_time }
-        info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
 
-        info "* Events stats : {"
-        stats.each { |k, v| info "    #{k} => #{v}" }
-        info "* }"
+        if DEVS.logger
+          info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
+          info "* Events stats : {"
+          stats.each { |k, v| info "    #{k} => #{v}" }
+          info "* }"
+          info "* Calling post simulation hooks"
+        end
 
-        info "* Calling post simulation hooks"
         changed
         notify_observers(:post_simulation)
       else
@@ -168,9 +170,7 @@ module DEVS
           error "The simulation already started at #{@start_time} and is currently running."
         else
           error "The simulation is already done. Started at #{@start_time} and finished at #{@final_time} in #{elapsed_secs} secs."
-        end
-
-        nil
+        end if DEVS.logger
       end
 
       self

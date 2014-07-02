@@ -54,23 +54,47 @@ module DEVS
     # Returns a list of all its couplings.
     #
     # @return [Array<Coupling>] the list of couplings
-    def couplings
-      @internal_couplings.values
+    def couplings(port = nil)
+      ary = @internal_couplings.values
         .concat(@input_couplings.values)
         .concat(@output_couplings.values)
         .flatten! || []
+
+      if port.nil?
+        ary
+      else
+        couplings = []
+        i = 0
+        while i < ary.size
+          couplings << ary[i] if coupling.port_source == port
+          i += 1
+        end
+        couplings
+      end
     end
 
-    def internal_couplings
-      @internal_couplings.values.flatten! || []
+    def internal_couplings(port = nil)
+      if port.nil?
+        @internal_couplings.values.flatten! || []
+      else
+        @internal_couplings[port]
+      end
     end
 
-    def output_couplings
-      @output_couplings.values.flatten! || []
+    def output_couplings(port = nil)
+      if port.nil?
+        @output_couplings.values.flatten! || []
+      else
+        @output_couplings[port]
+      end
     end
 
-    def input_couplings
-      @input_couplings.values.flatten! || []
+    def input_couplings(port = nil)
+      if port.nil?
+        @input_couplings.values.flatten! || []
+      else
+        @input_couplings[port]
+      end
     end
 
     # Returns a boolean indicating if <tt>self</tt> is a coupled model
@@ -299,28 +323,32 @@ module DEVS
     # @param port [Port, nil] the source port or nil
     # @yieldparam coupling [Coupling] the coupling that is yielded
     def each_coupling(ary_or_hash = self.couplings, port = nil)
-      check = false
-      ary = if port.nil? && ary_or_hash.kind_of?(Hash)
-        ary_or_hash.values.flatten!
-      elsif !port.nil? && ary_or_hash.kind_of?(Hash)
-        ary_or_hash[port]
-      else
-        check = true unless port.nil?
-        ary_or_hash
-      end
+      if block_given?
+        check = false
+        ary = if port.nil? && ary_or_hash.kind_of?(Hash)
+          ary_or_hash.values.flatten!
+        elsif !port.nil? && ary_or_hash.kind_of?(Hash)
+          ary_or_hash[port]
+        else
+          check = true unless port.nil?
+          ary_or_hash
+        end
 
-      if check
-        couplings = []
-        ary.each do |coupling|
-          if coupling.port_source == port
-            couplings << coupling
-            yield(coupling) if block_given?
+        i = 0
+        if check
+          while i < ary.size
+            coupling = ary[i]
+            yield(coupling) if coupling.port_source == port
+            i += 1
+          end
+        else
+          while i < ary.size
+            yield(ary[i])
+            i += 1
           end
         end
-        couplings
       else
-        ary.each { |coupling| yield(coupling) } if block_given?
-        ary
+        to_enum(:each_coupling, ary_or_hash, port)
       end
     end
 

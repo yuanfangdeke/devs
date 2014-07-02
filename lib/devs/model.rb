@@ -149,7 +149,7 @@ module DEVS
 
         if port.nil?
           port = add_port(type, name)
-          DEVS.logger.warn("specified #{type} port #{name} doesn't exist for #{self}. creating it")
+          DEVS.logger.warn("specified #{type} port #{name} doesn't exist for #{self}. creating it") if DEVS.logger
         end
       end
       port
@@ -166,7 +166,7 @@ module DEVS
         if existing.include?(n.to_sym)
           DEVS.logger.warn(
             "specified #{type} port #{n} already exists for #{self}. skipping..."
-          )
+          ) if DEVS.logger
         else
           ports << Port.new(self, type, n)
         end

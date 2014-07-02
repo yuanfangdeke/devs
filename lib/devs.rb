@@ -43,11 +43,11 @@ module DEVS
     end
 
     start_time = Time.now
-    DEVS.logger.info "*** Initializing simulation at #{start_time}"
+    DEVS.logger.info "*** Initializing simulation at #{start_time}" if DEVS.logger
     builder = Builders::SimulationBuilder.new(namespace, dsl_type, &block)
     init_time = Time.now
     elapsed = init_time - start_time
-    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{elapsed} secs."
+    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{elapsed} secs." if DEVS.logger
     root_coordinator = builder.root_coordinator
     root_coordinator.init_time = elapsed
     root_coordinator.simulate

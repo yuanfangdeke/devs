@@ -7,20 +7,28 @@ module DEVS
       end
 
       def handle_init_event(event)
-        @children.each { |child| child.dispatch(event) }
+        children = @children
+        i = 0
+        while i < children.size
+          children[i].dispatch(event)
+          i += 1
+        end
+
         @time_last = max_time_last
         @time_next = min_time_next
-        debug "\t#{model} set tl: #{@time_last}; tn: #{@time_next}"
       end
 
       def handle_collect_event(event)
         if event.time == @time_next
           @time_last = event.time
 
-          imminent_children.each do |child|
-            debug "\t#{model} dispatching #{event}"
+          imm = imminent_children
+          i = 0
+          while i < imm.size
+            child = imm[i]
             child.dispatch(event)
             @synchronize[child] = true
+            i += 1
           end
         else
           raise BadSynchronisationError,
@@ -33,76 +41,100 @@ module DEVS
         parent_bag = []
         child_bags = Hash.new { |hsh, key| hsh[key] = [] }
 
-        bag.each do |message|
+        i = 0
+        while i < bag.size
+          message = bag[i]
           payload, port = *message
           source = port.host.processor
 
           # check internal coupling to get children who receive sub-bag of y
-          model.each_internal_coupling(port) do |coupling|
+          j = 0
+          ic = model.internal_couplings(port)
+          while j < ic.size
+            coupling = ic[j]
             receiver = coupling.destination.processor
             child_bags[receiver] << Message.new(payload, coupling.destination_port)
             @synchronize[receiver] = true
+            j += 1
           end
 
           # check external coupling to form sub-bag of parent output
-          model.each_output_coupling(port) do |coupling|
-            parent_bag << Message.new(payload, coupling.destination_port)
+          j = 0
+          oc = model.output_couplings(port)
+          while j < oc.size
+            parent_bag << Message.new(payload, oc[j].destination_port)
+            j += 1
           end
+
+          i += 1
         end
 
-        child_bags.each do |receiver, sub_bag|
+        i = 0
+        receivers = child_bags.keys
+        while i < receivers.size
+          receiver = receivers[i]
+          sub_bag = child_bags[receiver]
           unless sub_bag.empty?
-            debug "\t#{model} dispatch input #{sub_bag.map{|m|m.payload.to_s + '@' + m.port.to_s}} to #{receiver.model} from output event"
             receiver.dispatch(Event.new(:input, event.time, sub_bag))
           end
+          i += 1
         end
 
         unless parent_bag.empty?
-          debug "\t#{model} dispatch output #{parent_bag.map{|m|m.payload.to_s + '@' + m.port.to_s}} to parent"
           parent.dispatch(Event.new(:output, event.time, parent_bag))
         end
       end
 
       def handle_input_event(event)
-        bag = event.bag
-        i = 0
-        while i < bag.size
-          @bag.push(bag[i])
-          i += 1
-        end
+        @bag.concat(event.bag)
       end
 
       def handle_internal_event(event)
         if (@time_last..@time_next).include?(event.time)
           child_bags = Hash.new { |hash, key| hash[key] = [] }
-          @bag.each do |message|
+          bag = @bag
+
+          i = 0
+          while i < bag.size
+            message = bag[i]
             payload, port = *message
+
             # check external input couplings to get children who receive sub-bag of y
-            model.each_input_coupling(port) do |coupling|
+            j = 0
+            ic = model.input_couplings(port)
+            while j < ic.size
+              coupling = ic[j]
               receiver = coupling.destination.processor
               child_bags[receiver] << Message.new(payload, coupling.destination_port)
               @synchronize[receiver] = true
+              j += 1
             end
+
+            i += 1
           end
 
-          child_bags.each do |receiver, sub_bag|
+          i = 0
+          receivers = child_bags.keys
+          while i < receivers.size
+            receiver = receivers[i]
+            sub_bag = child_bags[receiver]
             unless sub_bag.empty?
-              debug "\t#{model} dispatch input #{sub_bag.map{|m|m.payload.to_s + '@' + m.port.to_s}} to #{receiver.model} from output event"
               receiver.dispatch(Event.new(:input, event.time, sub_bag))
             end
+            i += 1
           end
-          @bag.clear
+          bag.clear
 
-          @synchronize.each_key do |child|
-            new_event = Event.new(:internal, event.time)
-            debug "\t#{model} dispatching #{new_event}"
-            child.dispatch(new_event)
+          flagged = @synchronize.keys
+          i = 0
+          while i < flagged.size
+            flagged[i].dispatch(Event.new(:internal, event.time))
+            i += 1
           end
           @synchronize.clear
 
           @time_last = event.time
           @time_next = min_time_next
-          debug "\t#{model} time_last: #{@time_last} | time_next: #{@time_next}"
         else
           raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
