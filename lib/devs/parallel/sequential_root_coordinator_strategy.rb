@@ -6,9 +6,7 @@ module DEVS
         run = true
         while run
           rc.send :debug, "* Tick at: #{rc.time}, #{Time.now - rc.start_time} secs elapsed" if DEVS.logger
-          bag = rc.child.collect(rc.time)
-          rc.child.remainder(rc.time, bag)
-          rc.time = rc.child.time_next
+          rc.time = rc.child.remainder(rc.time, rc.child.collect(rc.time))
           run = false if rc.time >= rc.duration
         end
       end

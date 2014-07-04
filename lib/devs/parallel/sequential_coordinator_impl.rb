@@ -3,6 +3,8 @@ module DEVS
     module CoordinatorImpl
       def after_initialize
         @influencees = Hash.new { |hsh, key| hsh[key] = [] }
+        @parent_bag = []
+        @bag = []
       end
 
       def init(time)
@@ -24,23 +26,23 @@ module DEVS
         end
         @time_last = time
 
-        bag = []
+        @bag.clear
         imm = imminent_children
         i = 0
         while i < imm.size
           child = imm[i]
-          bag.concat(child.collect(time))
+          @bag.concat(child.collect(time))
           # default value is assigned to key
           @influencees[child]
           i += 1
         end
 
         # keep internal couplings and send EOC up
-        parent_bag = []
+        @parent_bag.clear
 
         i = 0
-        while i < bag.size
-          message = bag[i]
+        while i < @bag.size
+          message = @bag[i]
           payload, port = message.payload, message.port
           source = port.host.processor
 
@@ -58,14 +60,14 @@ module DEVS
           j = 0
           oc = @model.output_couplings(port)
           while j < oc.size
-            parent_bag << Message.new(payload, oc[j].destination_port)
+            @parent_bag << Message.new(payload, oc[j].destination_port)
             j += 1
           end
 
           i += 1
         end
 
-        parent_bag
+        @parent_bag
       end
 
       def remainder(time, bag)
