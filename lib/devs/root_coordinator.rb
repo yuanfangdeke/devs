@@ -134,7 +134,7 @@ module DEVS
       if done?
         @stats ||= (stats = @child.stats
           total = Hash.new(0)
-          stats.values.each { |h| h.each { |k, v| total[k] += v }}
+          stats.values.each { |h| h.each { |k, v| total[k] += v if v }}
           stats[:TOTAL] = total
           stats
         )

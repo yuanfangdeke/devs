@@ -38,7 +38,7 @@ module DEVS
   #   end
   def simulate(formalism=:pdevs, dsl_type=:eval, &block)
     namespace = case formalism
-    when :pdevs then Parallel
+    when :pdevs then SequentialParallel
     when :devs then Classic
     end
 
