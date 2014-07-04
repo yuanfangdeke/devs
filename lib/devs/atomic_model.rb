@@ -194,13 +194,16 @@ module DEVS
       self.output
       bag = []
 
-      @output_ports.each do |port|
+      i = 0
+      while i < @output_ports.size
+        port = @output_ports[i]
         value = port.pick_up
         unless value.nil?
           msg = Message.new(value, port)
           yield(msg) if block_given?
           bag << msg
         end
+        i += 1
       end
 
       bag

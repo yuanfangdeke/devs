@@ -70,14 +70,28 @@ module DEVS
     #
     # @return [Numeric] the min time next
     def min_time_next
-      @children.map { |child| child.time_next }.min
+      min = DEVS::INFINITY
+      i = 0
+      while i < @children.size
+        tn = @children[i].time_next
+        min = tn if tn < min
+        i += 1
+      end
+      min
     end
 
     # Returns the maximum time last in all children
     #
     # @return [Numeric] the max time last
     def max_time_last
-      @children.map { |child| child.time_last }.max
+      max = 0
+      i = 0
+      while i < @children.size
+        tl = @children[i].time_last
+        max = tl if tl > max
+        i += 1
+      end
+      max
     end
   end
 end
