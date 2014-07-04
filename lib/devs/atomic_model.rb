@@ -119,13 +119,18 @@ module DEVS
       end
 
       # @!endgroup
+
+      attr_reader :counter
     end
+
+    @counter = 0
 
     # Returns a new instance of {AtomicModel}
     #
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
       super(name)
+      @name = "#{self.class.name || 'Anonymous'}#{AtomicModel.counter}"
 
       @elapsed = 0.0
       @sigma = INFINITY
