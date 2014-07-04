@@ -64,7 +64,7 @@ module DEVS
 
     # @return [String]
     def to_s
-      input? ? "-->#{name}" : "#{name}-->"
+      @name.to_s
     end
 
     def inspect
