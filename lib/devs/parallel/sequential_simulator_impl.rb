@@ -14,7 +14,7 @@ module DEVS
       end
 
       def remainder(time, bag)
-        synced = (@time_last..@time_next).include?(time)
+        synced = @time_last <= time && time <= @time_next
 
         if time == @time_next
           if bag.empty?
@@ -25,7 +25,6 @@ module DEVS
             @model.confluent_transition(bag.map { |message|
               ensure_input_message(message)
             })
-            bag.clear
           end
         elsif synced && !bag.empty?
           debug "\texternal transition: #{@model}" if DEVS.logger
@@ -33,7 +32,6 @@ module DEVS
           @model.external_transition(bag.map { |message|
             ensure_input_message(message)
           })
-          bag.clear
         elsif !synced
           raise BadSynchronisationError, "time: #{time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end

@@ -41,7 +41,7 @@ module DEVS
         i = 0
         while i < bag.size
           message = bag[i]
-          payload, port = *message
+          payload, port = message.payload, message.port
           source = port.host.processor
 
           # check internal coupling to get children who receive sub-bag of y
@@ -72,7 +72,7 @@ module DEVS
         i = 0
         while i < bag.size
           message = bag[i]
-          payload, port = *message
+          payload, port = message.payload, message.port
 
           # check external input couplings to get children who receive sub-bag of y
           j = 0
