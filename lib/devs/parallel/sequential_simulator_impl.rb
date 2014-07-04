@@ -22,16 +22,12 @@ module DEVS
             @model.internal_transition
           else
             debug "\tconfluent transition: #{@model}" if DEVS.logger
-            @model.confluent_transition(bag.map { |message|
-              ensure_input_message(message)
-            })
+            @model.confluent_transition(bag)
           end
         elsif synced && !bag.empty?
           debug "\texternal transition: #{@model}" if DEVS.logger
           @model.elapsed = time - @time_last
-          @model.external_transition(bag.map { |message|
-            ensure_input_message(message)
-          })
+          @model.external_transition(bag)
         elsif !synced
           raise BadSynchronisationError, "time: #{time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
