@@ -20,7 +20,7 @@ module DEVS
     end
 
     def stats
-      stats = {}
+      stats = Hash.new { |h, k| h[k] = Hash.new(0) }
       stats[model.name] = super
       children.each { |child|
         if child.kind_of?(Coordinator)

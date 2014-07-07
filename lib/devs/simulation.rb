@@ -38,13 +38,30 @@ module DEVS
       info "*** Builded simulation at #{@build_end_time} after #{@build_elapsed_secs} secs." if DEVS.logger
     end
 
+    def inspect
+      "<#{self.class}: status=\"#{status}\", time=#{time}, duration=#{@duration}>"
+    end
+
     def time
-      @lock.synchronize { @time }
+      @lock.lock
+      t = @time
+      @lock.unlock
+      t
     end
     alias_method :clock, :time
 
+    def duration
+      @lock.lock
+      d = @duration
+      @lock.unlock
+      d
+    end
+
     def duration=(v)
-      @duration = v if waiting?
+      @lock.lock
+      @duration = v
+      @lock.unlock
+      v
     end
 
     def start_time
@@ -97,13 +114,14 @@ module DEVS
       when :waiting then 0.0 * 100
       when :done    then 1.0 * 100
       when :running
-        @lock.synchronize do
-          if @time > @duration
-            1.0 * 100
-          else
-            @time.to_f / @duration.to_f * 100
-          end
+        @lock.lock
+        val = if @time > @duration
+          1.0 * 100
+        else
+          @time.to_f / @duration.to_f * 100
         end
+        @lock.unlock
+        val
       end
     end
 
@@ -112,9 +130,12 @@ module DEVS
       when :waiting
         0.0
       when :done
-        @final_time - @start_time
+        @lock.lock
+        t = @final_time - @start_time
+        @lock.unlock
+        t
       when :running
-        Time.now - @start_time
+        Time.now - self.start_time
       end
     end
 
@@ -125,7 +146,7 @@ module DEVS
       if done?
         @stats ||= (stats = @processor.stats
           total = Hash.new(0)
-          stats.values.each { |h| h.each { |k, v| total[k] += v if v }}
+          stats.values.each { |h| h.each { |k, v| total[k] += v }}
           stats[:TOTAL] = total
           stats
         )
@@ -135,20 +156,18 @@ module DEVS
     # Run the simulation in a new thread
     def simulate
       if waiting?
-        begin_simulation
-        self.time = t = @processor.init(self.time)
-        run = true
-        while run
-          "* Tick at: #{time}, #{Time.now - @start_time} secs elapsed" if DEVS.logger
-          self.time = t = @processor.step(t)
-          run = false if t >= @duration
+        start_time = begin_simulation
+        self.time = @processor.init(self.time)
+        while self.time < self.duration
+          "* Tick at: #{self.time}, #{Time.now - start_time} secs elapsed" if DEVS.logger
+          self.time = @processor.step(self.time)
         end
         end_simulation
       else
         if running?
-          error "The simulation already started at #{@start_time} and is currently running."
+          error "The simulation already started at #{self.start_time} and is currently running."
         else
-          error "The simulation is already done. Started at #{@start_time} and finished at #{@final_time} in #{elapsed_secs} secs."
+          error "The simulation is already done. Started at #{self.start_time} and finished at #{self.final_time} in #{elapsed_secs} secs."
         end if DEVS.logger
       end
       self
@@ -157,14 +176,12 @@ module DEVS
     def each(&block)
       if waiting?
         if block_given?
-          begin_simulation
-          self.time = t = @processor.init(self.time)
-          run = true
-          while run
-            "* Tick at: #{time}, #{Time.now - @start_time} secs elapsed" if DEVS.logger
-            self.time = t = @processor.step(t)
-            yield(self, t)
-            run = false if t >= @duration
+          start_time = begin_simulation
+          self.time = @processor.init(self.time)
+          while time < self.duration
+            "* Tick at: #{self.time}, #{Time.now - start_time} secs elapsed" if DEVS.logger
+            self.time = @processor.step(self.time)
+            yield(self)
           end
           end_simulation
         else
@@ -172,9 +189,9 @@ module DEVS
         end
       elsif DEVS.logger
         if running?
-          error "The simulation already started at #{@start_time} and is currently running."
+          error "The simulation already started at #{self.start_time} and is currently running."
         else
-          error "The simulation is already done. Started at #{@start_time} and finished at #{@final_time} in #{elapsed_secs} secs."
+          error "The simulation is already done. Started at #{self.start_time} and finished at #{self.final_time} in #{elapsed_secs} secs."
         end
         nil
       end
@@ -182,7 +199,10 @@ module DEVS
 
     private
     def time=(v)
-      @lock.synchronize { @time = v }
+      @lock.lock
+      @time = v
+      @lock.unlock
+      v
     end
 
     def hooks
@@ -207,15 +227,19 @@ module DEVS
     private :hooks
 
     def begin_simulation
-      @lock.synchronize do
-        @start_time = Time.now
-        info "*** Beginning simulation at #{@start_time} with duration: #{@duration}" if DEVS.logger
-      end
+      t = Time.now
+      @lock.lock
+      @start_time = t
+      info "*** Beginning simulation at #{@start_time} with duration: #{@duration}" if DEVS.logger
+      @lock.unlock
+      t
     end
 
     def end_simulation
       final_time = Time.now
-      @lock.synchronize { @final_time = final_time }
+      @lock.lock
+      @final_time = final_time
+      @lock.unlock
 
       if DEVS.logger
         info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
