@@ -135,6 +135,7 @@ module DEVS
       @elapsed = 0.0
       @sigma = INFINITY
       @time = 0
+      @bag = []
     end
 
     def next_activation
@@ -188,30 +189,27 @@ module DEVS
     end
     protected :post
 
-    # Yield outgoing messages added by the DEVS lambda (λ) function for the
+    # Returns outgoing messages added by the DEVS lambda (λ) function for the
     # current state
     #
     # @note This method calls the DEVS lambda (λ) function
     # @api private
-    # @yieldparam message [Message] the message that is yielded
     # @return [Array<Message>]
     def fetch_output!
       self.output
-      bag = []
+      @bag.clear
 
       i = 0
       while i < @output_ports.size
         port = @output_ports[i]
         value = port.pick_up
         unless value.nil?
-          msg = Message.new(value, port)
-          yield(msg) if block_given?
-          bag << msg
+          @bag << Message.new(value, port)
         end
         i += 1
       end
 
-      bag
+      @bag
     end
 
     # Returns a {Port} given a name or an instance and checks it.

@@ -3,6 +3,7 @@ module DEVS
     module CoordinatorImpl
       def after_initialize
         @influencees = Hash.new { |hsh, key| hsh[key] = [] }
+        @synchronize = {}
         @parent_bag = []
         @bag = []
       end
@@ -32,8 +33,7 @@ module DEVS
         while i < imm.size
           child = imm[i]
           @bag.concat(child.collect(time))
-          # default value is assigned to key
-          @influencees[child]
+          @synchronize[child] = true
           i += 1
         end
 
@@ -53,6 +53,7 @@ module DEVS
             coupling = ic[j]
             receiver = coupling.destination.processor
             @influencees[receiver] << Message.new(payload, coupling.destination_port)
+            @synchronize[receiver] = true
             j += 1
           end
 
@@ -83,21 +84,23 @@ module DEVS
             coupling = ic[j]
             receiver = coupling.destination.processor
             @influencees[receiver] << Message.new(payload, coupling.destination_port)
+            @synchronize[receiver] = true
             j += 1
           end
 
           i += 1
         end
 
-        influencees = @influencees.keys
+        influencees = @synchronize.keys
         i = 0
         while i < influencees.size
           receiver = influencees[i]
           sub_bag = @influencees[receiver]
           receiver.remainder(time, sub_bag)
+          sub_bag.clear
           i += 1
         end
-        @influencees.clear
+        @synchronize.clear
 
         @time_last = time
         @time_next = min_time_next
