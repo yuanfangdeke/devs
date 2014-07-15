@@ -40,11 +40,17 @@ module DEVS
     #   @return [Array<Coupling>] Returns a list of all its
     #     <i>external output couplings</i> (EOC)
 
+    class << self
+      attr_reader :counter
+    end
+    @counter = 0
+
     # Returns a new instance of {CoupledModel}
     #
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
       super(name)
+      @name = "#{self.class.name || 'Anonymous'}#{CoupledModel.counter}"
       @children = []
       @internal_couplings = Hash.new { |h, k| h[k] = [] }
       @input_couplings = Hash.new { |h, k| h[k] = [] }

@@ -25,7 +25,7 @@ module DEVS
     end
 
     def stats
-      stats = {}
+      stats = Hash.new { |h, k| h[k] = Hash.new(0) }
       stats[model.name] = super
       children.each { |child|
         if child.kind_of?(Coordinator)
@@ -86,7 +86,14 @@ module DEVS
     #
     # @return [Numeric] the max time last
     def max_time_last
-      @children.map { |child| child.time_last }.max
+      max = 0
+      i = 0
+      while i < @children.size
+        tl = @children[i].time_last
+        max = tl if tl > max
+        i += 1
+      end
+      max
     end
   end
 end

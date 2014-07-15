@@ -20,8 +20,11 @@ module DEVS
           raise BadSynchronisationError, "time: #{event.time} should match time_next: #{@time_next}"
         end
 
-        model.fetch_output! do |message|
-          parent.dispatch(Event.new(:output, event.time, [message]))
+        bag = model.fetch_output!
+        i = 0
+        while i < bag.size
+          parent.dispatch(Event.new(:output), event.time, [bag[i]])
+          i += 1
         end
 
         debug "\tinternal transition: #{model}" if DEVS.logger

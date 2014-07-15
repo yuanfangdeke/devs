@@ -2,9 +2,12 @@ module DEVS
   module Builders
     class SimulationBuilder < CoupledBuilder
       attr_accessor :duration
-      attr_reader :root_coordinator
+      attr_reader :simulation
 
       def initialize(namespace, dsl_type, &block)
+        build_start_time = Time.now
+        DEVS.logger.info "*** Building simulation at #{build_start_time}" if DEVS.logger
+
         @maintain_hierarchy = false
         @generate_graph = false
         @graph_file = 'model_hierarchy'
@@ -19,19 +22,19 @@ module DEVS
         @model.name = :RootCoupledModel
 
         @processor = Coordinator.new(@model)
+        @processor.singleton_class.send :include, namespace::Simulable
 
-        @duration = RootCoordinator::DEFAULT_DURATION
+        @duration = DEVS::INFINITY
 
         case dsl_type
         when :eval then instance_eval(&block)
         when :yield then block.call(self)
         end
 
-        @root_coordinator = RootCoordinator.new(@processor, namespace::RootCoordinatorStrategy, @duration)
-
         direct_connect! unless @maintain_hierarchy
         generate_graph(@graph_file, @graph_format) if @generate_graph
-        hooks.each { |observer| @root_coordinator.add_observer(observer) }
+
+        @simulation = Simulation.new(@processor, @duration, build_start_time)
       end
 
       def generate_graph!(file = nil, format = nil)
@@ -47,27 +50,6 @@ module DEVS
       def duration(duration)
         @duration = duration
       end
-
-      def hooks
-        models = Array.new(@model.components)
-        observers = []
-        index = 0
-
-        while index < models.count
-          model = models[index]
-
-          if model.atomic? && model.observer?
-            observers << model
-          elsif model.coupled?
-            models.concat(model.components)
-          end
-
-          index += 1
-        end
-
-        observers
-      end
-      private :hooks
 
       def direct_connect!
         rm = @model

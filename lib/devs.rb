@@ -22,38 +22,36 @@ require 'devs/coupled_model'
 require 'devs/processor'
 require 'devs/simulator'
 require 'devs/coordinator'
-require 'devs/root_coordinator'
 require 'devs/schedulers'
+require 'devs/simulation'
 require 'devs/builders'
 require 'devs/notifications'
 require 'devs/parallel'
 require 'devs/classic'
 
 module DEVS
-  # Runs a simulation
+  # Builds a simulation
   #
   # @param formalism [Symbol] the formalism to use, either <tt>:pdevs</tt>
   #   for parallel devs (default) or <tt>:devs</tt> for classic devs
   # @example
-  #   simulate do
+  #   build do
   #     duration = 200
   #
   #   end
-  def simulate(formalism=:pdevs, dsl_type=:eval, &block)
+  def build(formalism=:pdevs, dsl_type=:eval, &block)
     namespace = case formalism
-    when :pdevs then Parallel
+    when :pdevs then SequentialParallel
     when :devs then Classic
     end
 
-    start_time = Time.now
-    DEVS.logger.info "*** Initializing simulation at #{start_time}" if DEVS.logger
     builder = Builders::SimulationBuilder.new(namespace, dsl_type, &block)
-    init_time = Time.now
-    elapsed = init_time - start_time
-    DEVS.logger.info "*** Initialized simulation at #{init_time} after #{elapsed} secs." if DEVS.logger
-    root_coordinator = builder.root_coordinator
-    root_coordinator.init_time = elapsed
-    root_coordinator.simulate
+    builder.simulation
+  end
+  module_function :build
+
+  def simulate(formalism=:pdevs, dsl_type=:eval, &block)
+    build(formalism, dsl_type, &block).simulate
   end
   module_function :simulate
 

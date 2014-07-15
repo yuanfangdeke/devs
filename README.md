@@ -39,7 +39,7 @@ The following API documentation is available :
 ```ruby
 require 'devs'
 
-DEVS.simulate do
+simulation = DEVS.build do
   duration 50
 
   add_model do
@@ -69,6 +69,7 @@ DEVS.simulate do
     end
   end
 end
+simulation.simulate
 ```
 
 For more examples, see the examples folder
