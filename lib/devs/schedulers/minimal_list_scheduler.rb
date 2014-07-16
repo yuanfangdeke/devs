@@ -1,7 +1,7 @@
 module DEVS
   class MinimalListScheduler
     def initialize(elements = nil)
-      @ary = elements || []
+      @ary = elements.dup || []
       @min = DEVS::INFINITY
       reschedule!
     end
@@ -22,9 +22,10 @@ module DEVS
     def reschedule!
       min = DEVS::INFINITY
       i = 0
-      while min > 0 || i < @ary.size
+      while i < @ary.size
         p = @ary[i]
         min = p.time_next if p.time_next < min
+        break if min.zero?
         i += 1
       end
       @min = min
