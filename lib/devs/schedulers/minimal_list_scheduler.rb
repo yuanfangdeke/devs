@@ -8,7 +8,7 @@ module DEVS
 
     def schedule(processor)
       @ary << processor
-      @min = processor.time_next if processor.time_next < min
+      @min = processor.time_next if processor.time_next < @min
     end
 
     def unschedule(processor)
@@ -22,7 +22,7 @@ module DEVS
     def reschedule!
       min = DEVS::INFINITY
       i = 0
-      while i < @ary.size
+      while min > 0 || i < @ary.size
         p = @ary[i]
         min = p.time_next if p.time_next < min
         i += 1

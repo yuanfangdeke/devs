@@ -102,7 +102,7 @@ module DEVS
           sub_bag = @influencees[receiver]
           @scheduler.unschedule(receiver)
           receiver.remainder(time, sub_bag)
-          @scheduler.schedule(receiver) if child.time_next < DEVS::INFINITY
+          @scheduler.schedule(receiver) if receiver.time_next < DEVS::INFINITY
           sub_bag.clear
           i += 1
         end
