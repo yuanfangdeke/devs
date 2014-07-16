@@ -10,12 +10,16 @@ module DEVS
 
       def init(time)
         i = 0
+        selected = []
         min = DEVS::INFINITY
         while i < @children.size
-          tn = @children[i].init(time)
+          child = @children[i]
+          tn = child.init(time)
+          selected.push(child) if child.time_next < DEVS::INFINITY
           min = tn if tn < min
           i += 1
         end
+        @scheduler = Scheduler.new(selected)
 
         @time_last = max_time_last
         @time_next = min
@@ -96,7 +100,9 @@ module DEVS
         while i < influencees.size
           receiver = influencees[i]
           sub_bag = @influencees[receiver]
+          @scheduler.unschedule(receiver)
           receiver.remainder(time, sub_bag)
+          @scheduler.schedule(receiver) if child.time_next < DEVS::INFINITY
           sub_bag.clear
           i += 1
         end
