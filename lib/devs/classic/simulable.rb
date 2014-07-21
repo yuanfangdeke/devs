@@ -4,7 +4,7 @@ module DEVS
     # coordinating the simulation.
     module Simulable
       def initialize_state(time)
-        dispatch(Event.new(:init, @time))
+        dispatch(Event.new(:init, time))
         @time_next
       end
 
