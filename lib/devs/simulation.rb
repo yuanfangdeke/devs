@@ -157,7 +157,7 @@ module DEVS
     def simulate
       if waiting?
         start_time = begin_simulation
-        self.time = @processor.init(self.time)
+        self.time = @processor.initialize_state(self.time)
         while self.time < self.duration
           "* Tick at: #{self.time}, #{Time.now - start_time} secs elapsed" if DEVS.logger
           self.time = @processor.step(self.time)
@@ -177,7 +177,7 @@ module DEVS
       if waiting?
         if block_given?
           start_time = begin_simulation
-          self.time = @processor.init(self.time)
+          self.time = @processor.initialize_state(self.time)
           while time < self.duration
             "* Tick at: #{self.time}, #{Time.now - start_time} secs elapsed" if DEVS.logger
             self.time = @processor.step(self.time)
