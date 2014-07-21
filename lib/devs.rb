@@ -30,26 +30,29 @@ require 'devs/classic'
 module DEVS
   # Builds a simulation
   #
-  # @param formalism [Symbol] the formalism to use, either <tt>:pdevs</tt>
-  #   for parallel devs (default) or <tt>:devs</tt> for classic devs
+  # @param opts [Hash] the configuration hash
   # @example
-  #   build do
+  #   simulation = DEVS.build do
   #     duration = 200
-  #
+  #     # ...
   #   end
-  def build(formalism=:pdevs, dsl_type=:eval, &block)
-    namespace = case formalism
-    when :pdevs then SequentialParallel
-    when :devs then Classic
-    end
-
-    builder = Builders::SimulationBuilder.new(namespace, dsl_type, &block)
-    builder.simulation
+  #   simulation.simulate
+  def build(opts={}, &block)
+    builder = SimulationBuilder.new(opts, &block)
+    builder.build
   end
   module_function :build
 
-  def simulate(formalism=:pdevs, dsl_type=:eval, &block)
-    build(formalism, dsl_type, &block).simulate
+  # Builds a simulation
+  #
+  # @param opts [Hash] the configuration hash
+  # @example
+  #   DEVS.simulate do
+  #     duration = 200
+  #     # ...
+  #   end
+  def simulate(opts={}, &block)
+    build(opts, &block).simulate
   end
   module_function :simulate
 
