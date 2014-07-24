@@ -30,7 +30,7 @@ module DEVS
     end
 
     def inspect
-      "<#{self.class}: tn=#{@time_next}, tl=#{@time_next}>"
+      "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}>"
     end
 
     def stats

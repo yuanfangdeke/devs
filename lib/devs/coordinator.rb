@@ -21,7 +21,7 @@ module DEVS
     end
 
     def inspect
-      "<#{self.class}: tn=#{@time_next}, tl=#{@time_next}, components=#{@children.count}>"
+      "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}, components=#{@children.count}>"
     end
 
     def stats
