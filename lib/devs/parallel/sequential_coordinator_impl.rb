@@ -20,7 +20,7 @@ module DEVS
           min = tn if tn < min
           i += 1
         end
-        @scheduler = Scheduler.new(selected)
+        @scheduler = DEVS.scheduler.new(selected)
 
         @time_last = max_time_last
         @time_next = min

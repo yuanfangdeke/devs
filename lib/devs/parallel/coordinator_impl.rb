@@ -16,7 +16,7 @@ module DEVS
           selected.push(child) if child.time_next < DEVS::INFINITY
           i += 1
         end
-        @scheduler = Scheduler.new(selected)
+        @scheduler = DEVS.scheduler.new(selected)
 
         @time_last = max_time_last
         @time_next = min_time_next
@@ -49,7 +49,6 @@ module DEVS
         while i < bag.size
           message = bag[i]
           payload, port = *message
-          source = port.host.processor
 
           # check internal coupling to get children who receive sub-bag of y
           j = 0

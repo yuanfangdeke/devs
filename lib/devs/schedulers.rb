@@ -4,5 +4,8 @@ require 'devs/schedulers/minimal_list_scheduler'
 require 'devs/schedulers/ladder_queue_scheduler'
 
 module DEVS
-  Scheduler = LadderQueueScheduler
+  class << self
+    attr_accessor :scheduler
+  end
+  @scheduler = LadderQueueScheduler
 end

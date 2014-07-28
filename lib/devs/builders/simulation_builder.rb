@@ -8,35 +8,38 @@ module DEVS
       DEVS.logger.info("*** Building simulation at #{@build_start_time}") if DEVS.logger
       @opts = {
         formalism: :pdevs,
+        scheduler: :ladder_queue_scheduler,
         maintain_hierarchy: false,
         generate_graph: false,
         graph_file: 'model_hierarchy',
         graph_format: 'png'
       }.merge(opts)
 
-      namespace = case @opts[:formalism]
-      when :pdevs then SequentialParallel
-      when :cdevs then Classic
-      else
-        DEVS.logger.warn("formalism #{@opts[:formalism]} unknown, defaults to PDEVS") if DEVS.logger
-        SequentialParallel
-      end
-
-      Coordinator.send  :include, namespace::CoordinatorImpl
-      Simulator.send    :include, namespace::SimulatorImpl
-
       @model = CoupledModel.new
       @model.name = :RootCoupledModel
       @processor = Coordinator.new(@model)
-      @processor.singleton_class.send :include, namespace::Simulable
       @duration = DEVS::INFINITY
+      scheduler(@opts[:scheduler])
       instance_eval(&block) if block
     end
 
     def build
+      simulate_using!(@opts[:formalism])
       direct_connect! unless @opts[:maintain_hierarchy]
       generate_graph(@opts[:graph_file], @opts[:graph_format]) if @opts[:generate_graph]
       @simulation = Simulation.new(@processor, @duration, @build_start_time)
+    end
+
+    def scheduler(name)
+      DEVS.scheduler = case name
+      when :ladder_queue_scheduler then LadderQueueScheduler
+      when :binary_heap_scheduler then BinaryHeapScheduler
+      when :minimal_list_scheduler then MinimalListScheduler
+      when :sorted_list_scheduler then SortedListScheduler
+      else
+        DEVS.logger.warn("scheduler #{@opts[:scheduler]} unknown, defaults to LadderQueueScheduler") if DEVS.logger
+        LadderQueueScheduler
+      end
     end
 
     def generate_graph!(file = nil, format = nil)
@@ -52,6 +55,21 @@ module DEVS
     def duration(duration)
       @duration = duration
     end
+
+    def simulate_using!(algorithm)
+      namespace = case algorithm
+      when :pdevs then SequentialParallel
+      when :cdevs then Classic
+      else
+        DEVS.logger.warn("formalism #{@opts[:formalism]} unknown, defaults to PDEVS") if DEVS.logger
+        SequentialParallel
+      end
+
+      Coordinator.send(:include, namespace::CoordinatorImpl) unless Coordinator.include?(namespace::CoordinatorImpl)
+      Simulator.send(:include, namespace::SimulatorImpl) unless Simulator.include?(namespace::SimulatorImpl)
+      @processor.singleton_class.send(:include, namespace::Simulable)
+    end
+    private :simulate_using!
 
     def direct_connect!
       rm = @model

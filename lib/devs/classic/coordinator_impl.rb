@@ -7,7 +7,7 @@ module DEVS
       # @param event [Event] the init event
       def handle_init_event(event)
         @children.each { |child| child.dispatch(event) }
-        @scheduler = Scheduler.new(@children.select{ |c| c.time_next < DEVS::INFINITY })
+        @scheduler = DEVS.scheduler.new(@children.select{ |c| c.time_next < DEVS::INFINITY })
         @time_last = max_time_last
         @time_next = min_time_next
       end
