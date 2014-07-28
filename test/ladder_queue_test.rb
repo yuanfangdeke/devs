@@ -1,7 +1,5 @@
 require 'test_helper'
-
 require 'minitest/autorun'
-
 require 'devs'
 
 class Ev
@@ -18,7 +16,9 @@ class TestLadderQueue < MiniTest::Test
 
   def test_push
     n = 100
-    @queue.push(*(0...n).map { |i| Ev.new(i) }.shuffle)
+    (0...n).map { |i| Ev.new(i) }
+       .shuffle
+       .each { |ev| @queue << ev }
 
     assert_equal n, @queue.top_size
     assert_equal n, @queue.size
@@ -55,7 +55,9 @@ class TestLadderQueue < MiniTest::Test
 
   def test_pop
     n = 30
-    @queue.push(*(0...n).map { |i| Ev.new(i) }.shuffle)
+    (0...n).map { |i| Ev.new(i) }
+       .shuffle
+       .each { |ev| @queue << ev }
 
     assert_equal n, @queue.size
 
@@ -72,7 +74,9 @@ class TestLadderQueue < MiniTest::Test
 
   def test_peek
     n = 30
-    @queue.push(*(0...n).map { |i| Ev.new(i) }.shuffle)
+    (0...n).map { |i| Ev.new(i) }
+           .shuffle
+           .each { |ev| @queue << ev }
 
     assert_equal n, @queue.size
     assert_equal 0, @queue.peek.time_next
@@ -83,10 +87,47 @@ class TestLadderQueue < MiniTest::Test
     n = 100
     max = 50
     min = 0
-    @queue.push(*(0...n).map { Ev.new(rand(max - min) + min) }.shuffle)
+    (0...n).map { |i| Ev.new(rand(max - min) + min) }
+       .shuffle
+       .each { |ev| @queue << ev }
 
     #assert_raises(LadderQueue::RungOverflowError) { @queue.pop }
     #assert_raises(LadderQueue::RungOverflowError) { @queue.peek }
+  end
+
+  def test_rand
+    n = 500
+    max = 100
+    min = 1
+    (0...n).map { |i| Ev.new(rand(max - min) + min) }
+       .shuffle
+       .each { |ev| @queue << ev }
+    assert_equal n, @queue.size
+    expected = n
+
+    time = 0
+    stored = nil
+    while time < 20
+      a = []
+      a << stored if stored
+      while @queue.size > 0
+        stored = @queue.pop
+        break if stored.time_next == time
+        a << stored
+        stored = nil
+      end
+      #a << @queue.pop while @queue.size > 0 && @queue.peek.time_next == time
+      a.each do |ev|
+        if rand > 0.5
+          expected -= 1
+        else
+          ev.time_next = rand(max - min) + min
+          @queue.push(ev)
+        end
+      end
+      time = @queue.peek.time_next
+    end
+    assert_equal expected, @queue.size
   end
 
   def test_infinity
@@ -94,7 +135,9 @@ class TestLadderQueue < MiniTest::Test
     max = Float::MAX
     min = 0
     @queue.push(Ev.new(Float::INFINITY))
-    @queue.push(*(0...n).map { Ev.new(rand(max - min) + min) }.shuffle)
+    (0...n).map { |i| Ev.new(rand(max - min) + min) }
+       .shuffle
+       .each { |ev| @queue << ev }
 
     @queue.pop
     @queue.pop
@@ -159,7 +202,9 @@ class TestLadderQueue < MiniTest::Test
 
   def test_bottom_overflow
     n = 100
-    @queue.push(*(0...n).map { |i| Ev.new(0) }.shuffle)
+    (0...n).map { |i| Ev.new(0) }
+       .shuffle
+       .each { |ev| @queue << ev }
 
     assert_equal n, @queue.size
     assert_equal n, @queue.top_size

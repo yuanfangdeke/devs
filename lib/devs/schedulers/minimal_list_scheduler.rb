@@ -22,10 +22,9 @@ module DEVS
     def reschedule!
       min = DEVS::INFINITY
       i = 0
-      while i < @ary.size
+      while i < @ary.size && min > 0
         p = @ary[i]
         min = p.time_next if p.time_next < min
-        break if min.zero?
         i += 1
       end
       @min = min

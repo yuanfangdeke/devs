@@ -9,11 +9,11 @@ module DEVS
     end
 
     def empty?
-      @queue.size.zero?
+      @queue.size == 0
     end
 
     def read
-      return nil if empty?
+      return nil if @queue.size == 0
       @queue.peek.time_next
     end
 
