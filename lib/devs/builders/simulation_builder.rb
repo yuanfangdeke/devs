@@ -18,13 +18,13 @@ module DEVS
       @model = CoupledModel.new
       @model.name = :RootCoupledModel
       @processor = Coordinator.new(@model)
+      simulate_using!(@opts[:formalism])
       @duration = DEVS::INFINITY
       scheduler(@opts[:scheduler])
       instance_eval(&block) if block
     end
 
     def build
-      simulate_using!(@opts[:formalism])
       direct_connect! unless @opts[:maintain_hierarchy]
       generate_graph(@opts[:graph_file], @opts[:graph_format]) if @opts[:generate_graph]
       @simulation = Simulation.new(@processor, @duration, @build_start_time)
