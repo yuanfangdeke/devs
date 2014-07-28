@@ -15,7 +15,7 @@ module DEVS
         graph_format: 'png'
       }.merge(opts)
 
-      namespace = case algorithm
+      namespace = case @opts[:formalism]
       when :pdevs then SequentialParallel
       when :cdevs then Classic
       else
