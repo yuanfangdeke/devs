@@ -17,7 +17,7 @@ module DEVS
       namespace = case @opts[:formalism]
       when :pdevs then SequentialParallel
       when :cdevs then Classic
-      else SequentialParallel
+      else
         DEVS.logger.warn("formalism #{@opts[:formalism]} unknown, defaults to PDEVS") if DEVS.logger
         SequentialParallel
       end
