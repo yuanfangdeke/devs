@@ -15,10 +15,21 @@ module DEVS
         graph_format: 'png'
       }.merge(opts)
 
+      namespace = case algorithm
+      when :pdevs then SequentialParallel
+      when :cdevs then Classic
+      else
+        DEVS.logger.warn("formalism #{@opts[:formalism]} unknown, defaults to PDEVS") if DEVS.logger
+        SequentialParallel
+      end
+
+      Coordinator.send(:include, namespace::CoordinatorImpl) unless Coordinator.include?(namespace::CoordinatorImpl)
+      Simulator.send(:include, namespace::SimulatorImpl) unless Simulator.include?(namespace::SimulatorImpl)
+
       @model = CoupledModel.new
       @model.name = :RootCoupledModel
       @processor = Coordinator.new(@model)
-      simulate_using!(@opts[:formalism])
+      @processor.singleton_class.send(:include, namespace::Simulable)
       @duration = DEVS::INFINITY
       scheduler(@opts[:scheduler])
       instance_eval(&block) if block
@@ -55,21 +66,6 @@ module DEVS
     def duration(duration)
       @duration = duration
     end
-
-    def simulate_using!(algorithm)
-      namespace = case algorithm
-      when :pdevs then SequentialParallel
-      when :cdevs then Classic
-      else
-        DEVS.logger.warn("formalism #{@opts[:formalism]} unknown, defaults to PDEVS") if DEVS.logger
-        SequentialParallel
-      end
-
-      Coordinator.send(:include, namespace::CoordinatorImpl) unless Coordinator.include?(namespace::CoordinatorImpl)
-      Simulator.send(:include, namespace::SimulatorImpl) unless Simulator.include?(namespace::SimulatorImpl)
-      @processor.singleton_class.send(:include, namespace::Simulable)
-    end
-    private :simulate_using!
 
     def direct_connect!
       rm = @model
