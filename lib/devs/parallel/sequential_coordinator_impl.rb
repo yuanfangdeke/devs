@@ -6,6 +6,7 @@ module DEVS
         @synchronize = {}
         @parent_bag = []
         @bag = []
+        @imm = []
       end
 
       def init(time)
@@ -15,7 +16,7 @@ module DEVS
         while i < @children.size
           child = @children[i]
           tn = child.init(time)
-          selected.push(child) if child.time_next < DEVS::INFINITY
+          selected.push(child) if tn < DEVS::INFINITY
           min = tn if tn < min
           i += 1
         end
@@ -32,10 +33,10 @@ module DEVS
         @time_last = time
 
         @bag.clear
-        imm = imminent_children
+        @imm = imminent_children
         i = 0
-        while i < imm.size
-          child = imm[i]
+        while i < @imm.size
+          child = @imm[i]
           @bag.concat(child.collect(time))
           @synchronize[child] = true
           i += 1
@@ -48,7 +49,6 @@ module DEVS
         while i < @bag.size
           message = @bag[i]
           payload, port = message.payload, message.port
-          source = port.host.processor
 
           # check internal coupling to get children who receive sub-bag of y
           j = 0
@@ -100,9 +100,9 @@ module DEVS
         while i < influencees.size
           receiver = influencees[i]
           sub_bag = @influencees[receiver]
-          @scheduler.unschedule(receiver)
-          receiver.remainder(time, sub_bag)
-          @scheduler.schedule(receiver) if receiver.time_next < DEVS::INFINITY
+          @scheduler.unschedule(receiver) if receiver.time_next < DEVS::INFINITY && !@imm.include?(receiver)
+          tn = receiver.remainder(time, sub_bag)
+          @scheduler.schedule(receiver) if tn < DEVS::INFINITY
           sub_bag.clear
           i += 1
         end
