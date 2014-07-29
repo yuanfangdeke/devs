@@ -23,11 +23,11 @@ module DEVS
       a
     end
 
-    def schedule(processor)
+    def insert(processor)
       @queue.push(processor)
     end
 
-    def unschedule(processor)
+    def cancel(processor)
       @queue.delete(processor)
     end
 

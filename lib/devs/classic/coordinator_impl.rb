@@ -54,9 +54,9 @@ module DEVS
           model.each_input_coupling(port) do |coupling|
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
-            @scheduler.unschedule(child)
+            @scheduler.cancel(child)
             child.dispatch(Event.new(:input, event.time, [message]))
-            @scheduler.schedule(child)
+            @scheduler.insert(child)
           end
 
           @time_last = event.time
@@ -82,9 +82,9 @@ module DEVS
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:input, event.time, [message])
           child = coupling.destination.processor
-          @scheduler.unschedule(child)
+          @scheduler.cancel(child)
           child.dispatch(new_event)
-          @scheduler.schedule(child)
+          @scheduler.insert(child)
         end
       end
     end

@@ -6,12 +6,12 @@ module DEVS
       reschedule!
     end
 
-    def schedule(processor)
+    def insert(processor)
       @ary << processor
       @min = processor.time_next if processor.time_next < @min
     end
 
-    def unschedule(processor)
+    def cancel(processor)
       index = @ary.index(processor)
       unless index.nil?
         @ary.delete_at(index)
@@ -39,7 +39,7 @@ module DEVS
       i = 0
       while i < @ary.size
         p = @ary[i]
-        a.push(p) if p.time_next == time
+        a << p if p.time_next == time
         i += 1
       end
       a
@@ -50,7 +50,7 @@ module DEVS
       i = 0
       while i < @ary.size
         p = @ary[i]
-        a.push(@ary.delete_at(i)) if p.time_next == time
+        a << (@ary.delete_at(i)) if p.time_next == time
         i += 1
       end
       a

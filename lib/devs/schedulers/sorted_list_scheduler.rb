@@ -43,12 +43,12 @@ module DEVS
       ary
     end
 
-    def schedule(processor)
+    def insert(processor)
       @ary.push(processor)
       reschedule!
     end
 
-    def unschedule(processor)
+    def cancel(processor)
       i = @ary.size - 1
       elmt = nil
       while i >= 0

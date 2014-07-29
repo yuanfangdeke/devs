@@ -20,13 +20,13 @@ module DEVS
       @que.size
     end
 
-    def schedule(processor)
+    def insert(processor)
       @que << processor
       reheap(@que.size - 1)
       self
     end
 
-    def reschedule(processor)
+    def adjust(processor)
       idx = index(processor)
       reheap(idx) unless idx.nil?
       self
@@ -46,7 +46,7 @@ module DEVS
     end
     private :index
 
-    def unschedule(processor)
+    def cancel(processor)
       i = @que.size - 1
       elmt = nil
       while i >= 0
@@ -140,7 +140,7 @@ module DEVS
     private
 
     def initialize_copy(other)
-      @que  = other.que.dup
+      @que = other.que.dup
       reschedule!
     end
 

@@ -132,9 +132,9 @@ module DEVS
           i = 0
           while i < flagged.size
             child = flagged[i]
-            @scheduler.unschedule(child)
+            @scheduler.cancel(child)
             child.dispatch(Event.new(:internal, event.time))
-            @scheduler.schedule(child) if child.time_next < DEVS::INFINITY
+            @scheduler.insert(child) if child.time_next < DEVS::INFINITY
             i += 1
           end
           @synchronize.clear
