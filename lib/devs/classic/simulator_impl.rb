@@ -23,7 +23,7 @@ module DEVS
         bag = model.fetch_output!
         i = 0
         while i < bag.size
-          parent.dispatch(Event.new(:output), event.time, [bag[i]])
+          parent.dispatch(Event.new(:output, event.time, bag[i]))
           i += 1
         end
 
@@ -42,11 +42,10 @@ module DEVS
       #   range, e.g isn't between {Coordinator#time_last} and
       #   {Coordinator#time_next}
       def handle_input_event(event)
-        if (@time_last..@time_next).include?(event.time)
+        if @time_last <= event.time && event.time <= @time_next
           model.elapsed = event.time - @time_last
           debug "\texternal transition: #{model}" if DEVS.logger
-          bag = event.bag.map { |msg| ensure_input_message(msg).freeze }
-          model.external_transition(bag)
+          model.external_transition([event.bag])
           @time_last = model.time = event.time
           @time_next = event.time + model.time_advance
           debug "\t\ttime_last: #{@time_last} | time_next: #{@time_next}" if DEVS.logger

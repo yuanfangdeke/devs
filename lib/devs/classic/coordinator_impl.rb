@@ -6,10 +6,25 @@ module DEVS
       #
       # @param event [Event] the init event
       def handle_init_event(event)
-        @children.each { |child| child.dispatch(event) }
-        @scheduler = DEVS.scheduler.new(@children.select{ |c| c.time_next < DEVS::INFINITY })
+        i = 0
+        selected = []
+        min = DEVS::INFINITY
+        while i < @children.size
+          child = @children[i]
+          child.dispatch(event)
+          tn = child.time_next
+          selected.push(child) if tn < DEVS::INFINITY
+          min = tn if tn < min
+          i += 1
+        end
+        @scheduler = if DEVS.scheduler == MinimalListScheduler
+          DEVS.scheduler.new(@children)
+        else
+          DEVS.scheduler.new(selected)
+        end
+
         @time_last = max_time_last
-        @time_next = min_time_next
+        @time_next = min
       end
 
       # Handles internal events (* messages)
@@ -23,19 +38,33 @@ module DEVS
                 "time: #{event.time} should match time_next: #{@time_next}"
         end
 
-        children = imminent_children
-
-        child = if children.count > 1
-          children_models = children.map(&:model)
-          child_model = model.select(children_models)
-          children[children_models.index(child_model)]
+        imm = if DEVS.scheduler == MinimalListScheduler
+          read_imminent_children
         else
-          children.first
+          imminent_children
         end
 
-        imminent_children.each { |c| @scheduler.schedule(c) unless c == child }
-        child.dispatch(event)
-        @scheduler.schedule(child)
+        child = if imm.size > 1
+          children_models = imm.map(&:model)
+          child_model = model.select(children_models)
+          imm[children_models.index(child_model)]
+        else
+          imm.first
+        end
+
+        if DEVS.scheduler == MinimalListScheduler
+          child.dispatch(event)
+          @scheduler.reschedule!
+        else
+          i = 0
+          while i < imm.size
+            c = imm[i]
+            @scheduler.insert(c) unless c == child
+            i += 1
+          end
+          child.dispatch(event)
+          @scheduler.insert(child) if child.time_next < DEVS::INFINITY
+        end
 
         @time_last = event.time
         @time_next = min_time_next
@@ -48,15 +77,27 @@ module DEVS
       #   range, e.g isn't between {Coordinator#time_last} and
       #   {Coordinator#time_next}
       def handle_input_event(event)
-        if (@time_last..@time_next).include?(event.time)
-          payload, port = *event.bag.first
+        if @time_last <= event.time && event.time <= @time_next
+          msg = event.bag
+          payload = msg.payload
+          port = msg.port
 
-          model.each_input_coupling(port) do |coupling|
+          eic = @model.input_couplings(port)
+          i = 0
+          while i < eic.size
+            coupling = eic[i]
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
-            @scheduler.cancel(child)
-            child.dispatch(Event.new(:input, event.time, [message]))
-            @scheduler.insert(child)
+            new_event = Event.new(:input, event.time, message)
+            if DEVS.scheduler == MinimalListScheduler
+              child.dispatch(new_event)
+              @scheduler.reschedule!
+            else
+              @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
+              child.dispatch(new_event)
+              @scheduler.insert(child) if child.time_next < DEVS::INFINITY
+            end
+            i += 1
           end
 
           @time_last = event.time
@@ -70,21 +111,35 @@ module DEVS
       #
       # @param event [Event] the output event
       def handle_output_event(event)
-        payload, port = *event.bag.first
+        msg = event.bag
+        payload = msg.payload
+        port = msg.port
 
-        model.each_output_coupling(port) do |coupling|
+        eoc = @model.output_couplings(port)
+        i = 0
+        while i < eoc.size
+          coupling = eoc[i]
           message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:output, event.time, [message])
+          new_event = Event.new(:output, event.time, message)
           parent.dispatch(new_event)
+          i += 1
         end
 
-        model.each_internal_coupling(port) do |coupling|
+        ic = @model.internal_couplings(port)
+        i = 0
+        while i < ic.size
+          coupling = ic[i]
           message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:input, event.time, [message])
+          new_event = Event.new(:input, event.time, message)
           child = coupling.destination.processor
-          @scheduler.cancel(child)
-          child.dispatch(new_event)
-          @scheduler.insert(child)
+          if DEVS.scheduler == MinimalListScheduler
+            child.dispatch(new_event)
+          else
+            @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
+            child.dispatch(new_event)
+            @scheduler.insert(child) if child.time_next < DEVS::INFINITY
+          end
+          i += 1
         end
       end
     end
