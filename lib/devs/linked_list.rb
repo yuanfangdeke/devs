@@ -2,9 +2,16 @@ module DEVS
   class LinkedList
     include Enumerable
 
-    attr_reader :size
+    attr_reader :size, :head, :tail
 
-    Node = Struct.new(:value, :previous, :next)
+    class Node
+      attr_accessor :value, :previous, :next
+      def initialize(v=nil, p=nil, n=nil)
+        @value = v
+        @previous = p
+        @next = n
+      end
+    end
 
     def initialize(size = 0)
       @head = nil
@@ -12,7 +19,11 @@ module DEVS
       @size = 0
 
       if block_given? && size > 0
-        size.times { |i| push(yield(i)) }
+        i = 0
+        while i < size
+          self << yield(i)
+          i += 1
+        end
       end
     end
 
@@ -23,44 +34,45 @@ module DEVS
     end
 
     def empty?
-      @size.zero?
+      @size == 0
     end
 
     # Append (O(1)) — Pushes the given object(s) on to the end of this list. This
     # expression returns the list itself, so several appends may be chained
     # together. See also {#pop} for the opposite effect.
-    def push(*values)
-      values.each do |v|
-        node = Node.new(v)
-        if @head.nil?
-          @head = @tail = node
-        else
-          node.previous = @tail
-          @tail.next = node
-          @tail = node
-        end
-        @size += 1
+    def <<(obj)
+      obj = obj.value if obj.is_a?(Node)
+      node = Node.new(obj)
+
+      if @head.nil?
+        @head = @tail = node
+      else
+        node.previous = @tail
+        @tail.next = node
+        @tail = node
       end
+      @size += 1
       self
     end
+    alias_method :push, :<<
 
     # Append (0(1)) - Pushes the given object(s) on to the beginning of this list.
     # This expression returns the list itself, so several appends may be chained
     # together.
     #
     # See also {#take} for the opposite effect.
-    def push_front(*values)
-      values.each do |v|
-        node = Node.new(v)
-        if @head.nil?
-          @head = @tail = node
-        else
-          node.next = @head
-          @head.previous = node
-          @head = node
-        end
-        @size += 1
+    def push_front(obj)
+      obj = obj.value if obj.is_a?(Node)
+      node = Node.new(obj)
+
+      if @head.nil?
+        @head = @tail = node
+      else
+        node.next = @head
+        @head.previous = node
+        @head = node
       end
+      @size += 1
       self
     end
 
@@ -69,9 +81,9 @@ module DEVS
     #
     # See also {#push_front} for the opposite effect
     def shift
-      return nil if @size.zero?
+      return nil if @size == 0
 
-      item = @head.value
+      item = @head
       if @head == @tail
         @head = nil
         @tail = nil
@@ -88,9 +100,9 @@ module DEVS
     #
     # See also {#push} for the opposite effect.
     def pop
-      return nil if @size.zero?
+      return nil if @size == 0
 
-      item = @tail.value
+      item = @tail
       if @tail == @head
         @tail = nil
         @head = nil
@@ -102,14 +114,14 @@ module DEVS
       item
     end
 
-    # Deletes (O(n)) first item from self that is equal to v.
+    # Deletes first item from self that is equal to v.
     #
     # Returns the deleted item, or nil if no matching item is found.
-    def delete(v)
-      if @head.nil?
+    def delete(obj)
+      if @head == nil
         nil
-      elsif v == @head.value
-        item = @head.value
+      elsif obj == @head.value
+        item = @head
         if @head == @tail
           @head = nil
           @tail = nil
@@ -121,18 +133,18 @@ module DEVS
         item
       else
         node = @head.next
-        while node && v != node.value
+        while node && obj != node.value
           node = node.next
         end
 
         if node == @tail
-          item = @tail.value
+          item = @tail
           @tail = @tail.previous
           @tail.next = nil
           @size -= 1
           item
         elsif node
-          item = node.value
+          item = node
           node.previous.next = node.next
           node.next.previous = node.previous
           @size -= 1
@@ -144,7 +156,37 @@ module DEVS
     end
 
     def concat(list)
-      list.each { |obj| push(obj) }
+      if list.is_a?(LinkedList)
+        n = list.head
+        while n
+         self << n.value
+         n = n.next
+        end
+      else
+        i = 0
+        while i < list.size
+          self << list[i]
+          i += 1
+        end
+      end
+      self
+    end
+
+    # Inserts (O(1)) the given object before the element with the given node.
+    def insert_before(node, obj)
+      obj = obj.value if obj.is_a?(Node)
+      node = Node.new(obj)
+
+      if @head == node
+        @head = new_node
+        new_node.next = node
+      else
+        previous = node.previous
+        previous.next = new_node
+        new_node.previous = previous
+        new_node.next = node
+      end
+      self
     end
 
     def first
