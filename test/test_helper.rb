@@ -1,7 +1,7 @@
 require 'bundler/setup'
-require 'coveralls'
 require 'pry'
 require 'pry-nav'
 require 'pry-stack_explorer'
+require 'codeclimate-test-reporter'
 
-Coveralls.wear!
+CodeClimate::TestReporter.start

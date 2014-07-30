@@ -1,10 +1,8 @@
 # DEVS - Discrete Event Specification System
 
-[![Dependency Status](https://gemnasium.com/romain1189/devs.png)](https://gemnasium.com/romain1189/devs)
 [![Build Status](https://secure.travis-ci.org/devs-ruby/devs.png?branch=master)](http://travis-ci.org/devs-ruby/devs)
 [![Inline docs](http://inch-ci.org/github/devs-ruby/devs.png?branch=master)](http://inch-ci.org/github/devs-ruby/devs)
 [![Code Climate](https://codeclimate.com/github/devs-ruby/devs.png)](https://codeclimate.com/github/devs-ruby/devs)
-[![Coverage Status](https://coveralls.io/repos/romain1189/devs/badge.png)](https://coveralls.io/r/romain1189/devs)
 
 DEVS abbreviating Discrete Event System Specification is a modular and hierarchical formalism for modeling and analyzing general systems that can be discrete event systems which might be described by state transition tables, and continuous state systems which might be described by differential equations, and hybrid continuous state and discrete event systems. DEVS is a timed event system.
 
