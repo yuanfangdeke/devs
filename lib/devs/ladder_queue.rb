@@ -318,9 +318,7 @@ module DEVS
       end
 
       @size -= 1 if item
-      # unless item
-      #   warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger
-      # end
+      #warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger && !item
       item
     end
 
@@ -368,29 +366,31 @@ module DEVS
           while @active_rungs > 0 && rung.total_event_count == 0
             @active_rungs -= 1
             rung = @rungs[@active_rungs - 1]
-            #info("LadderQueue invalidated rung from prepare!. Active rungs: #{@active_rungs}") if DEVS.logger
+            info("LadderQueue invalidated rung from prepare!. Active rungs: #{@active_rungs}") if DEVS.logger
           end
         else
-          # no more events in ladder, new epoch
+          # no more events in ladder & bottom, new epoch
 
-          break if @top.size.zero? # no more events in queue, nothing to do
+          break if @top.size == 0 # no more events in queue, nothing to do
 
           max = @top_max == Float::INFINITY ? Float::MAX : @top_max
           if @top_max - @top_min == 0
             # all timestamps are identical, no sort required
             # transfer directly events from top into bottom (shortcut)
-            @bottom.concat(@top)
-            #info("LadderQueue NEW EPOCH, transfer directly from TOP to BOTTOM") if DEVS.logger
+            tmp = @bottom
+            @bottom = @top
+            @top = tmp
+            #info("LadderQueue NEW EPOCH, transfer directly from TOP to BOTTOM (#{@bottom.size} events)") if DEVS.logger
           else
             rung = @rungs.first
             rung.reset((max.to_f - @top_min.to_f) / @top.size, @top.size + 1, @top_min)
             #info("LadderQueue NEW EPOCH, spawn first rung: #{rung.inspect}") if DEVS.logger
             @active_rungs = 1
             rung.concat(@top)
+            @top.clear
           end
 
           @epoch += 1
-          @top.clear
           @top_start = max
           @top_max = nil
           @top_min = nil
