@@ -17,7 +17,7 @@ module DEVS
           min = tn if tn < min
           i += 1
         end
-        @scheduler = if DEVS.scheduler == MinimalListScheduler
+        @scheduler = if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
           DEVS.scheduler.new(@children)
         else
           DEVS.scheduler.new(selected)
@@ -38,7 +38,7 @@ module DEVS
                 "time: #{event.time} should match time_next: #{@time_next}"
         end
 
-        imm = if DEVS.scheduler == MinimalListScheduler
+        imm = if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
           read_imminent_children
         else
           imminent_children
@@ -52,7 +52,7 @@ module DEVS
           imm.first
         end
 
-        if DEVS.scheduler == MinimalListScheduler
+        if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
           child.dispatch(event)
           @scheduler.reschedule!
         else
@@ -89,14 +89,14 @@ module DEVS
             child = coupling.destination.processor
             message = Message.new(payload, coupling.destination_port)
             new_event = Event.new(:input, event.time, message)
-            if DEVS.scheduler == MinimalListScheduler
+            if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
               child.dispatch(new_event)
-              @scheduler.reschedule!
             else
               @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
               child.dispatch(new_event)
               @scheduler.insert(child) if child.time_next < DEVS::INFINITY
             end
+            @scheduler.reschedule! if DEVS.scheduler == MinimalListScheduler
             i += 1
           end
 
@@ -132,7 +132,7 @@ module DEVS
           message = Message.new(payload, coupling.destination_port)
           new_event = Event.new(:input, event.time, message)
           child = coupling.destination.processor
-          if DEVS.scheduler == MinimalListScheduler
+          if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
             child.dispatch(new_event)
           else
             @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
