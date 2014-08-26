@@ -47,6 +47,7 @@ module DEVS
       when :binary_heap then BinaryHeapScheduler
       when :minimal_list then MinimalListScheduler
       when :sorted_list then SortedListScheduler
+      when :splay_tree then SplayTreeScheduler
       else
         DEVS.logger.warn("scheduler #{@opts[:scheduler]} unknown, defaults to LadderQueueScheduler") if DEVS.logger
         LadderQueueScheduler
