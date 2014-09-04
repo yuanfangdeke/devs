@@ -41,7 +41,7 @@ module DEVS
         else
           imminent_children
         end
-        info("Imminent children size: #{imm.size}") if DEVS.logger
+
         i = 0
         while i < imm.size
           child = imm[i]
