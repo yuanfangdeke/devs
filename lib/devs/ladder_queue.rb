@@ -285,8 +285,12 @@ module DEVS
         x = 0
         x += 1 while timestamp < @rungs[x].current_timestamp && x < @active_rungs
 
-        if x < @active_rungs
-          # found, add to appropriate rung
+        # if timestamp is lower than the maximum timestamp from bottom, this
+        # this event should be in bottom.
+        should_be_in_bottom = @bottom.size > 0 && timestamp <= @bottom.first.time_next
+
+        if x < @active_rungs && !should_be_in_bottom
+          # add to appropriate rung
           @rungs[x] << obj
         else
           if @bottom.size + 1 > @threshold
