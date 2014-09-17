@@ -96,7 +96,7 @@ module DEVS
               child.dispatch(new_event)
               @scheduler.insert(child) if child.time_next < DEVS::INFINITY
             end
-            @scheduler.reschedule! if DEVS.scheduler == MinimalListScheduler
+            @scheduler.reschedule! if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
             i += 1
           end
 

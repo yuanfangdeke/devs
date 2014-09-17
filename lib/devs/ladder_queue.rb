@@ -276,7 +276,7 @@ module DEVS
       timestamp = obj.time_next
 
       # check wether event should be in top
-      if timestamp >= @top_start
+      if timestamp > @top_start
         @top << obj
         @top_min = timestamp if @top_min.nil? || timestamp < @top_min
         @top_max = timestamp if @top_max.nil? || timestamp > @top_max
@@ -297,8 +297,15 @@ module DEVS
               # rewind current rung to it's start and transfer bottom into it
               #info("LadderQueue rewind current rung to it's start and transfer bottom into it")
 
-              @rungs[@active_rungs-1].rewind!.concat(@bottom)
-              @bottom.clear
+              rung = @rungs[@active_rungs-1]
+              if rung.start_timestamp > @bottom.last.time_next
+                i = @bottom.size-1
+                i -= 1 while rung.start_timestamp > @bottom[i].time_next
+                rung.rewind!.concat(@bottom.slice!(0, i))
+              else
+                rung.rewind!.concat(@bottom)
+                @bottom.clear
+              end
             else
               max = @bottom.first.time_next
               min = @bottom.last.time_next
@@ -329,24 +336,23 @@ module DEVS
       timestamp = obj.time_next
       item = nil
 
-      if timestamp >= @top_start
+      if timestamp > @top_start
         index = @top.index(obj)
         item = @top.delete_at(index) unless index.nil?
-      end
-
-      unless item
+      else
         x = 0
         x += 1 while timestamp < @rungs[x].current_timestamp && x < @active_rungs
-        item = @rungs[x].delete(obj) if x < @active_rungs
-      end
 
-      unless item
-        index = @bottom.index(obj)
-        item = @bottom.delete_at(index) unless index.nil?
+        item = @rungs[x].delete(obj) if x < @active_rungs
+
+        unless item
+          index = @bottom.index(obj)
+          item = @bottom.delete_at(index) unless index == nil
+        end
       end
 
       @size -= 1 if item
-      #warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger && !item
+      #warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger && item == nil
       item
     end
 
