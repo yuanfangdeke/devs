@@ -120,7 +120,7 @@ module DEVS
 
       # @!endgroup
 
-      attr_reader :counter
+      attr_accessor :counter
     end
 
     @counter = 0
@@ -130,6 +130,7 @@ module DEVS
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
       super(name)
+      AtomicModel.counter += 1
       @name = "#{self.class.name || 'Anonymous'}#{AtomicModel.counter}"
 
       @elapsed = 0.0
