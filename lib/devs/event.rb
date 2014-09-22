@@ -20,17 +20,10 @@ module DEVS
     # @param type [Symbol] the type of event
     # @param time [Numeric] the time at which the event was emitted
     # @param bag [Array<Message>] the bag carrying the messages
-    # @raise [ArgumentError] if the given time is not in a correct range
     def initialize(type, time, bag = nil)
       @type = type
-
-      if (0..INFINITY).include?(time)
-        @time = time
-      else
-        raise ArgumentError, "time attribute must be within 0 and INFINITY"
-      end
-
-      @bag = bag || []
+      @time = time
+      @bag = bag
     end
 
     # Comparison - Returns an integer (-1, 0 or +1) if this event is less than,
@@ -47,21 +40,11 @@ module DEVS
       @type == other.type && @time == other.time
     end
 
-    def bag
-      @bag.dup
-    end
-
     # Append the given message(s) on to the bag
     #
     # @param args [Message] a variable list of messages
     def <<(*args)
-      @bag.push(*args)
-    end
-
-    def to_s
-      s = "event #{@type} at #{@time}"
-      s = "#{s} with #{@bag.map{|m|m.payload}}" unless @bag.empty?
-      s
+      (@bag ||= []).push(*args)
     end
 
     def inspect
