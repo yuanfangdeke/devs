@@ -105,21 +105,6 @@ module DEVS
 
       # @!endgroup
 
-      # @!group Class level Hook methods
-
-      # Defines the post simulation hook method using the given block as body.
-      #
-      # @example
-      #   post_simulation_hook do
-      #     puts "Do whatever once the simulation has ended."
-      #   end
-      # @return [void]
-      def post_simulation_hook(&block)
-        define_method(:post_simulation_hook, &block) if block
-      end
-
-      # @!endgroup
-
       attr_accessor :counter
     end
 
@@ -156,24 +141,6 @@ module DEVS
 
     def inspect
       "<#{self.class}: name=#{@name}, time=#{@time}, elapsed=#{@elapsed}>"
-    end
-
-    # Returns a boolean indicating if <tt>self</tt> is an observer of hooks
-    # events
-    #
-    # @api private
-    # @return [Boolean] true if a hook method is defined, false otherwise
-    def observer?
-      self.respond_to? :post_simulation_hook
-    end
-
-    # Observer callback method. Dispatches the hook event to the appropriate
-    # method
-    #
-    # @api private
-    # @return [void]
-    def update(hook, *args)
-      self.send("#{hook}_hook", *args)
     end
 
     # Sends an output value to the specified output {Port}
