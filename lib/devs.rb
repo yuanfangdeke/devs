@@ -25,7 +25,7 @@ require 'devs/coordinator'
 require 'devs/schedulers'
 require 'devs/simulation'
 require 'devs/builders'
-require 'devs/notifications'
+require 'devs/hooks'
 require 'devs/parallel'
 require 'devs/classic'
 

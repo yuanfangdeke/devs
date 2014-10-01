@@ -49,5 +49,11 @@ module DEVS
     def output(&block)
       @model.define_singleton_method(:output, &block) if block
     end
+
+    # Hooks
+    def post_simulation_hook(&block)
+      @model.define_singleton_method(:post_simulation_hook, &block) if block
+      Hooks.notifier.subscribe(:post_simulation_hook)
+    end
   end
 end

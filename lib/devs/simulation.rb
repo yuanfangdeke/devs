@@ -223,7 +223,10 @@ module DEVS
         debug "* Events stats : {"
         stats.each { |k, v| debug "    #{k} => #{v}" }
         debug "* }"
+        debug "* Running post simulation hook"
       end
+
+      Hooks.notifier.publish(:post_simulation_hook)
     end
   end
 end
