@@ -1,5 +1,6 @@
 module DEVS
   class Processor
+    include Comparable
     include Logging
     attr_reader :model, :time_next, :time_last
     attr_accessor :parent
@@ -27,6 +28,14 @@ module DEVS
       @time_next = 0
       @time_last = 0
       @events_count = Hash.new(0)
+    end
+
+    # The comparison operator. Compares two processors given their #time_next
+    #
+    # @param other [Processor]
+    # @return [Integer]
+    def <=>(other)
+      other.time_next <=> @time_next
     end
 
     def inspect
