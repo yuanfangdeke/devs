@@ -1,5 +1,6 @@
 module DEVS
   class Processor
+    include Comparable
     include Logging
     attr_reader :model, :time_next, :time_last
     attr_accessor :parent
@@ -29,6 +30,14 @@ module DEVS
       @events_count = Hash.new(0)
     end
 
+    # The comparison operator. Compares two processors given their #time_next
+    #
+    # @param other [Processor]
+    # @return [Integer]
+    def <=>(other)
+      other.time_next <=> @time_next
+    end
+
     def inspect
       "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}>"
     end
@@ -37,26 +46,6 @@ module DEVS
       stats = @events_count.dup
       stats[:total] = stats.values.reduce(&:+) || 0
       stats
-    end
-
-    # Handles an incoming event
-    #
-    # @param event [Event] the incoming event
-    # @raise [RuntimeError] if the processor cannot handle the given event
-    #   ({Event#type})
-    def dispatch(event)
-      @events_count[event.type] += 1
-
-      case event.type
-      when :internal then handle_internal_event(event)
-      when :collect then handle_collect_event(event)
-      when :input then handle_input_event(event)
-      when :output then handle_output_event(event)
-      when :init then handle_init_event(event)
-      else
-        method_name = "handle_#{event.type}_event".to_sym
-        __send__(method_name, event)
-      end
     end
 
     # Ensure the given {Message} is an input {Port} and belongs to {#model}.

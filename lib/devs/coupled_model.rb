@@ -41,7 +41,7 @@ module DEVS
     #     <i>external output couplings</i> (EOC)
 
     class << self
-      attr_reader :counter
+      attr_accessor :counter
     end
     @counter = 0
 
@@ -50,6 +50,7 @@ module DEVS
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
       super(name)
+      CoupledModel.counter += 1
       @name = "#{self.class.name || 'Anonymous'}#{CoupledModel.counter}"
       @children = []
       @internal_couplings = Hash.new { |h, k| h[k] = [] }

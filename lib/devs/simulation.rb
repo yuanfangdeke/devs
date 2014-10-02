@@ -1,7 +1,6 @@
 module DEVS
   # This class represent the interface to the simulation
   class Simulation
-    include Observable        # used for hooks
     include Logging
     include Enumerable
 
@@ -31,7 +30,6 @@ module DEVS
       @time = 0
       @processor = processor
       @lock = Mutex.new
-      hooks.each { |observer| add_observer(observer) }
       @build_start_time = build_start_time
       @build_end_time = Time.now
       @build_elapsed_secs = @build_end_time - @build_start_time
@@ -205,27 +203,6 @@ module DEVS
       v
     end
 
-    def hooks
-      models = Array.new(@processor.model.components)
-      observers = []
-      index = 0
-
-      while index < models.count
-        model = models[index]
-
-        if model.atomic? && model.observer?
-          observers << model
-        elsif model.coupled?
-          models.concat(model.components)
-        end
-
-        index += 1
-      end
-
-      observers
-    end
-    private :hooks
-
     def begin_simulation
       t = Time.now
       @lock.lock
@@ -246,11 +223,10 @@ module DEVS
         debug "* Events stats : {"
         stats.each { |k, v| debug "    #{k} => #{v}" }
         debug "* }"
-        debug "* Calling post simulation hooks"
+        debug "* Running post simulation hook"
       end
 
-      changed
-      notify_observers(:post_simulation)
+      Hooks.notifier.publish(:post_simulation_hook)
     end
   end
 end

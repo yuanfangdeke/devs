@@ -28,15 +28,15 @@ module DEVS
     #
     # Consist of buckets where each bucket may contain an unsorted list.
     class Rung
-      attr_accessor :current_timestamp, :current_bucket_index, :start_timestamp,
-                    :total_event_count
-      attr_reader   :bucket_count, :bucket_width
+      attr_reader :current_bucket_index, :start_timestamp,
+                  :total_event_count, :bucket_count, :bucket_width,
+                  :current_timestamp
 
-      # @!attribute [rw] start_timestamp
+      # @!attribute [r] start_timestamp
       #   Starting timestamp threshold of the first bucket. Used for calculating
       #   the bucket-index when inserting an event.
 
-      # @!attribute [rw] current_timestamp
+      # @!attribute [r] current_timestamp
       #   Starting timestamp threshold of the first valid bucket which subsequent
       #   dequeue operations will start. Minimum timestamp threshold of events
       #   which can be enqueued.
@@ -49,30 +49,42 @@ module DEVS
         @buckets = nil
 
         @start_timestamp = 0
-        @current_timestamp = 0
         @current_bucket_index = 0
         @bucket_width = 0
         @total_event_count = 0
       end
 
       def inspect
-        "<#{self.class}: start_timestamp=#{@start_timestamp}, current_timestamp=#{@current_timestamp}>, current_bucket_index=#{@current_bucket_index}, bucket_width=#{@bucket_width}, buckets=#{@buckets ? @buckets.map(&:size) : 'nil'}>"
+        "<#{self.class}: start_timestamp=#{@start_timestamp}, current_timestamp=#{current_timestamp}>, current_bucket_index=#{@current_bucket_index}, bucket_width=#{@bucket_width}, buckets=#{@buckets ? @buckets.size : 'nil'}, events=#{@total_event_count}>"
       end
 
-      def event_count(index)
-        bucket = @buckets[index]
-        raise RangeError, "bucket index #{index} out of range" if bucket.nil?
-        bucket.size
+      def current_bucket_count
+        @buckets[@current_bucket_index].size
       end
 
       def bucket_count
         @buckets.size
       end
 
+      def current_timestamp
+        @start_timestamp + @current_bucket_index * @bucket_width
+      end
+
+      def next_bucket!
+        i = @current_bucket_index
+        while i < @buckets.size && @buckets[i].size == 0
+          i+=1
+        end
+        @current_bucket_index = i > @buckets.size-1 ? @buckets.size-1 : i
+      end
+
+      def rewind!
+        @current_bucket_index = 0
+        self
+      end
+
       def clear
-        @buckets.clear
         @start_timestamp = 0
-        @current_timestamp = 0
         @current_bucket_index = 0
         @bucket_width = 0
         @total_event_count = 0
@@ -82,17 +94,17 @@ module DEVS
         @buckets[index]
       end
 
-      def clear_bucket_at(index)
-        bucket = @buckets[index]
-        raise RangeError, "bucket index #{index} out of range" if bucket.nil?
+      def clear_current_bucket
+        bucket = @buckets[@current_bucket_index]
         @total_event_count -= bucket.size
-        @buckets[index] = []
+        @buckets[@current_bucket_index] = []
         bucket
       end
 
-      def reset(bucket_width, bucket_count, timestamp)
+      def reset(bucket_width, num_events, timestamp)
         raise RungInUseError if @total_event_count > 0
 
+        bucket_count = num_events + 1
         @bucket_width = bucket_width
         if @buckets.nil?
           @buckets = Array.new(bucket_count) { [] }
@@ -114,7 +126,6 @@ module DEVS
         @total_event_count = 0
         @current_bucket_index = 0
         @start_timestamp = timestamp
-        @current_timestamp = timestamp
       end
 
       def delete(obj)
@@ -145,12 +156,10 @@ module DEVS
       private
       def bucket_for(obj)
         tn = obj.time_next
-        tn = Float::MAX if tn == Float::INFINITY
         index = ((tn - @start_timestamp) / @bucket_width).round
-        if index < 0 || index > @buckets.size
-          raise RangeError, "bucket index #{index} out of range"
+        if index < 0 || index > @buckets.size-1
+          raise RangeError, "bucket index #{index} out of range for event #{tn}"
         end
-        index == Float::INFINITY ? @buckets.last : @buckets[index]
         @buckets[index]
       end
     end
@@ -248,7 +257,7 @@ module DEVS
     end
 
     def inspect
-      "<#{self.class}: epoch=#{@epoch}, size=#{@size}, top=#{@top.size}, bottom=#{@bottom.size}, active_rungs=#{@active_rungs}, threshold=#{@threshold}, max_rungs=#{@max_rungs}, top_start=#{@top_start || 'nil'}, top_min=#{@top_min || 'nil'}, top_max=#{@top_max}, rungs=#{@rungs[0, @active_rungs]}>"
+      "<#{self.class}: epoch=#{@epoch}, size=#{@size}, top=#{@top.size}, bottom=#{@bottom.size}, active_rungs=#{@active_rungs}, threshold=#{@threshold}, max_rungs=#{@max_rungs}, top_start=#{@top_start || 'nil'}, top_min=#{@top_min || 'nil'}, top_max=#{@top_max || 'nil'}, rungs=#{@rungs[0, @active_rungs]}>"
     end
 
     def top_size
@@ -267,7 +276,7 @@ module DEVS
       timestamp = obj.time_next
 
       # check wether event should be in top
-      if timestamp >= @top_start
+      if timestamp > @top_start
         @top << obj
         @top_min = timestamp if @top_min.nil? || timestamp < @top_min
         @top_max = timestamp if @top_max.nil? || timestamp > @top_max
@@ -276,16 +285,46 @@ module DEVS
         x = 0
         x += 1 while timestamp < @rungs[x].current_timestamp && x < @active_rungs
 
-        if x < @active_rungs
-          # found, add to appropriate rung
+        # if timestamp is lower than the maximum timestamp from bottom, this
+        # this event should be in bottom.
+        should_be_in_bottom = @bottom.size > 0 && timestamp <= @bottom.first.time_next
+
+        if x < @active_rungs && !should_be_in_bottom
+          # add to appropriate rung
           @rungs[x] << obj
         else
-          if @bottom.size > @threshold
-            # transfer new event and bottom to new rung
-            rung = add_rung(@bottom.size)
-            @bottom << obj
-            rung.concat(@bottom)
-            @bottom.clear
+          if @bottom.size + 1 > @threshold
+            # add new event to bottom
+            push_bottom(obj)
+
+            if @active_rungs > 0
+              # rewind current rung to it's start and transfer bottom into it
+              #info("LadderQueue rewind current rung to it's start and transfer bottom into it")
+
+              rung = @rungs[@active_rungs-1]
+              if rung.start_timestamp > @bottom.last.time_next
+                i = @bottom.size-1
+                i -= 1 while rung.start_timestamp > @bottom[i].time_next
+                rung.rewind!.concat(@bottom.slice!(0, i))
+              else
+                rung.rewind!.concat(@bottom)
+                @bottom.clear
+              end
+            else
+              max = @bottom.first.time_next
+              min = @bottom.last.time_next
+
+              # create first rung and transfer bottom into it only if timestamps
+              # are not identical.
+              if max - min > 0
+                @rungs.first.reset((@bottom.first.time_next.to_f - @bottom.last.time_next.to_f) / @bottom.size, @bottom.size, @bottom.last.time_next)
+                @active_rungs = 1
+                @epoch += 1
+                #info("LadderQueue NEW EPOCH, spawn first rung (from #insert): #{@rungs.first.inspect}") if DEVS.logger
+                @rungs.first.concat(@bottom)
+                @bottom.clear
+              end
+            end
           else
             # sort new event into bottom
             push_bottom(obj)
@@ -301,24 +340,23 @@ module DEVS
       timestamp = obj.time_next
       item = nil
 
-      if timestamp >= @top_start
+      if timestamp > @top_start
         index = @top.index(obj)
         item = @top.delete_at(index) unless index.nil?
-      end
-
-      unless item
+      else
         x = 0
         x += 1 while timestamp < @rungs[x].current_timestamp && x < @active_rungs
-        item = @rungs[x].delete(obj) if x < @active_rungs
-      end
 
-      unless item
-        index = @bottom.index(obj)
-        item = @bottom.delete_at(index) unless index.nil?
+        item = @rungs[x].delete(obj) if x < @active_rungs
+
+        unless item
+          index = @bottom.index(obj)
+          item = @bottom.delete_at(index) unless index == nil
+        end
       end
 
       @size -= 1 if item
-      #warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger && !item
+      #warn("LadderQueue failed to delete #{timestamp}: #{obj.inspect}(model: #{obj.model.name}) | top_start: #{@top_start}") if DEVS.logger && item == nil
       item
     end
 
@@ -338,7 +376,7 @@ module DEVS
     def clear
       @top.clear
       @bottom.clear
-      @rungs.clear
+      @rungs.each { |r| r.clear }
 
       @active_rungs = 0
       @size = 0
@@ -348,11 +386,13 @@ module DEVS
     def prepare!
       while @bottom.empty?
         if @active_rungs > 0
-          rung = @rungs[@active_rungs - 1]
+          rung = @rungs[@active_rungs-1]
 
           # transfer from rung to bottom if not empty
           unless rung.total_event_count == 0
-            events = rung.clear_bucket_at(recurse_rungs)
+            rung = recurse_rungs
+            events = rung.clear_current_bucket
+
             size = events.size
             # sort bucket into bottom
             i = 0
@@ -364,16 +404,15 @@ module DEVS
 
           # invalidate rung if empty
           while @active_rungs > 0 && rung.total_event_count == 0
+            rung.clear
             @active_rungs -= 1
+            #info("LadderQueue invalidated rung from prepare!. Active rungs: #{@active_rungs}") if DEVS.logger
             rung = @rungs[@active_rungs - 1]
-            info("LadderQueue invalidated rung from prepare!. Active rungs: #{@active_rungs}") if DEVS.logger
           end
         else
           # no more events in ladder & bottom, new epoch
+          break if @top.size == 0 # no more events in top, nothing to do
 
-          break if @top.size == 0 # no more events in queue, nothing to do
-
-          max = @top_max == Float::INFINITY ? Float::MAX : @top_max
           if @top_max - @top_min == 0
             # all timestamps are identical, no sort required
             # transfer directly events from top into bottom (shortcut)
@@ -383,7 +422,7 @@ module DEVS
             #info("LadderQueue NEW EPOCH, transfer directly from TOP to BOTTOM (#{@bottom.size} events)") if DEVS.logger
           else
             rung = @rungs.first
-            rung.reset((max.to_f - @top_min.to_f) / @top.size, @top.size + 1, @top_min)
+            rung.reset((@top_max.to_f - @top_min.to_f) / @top.size, @top.size, @top_min)
             #info("LadderQueue NEW EPOCH, spawn first rung: #{rung.inspect}") if DEVS.logger
             @active_rungs = 1
             rung.concat(@top)
@@ -391,9 +430,8 @@ module DEVS
           end
 
           @epoch += 1
-          @top_start = max
-          @top_max = nil
-          @top_min = nil
+          @top_start = @top_max
+          @top_max = @top_min = nil
         end
       end
 
@@ -405,23 +443,20 @@ module DEVS
       found = false
       # until an acceptable bucket is found
       until found
-        # find next non-empty bucket from lowest rung
-        while lowest.event_count(lowest.current_bucket_index) == 0
-          lowest.current_bucket_index += 1
-          lowest.current_timestamp += lowest.bucket_width
-        end
+        # find next non-empty bucket
+        lowest.next_bucket!
 
         # create a new rung if bucket gets too big
-        if lowest.event_count(lowest.current_bucket_index) > @threshold
+        if lowest.current_bucket_count > @threshold
           if @active_rungs == @max_rungs
-            warn("LadderQueue reached its max number of rungs (#{@max_rungs})") if DEVS.logger
+            #warn("LadderQueue reached its max number of rungs (#{@max_rungs})") if DEVS.logger
             # if ladder reached its maximum number of rungs, events in the
             # current dequeue bucket, associated with the last rung, are
             # sorted to create Bottom even though the number of events may
             # exceed threshold
             found = true
           else
-            events = lowest.clear_bucket_at(lowest.current_bucket_index)
+            events = lowest.clear_current_bucket
             rung = add_rung(events.size)
             rung.concat(events)
             lowest = rung
@@ -432,7 +467,7 @@ module DEVS
         end
       end
 
-      lowest.current_bucket_index
+      lowest
     end
 
     def push_bottom(obj)
@@ -454,7 +489,7 @@ module DEVS
 
       # set bucket width to current rung's bucket width / thres
       # set start and current of the new rung to current marking of the current bucket
-      new_rung.reset(width, n+1, current_rung.current_timestamp)
+      new_rung.reset(width, n, current_rung.current_timestamp)
       @active_rungs += 1
       @max_active_rungs = @active_rungs if @active_rungs > @max_active_rungs
       new_rung

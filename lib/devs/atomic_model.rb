@@ -105,22 +105,7 @@ module DEVS
 
       # @!endgroup
 
-      # @!group Class level Hook methods
-
-      # Defines the post simulation hook method using the given block as body.
-      #
-      # @example
-      #   post_simulation_hook do
-      #     puts "Do whatever once the simulation has ended."
-      #   end
-      # @return [void]
-      def post_simulation_hook(&block)
-        define_method(:post_simulation_hook, &block) if block
-      end
-
-      # @!endgroup
-
-      attr_reader :counter
+      attr_accessor :counter
     end
 
     @counter = 0
@@ -130,6 +115,7 @@ module DEVS
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
       super(name)
+      AtomicModel.counter += 1
       @name = "#{self.class.name || 'Anonymous'}#{AtomicModel.counter}"
 
       @elapsed = 0.0
@@ -155,24 +141,6 @@ module DEVS
 
     def inspect
       "<#{self.class}: name=#{@name}, time=#{@time}, elapsed=#{@elapsed}>"
-    end
-
-    # Returns a boolean indicating if <tt>self</tt> is an observer of hooks
-    # events
-    #
-    # @api private
-    # @return [Boolean] true if a hook method is defined, false otherwise
-    def observer?
-      self.respond_to? :post_simulation_hook
-    end
-
-    # Observer callback method. Dispatches the hook event to the appropriate
-    # method
-    #
-    # @api private
-    # @return [void]
-    def update(hook, *args)
-      self.send("#{hook}_hook", *args)
     end
 
     # Sends an output value to the specified output {Port}

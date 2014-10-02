@@ -2,17 +2,16 @@ module DEVS
   module Classic
     module CoordinatorImpl
 
-      # Handles events of init type (i messages)
+      # Handles init (i) messages
       #
-      # @param event [Event] the init event
-      def handle_init_event(event)
+      # @param time
+      def init(time)
         i = 0
         selected = []
         min = DEVS::INFINITY
         while i < @children.size
           child = @children[i]
-          child.dispatch(event)
-          tn = child.time_next
+          tn = child.init(time)
           selected.push(child) if tn < DEVS::INFINITY
           min = tn if tn < min
           i += 1
@@ -27,15 +26,15 @@ module DEVS
         @time_next = min
       end
 
-      # Handles internal events (* messages)
+      # Handles internal (*) messages
       #
-      # @param event [Event] the internal event
-      # @raise [BadSynchronisationError] if the event time is not equal to
+      # @param time
+      # @raise [BadSynchronisationError] if the time is not equal to
       #   {Coordinator#time_next}
-      def handle_internal_event(event)
-        if event.time != @time_next
+      def internal_message(time)
+        if time != @time_next
           raise BadSynchronisationError,
-                "time: #{event.time} should match time_next: #{@time_next}"
+                "time: #{time} should match time_next: #{@time_next}"
         end
 
         imm = if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
@@ -53,7 +52,7 @@ module DEVS
         end
 
         if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
-          child.dispatch(event)
+          child.internal_message(time)
           @scheduler.reschedule!
         else
           i = 0
@@ -62,66 +61,59 @@ module DEVS
             @scheduler.insert(c) unless c == child
             i += 1
           end
-          child.dispatch(event)
+          child.internal_message(time)
           @scheduler.insert(child) if child.time_next < DEVS::INFINITY
         end
 
-        @time_last = event.time
+        @time_last = time
         @time_next = min_time_next
       end
 
-      # Handles input events (x messages)
+      # Handles input (x) messages
       #
-      # @param event [Event] the input event
-      # @raise [BadSynchronisationError] if the event time isn't in a proper
+      # @param time
+      # @param payload [Object]
+      # @param port [Port]
+      # @raise [BadSynchronisationError] if the time isn't in a proper
       #   range, e.g isn't between {Coordinator#time_last} and
       #   {Coordinator#time_next}
-      def handle_input_event(event)
-        if @time_last <= event.time && event.time <= @time_next
-          msg = event.bag
-          payload = msg.payload
-          port = msg.port
+      def handle_input(time, payload, port)
+        if @time_last <= time && time <= @time_next
 
           eic = @model.input_couplings(port)
           i = 0
           while i < eic.size
             coupling = eic[i]
             child = coupling.destination.processor
-            message = Message.new(payload, coupling.destination_port)
-            new_event = Event.new(:input, event.time, message)
             if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
-              child.dispatch(new_event)
+              child.handle_input(time, payload, coupling.destination_port)
             else
               @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
-              child.dispatch(new_event)
+              child.handle_input(time, payload, coupling.destination_port)
               @scheduler.insert(child) if child.time_next < DEVS::INFINITY
             end
-            @scheduler.reschedule! if DEVS.scheduler == MinimalListScheduler
+            @scheduler.reschedule! if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
             i += 1
           end
 
-          @time_last = event.time
+          @time_last = time
           @time_next = min_time_next
         else
-          raise BadSynchronisationError, "time: #{event.time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
+          raise BadSynchronisationError, "time: #{time} should be between time_last: #{@time_last} and time_next: #{@time_next}"
         end
       end
 
-      # Handles output events (y messages)
+      # Handles output (y) messages
       #
-      # @param event [Event] the output event
-      def handle_output_event(event)
-        msg = event.bag
-        payload = msg.payload
-        port = msg.port
-
+      # @param time
+      # @param payload [Object]
+      # @param port [Port]
+      def handle_output(time, payload, port)
         eoc = @model.output_couplings(port)
         i = 0
         while i < eoc.size
           coupling = eoc[i]
-          message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:output, event.time, message)
-          parent.dispatch(new_event)
+          parent.handle_output(time, payload, coupling.destination_port)
           i += 1
         end
 
@@ -129,14 +121,12 @@ module DEVS
         i = 0
         while i < ic.size
           coupling = ic[i]
-          message = Message.new(payload, coupling.destination_port)
-          new_event = Event.new(:input, event.time, message)
           child = coupling.destination.processor
           if DEVS.scheduler == MinimalListScheduler || DEVS.scheduler == SortedListScheduler
-            child.dispatch(new_event)
+            child.handle_input(time, payload, coupling.destination_port)
           else
             @scheduler.cancel(child) if child.time_next < DEVS::INFINITY
-            child.dispatch(new_event)
+            child.handle_input(time, payload, coupling.destination_port)
             @scheduler.insert(child) if child.time_next < DEVS::INFINITY
           end
           i += 1
