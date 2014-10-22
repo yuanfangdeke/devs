@@ -48,6 +48,7 @@ module DEVS
       when :minimal_list then MinimalListScheduler
       when :sorted_list then SortedListScheduler
       when :splay_tree then SplayTreeScheduler
+      when :calendar_queue then CalendarQueueScheduler
       else
         DEVS.logger.warn("scheduler #{@opts[:scheduler]} unknown, defaults to LadderQueueScheduler") if DEVS.logger
         LadderQueueScheduler
