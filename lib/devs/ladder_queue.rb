@@ -366,10 +366,10 @@ module DEVS
     end
 
     def pop
-      prepare! if @bottom.empty?
+      prepare! if @bottom.size == 0
+      return nil if @bottom.size == 0
       # return next event from bottom
       @size -= 1
-      #error("LadderQueue IS INCONSISTENT 1st ev in bottom: #{@bottom.first.time_next} >= top_start: #{@top_start}") if @bottom.last.time_next > @top_start && DEVS.logger
       @bottom.pop
     end
 
