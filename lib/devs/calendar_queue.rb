@@ -21,6 +21,14 @@ module DEVS
       @last_priority = 0
 
       local_init(bucket_count, bucket_width, start_priority)
+
+      if elements
+        i = 0
+        while i < elements.size
+          self << elements[i]
+          i+=1
+        end
+      end
     end
 
     def inspect
