@@ -42,10 +42,8 @@ module DEVS
     # @param child [Processor] the processor to append
     # @return [Processor] the newly added processor
     def <<(child)
-      unless @children.include?(child)
-        @children << child
-        child.parent = self
-      end
+      @children << child
+      child.parent = self
       child
     end
     alias_method :add_child, :<<
