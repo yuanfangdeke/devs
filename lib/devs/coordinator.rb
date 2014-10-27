@@ -53,11 +53,9 @@ module DEVS
     # @param child [Processor] the child to remove
     # @return [Processor] the deleted child
     def remove_child(child)
-      if @children.include?(child)
-        @children.delete(child)
-        child.parent = nil
-      end
-      child
+      child.parent = nil
+      idx = @children.index { |x| child.equal?(x) }
+      @children.delete_at(idx) if idx
     end
 
     # Returns a subset of {#children} including imminent children, e.g with
