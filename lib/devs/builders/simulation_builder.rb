@@ -8,7 +8,7 @@ module DEVS
       DEVS.logger.info("*** Building simulation at #{@build_start_time}") if DEVS.logger
       @opts = {
         formalism: :pdevs,
-        scheduler: :ladder_queue_scheduler,
+        scheduler: :ladder_queue,
         maintain_hierarchy: false,
         generate_graph: false,
         graph_file: 'model_hierarchy',

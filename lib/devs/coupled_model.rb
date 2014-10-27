@@ -116,10 +116,8 @@ module DEVS
     # @param child [Model] the new child
     # @return [Model] the added child
     def <<(child)
-      unless @children.include?(child)
-        @children << child
-        child.parent = self
-      end
+      @children << child
+      child.parent = self
       child
     end
     alias_method :add_child, :<<
@@ -129,10 +127,8 @@ module DEVS
     # @param child [Model] the child to remove
     # @return [Model] the deleted child
     def remove_child(child)
-      if @children.include?(child)
-        @children.delete(child)
-        child.parent = nil
-      end
+      @children.delete(child)
+      child.parent = nil
       child
     end
 

@@ -17,7 +17,6 @@ module DEVS
       super(model)
       @children = []
       @scheduler = nil
-      after_initialize if respond_to?(:after_initialize)
     end
 
     def inspect
@@ -43,10 +42,8 @@ module DEVS
     # @param child [Processor] the processor to append
     # @return [Processor] the newly added processor
     def <<(child)
-      unless @children.include?(child)
-        @children << child
-        child.parent = self
-      end
+      @children << child
+      child.parent = self
       child
     end
     alias_method :add_child, :<<
@@ -56,11 +53,9 @@ module DEVS
     # @param child [Processor] the child to remove
     # @return [Processor] the deleted child
     def remove_child(child)
-      if @children.include?(child)
-        @children.delete(child)
-        child.parent = nil
-      end
-      child
+      child.parent = nil
+      idx = @children.index { |x| child.equal?(x) }
+      @children.delete_at(idx) if idx
     end
 
     # Returns a subset of {#children} including imminent children, e.g with

@@ -1,7 +1,17 @@
 module DEVS
   module Hooks
-    def self.notifier
-      @notifier ||= Fanout.new
+    class << self
+      def notifier
+        @notifier ||= Fanout.new
+      end
+
+      def subscribe(hook, instance, method=nil)
+        self.notifier.subscribe(hook, instance, method)
+      end
+
+      def publish(hook, *args)
+        self.notifier.publish(hook, *args)
+      end
     end
 
     class Fanout
@@ -14,7 +24,7 @@ module DEVS
       end
 
       def publish(hook, *args)
-        @listeners_for[hook].each { |s| s.publish(hook, *args) }
+        @listeners_for[hook].each { |s| s.publish(*args) }
       end
     end
 
