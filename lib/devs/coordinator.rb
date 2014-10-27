@@ -17,7 +17,6 @@ module DEVS
       super(model)
       @children = []
       @scheduler = nil
-      after_initialize if respond_to?(:after_initialize)
     end
 
     def inspect

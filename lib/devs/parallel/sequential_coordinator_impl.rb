@@ -1,14 +1,12 @@
 module DEVS
   module SequentialParallel
     module CoordinatorImpl
-      def after_initialize
+      def init(time)
         @influencees = Hash.new { |hsh, key| hsh[key] = [] }
         @synchronize = {}
         @parent_bag = []
         @bag = []
-      end
 
-      def init(time)
         i = 0
         selected = []
         min = DEVS::INFINITY
@@ -109,7 +107,7 @@ module DEVS
           receiver = influencees[i]
           sub_bag = @influencees[receiver]
           if DEVS.scheduler == SortedListScheduler || DEVS.scheduler == MinimalListScheduler
-           receiver.remainder(time, sub_bag)
+            receiver.remainder(time, sub_bag)
           else
             tn = receiver.time_next
             # before trying to cancel a receiver, test if time is not strictly
