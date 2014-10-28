@@ -38,6 +38,10 @@ module DEVS
       other.time_next <=> @time_next
     end
 
+    def ==(other)
+      self.equal?(other)
+    end
+
     def inspect
       "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}>"
     end
