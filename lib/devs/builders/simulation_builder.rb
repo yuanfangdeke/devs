@@ -75,6 +75,7 @@ module DEVS
       unfolded = []
       sub_ic = []
       i = 0
+      root_threshold = folded.size
 
       while i < folded.count
         m = folded[i]
@@ -85,7 +86,7 @@ module DEVS
           })
           folded.concat(m.children)
         else
-          unfolded << m
+          unfolded << m if i > root_threshold-1
         end
 
         i += 1
