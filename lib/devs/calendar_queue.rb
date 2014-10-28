@@ -2,6 +2,7 @@ module DEVS
 
   # A fast O(1) priority queue implementation
   class CalendarQueue
+    include Logging
     attr_reader :size
 
     # @!attribute [r] size
@@ -53,9 +54,23 @@ module DEVS
         bucket.insert(j + 1, obj)
       end
 
+      # check last priority and update last bucket accordingly
+      if @last_bucket > 0 && @buckets[@last_bucket].size > 0
+        next_timestamp = @buckets[@last_bucket].last.time_next
+        if tn < next_timestamp
+          info("CQ#push: timestamp #{tn} < next timestamp #{next_timestamp}. update bucket from #{@last_bucket} to #{i}") if DEVS.logger
+          @last_bucket = i
+          @last_priority = bucket.last.time_next
+          @bucket_top = (((@last_priority / @width) + 1).to_i * @width + (0.5 * @width)).to_f
+        end
+      end
+
       @size += 1
 
+      info("CQ added #{tn} at bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && @resize_enabled
+
       # double the calendar size if needed
+      info("CQ double calendar size. #{@buckets.size} to #{@buckets.size * 2} buckets. threshold=#{@expand_threshold}") if @size > @expand_threshold && DEVS.logger && @resize_enabled
       resize(2 * @buckets.size) if @size > @expand_threshold
 
       self
@@ -76,7 +91,10 @@ module DEVS
       end
 
       # halve calendar size if needed
+      info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger
       resize(@buckets.size / 2) if @size < @shrink_threshold
+      warn("CQ failed to delete #{tn}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && item.equal?(nil)
+      info("CQ deleted #{tn} from bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && item
 
       item
     end
@@ -104,6 +122,7 @@ module DEVS
         end
       end
 
+      warn("CQ#peek direct search") if DEVS.logger
       # directly search for minimum priority event
       lowest = Float::INFINITY
       i = tmp = 0
@@ -115,9 +134,11 @@ module DEVS
         end
         i += 1
       end
+      warn("CQ#peek found lowest: #{lowest}") if DEVS.logger
       @last_bucket = tmp
+      @last_priority = lowest
       @bucket_top = (((lowest / @width) + 1).to_i * @width + (0.5 * @width)).to_f
-      peek
+      peek # resume search at min bucket
     end
 
     def pop
@@ -135,7 +156,10 @@ module DEVS
           @size -= 1
 
           # halve calendar size if needed
+          info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger && @resize_enabled
           resize(@buckets.size / 2) if @size < @shrink_threshold
+
+          info("CQ pop #{item.time_next}: #{item.inspect}(model: #{item.model.name})") if DEVS.logger && @resize_enabled
 
           return item
         else
@@ -148,6 +172,7 @@ module DEVS
         end
       end
 
+      warn("CQ#pop direct search") if DEVS.logger
       # directly search for minimum priority event
       lowest = DEVS::INFINITY
       i = tmp = 0
@@ -159,10 +184,11 @@ module DEVS
         end
         i += 1
       end
+      warn("CQ#pop found lowest: #{lowest}") if DEVS.logger
       @last_bucket = tmp
       @last_priority = lowest
       @bucket_top = (((lowest / @width) + 1).to_i * @width + (0.5 * @width)).to_f
-      pop
+      pop # resume search at min bucket
     end
 
     private
@@ -188,7 +214,7 @@ module DEVS
 
       @last_priority = start_priority
       i = start_priority / bucket_width # virtual bucket
-      @last_bucket = i % bucket_count
+      @last_bucket = (i % bucket_count).to_i
       @bucket_top = (i+1) * bucket_width + 0.5 * bucket_width
 
       # set up queue size change thresholds
@@ -203,6 +229,7 @@ module DEVS
       bucket_width = new_width # find new bucket width
       local_init(new_size, bucket_width, @last_priority)
 
+      info("CQ resize: begin transfer") if DEVS.logger
       i = 0
       while i < @cached_buckets.size
         bucket = @cached_buckets[i]
@@ -212,6 +239,7 @@ module DEVS
         end
         i += 1
       end
+      info("CQ resize: transfer complete") if DEVS.logger
     end
 
     # Calculates the width to use for buckets
@@ -265,6 +293,7 @@ module DEVS
         self << tmp[i]
         i += 1
       end
+      new_average = new_average / j.to_f
 
       # restore variables
       @resize_enabled = true
@@ -273,7 +302,13 @@ module DEVS
       @bucket_top = tmp_bucket_top
 
       # this is the new width
-      (new_average / j.to_f) * 3.0
+      if new_average > 0.0
+        new_average * 3.0
+      elsif average > 0.0
+        average * 2.0
+      else
+        1.0
+      end
     end
   end
 end
