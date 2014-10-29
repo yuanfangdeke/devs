@@ -55,22 +55,29 @@ module DEVS
       end
 
       # check last priority and update last bucket accordingly
-      if @last_bucket > 0 && @buckets[@last_bucket].size > 0
-        next_timestamp = @buckets[@last_bucket].last.time_next
-        if tn < next_timestamp
-          info("CQ#push: timestamp #{tn} < next timestamp #{next_timestamp}. update bucket from #{@last_bucket} to #{i}") if DEVS.logger
-          @last_bucket = i
-          @last_priority = bucket.last.time_next
-          @bucket_top = (((@last_priority / @width) + 1).to_i * @width + (0.5 * @width)).to_f
-        end
+      b = @last_bucket
+      cur_bucket = @buckets[b]
+      btop = @bucket_top
+      j = 0
+      while j < @buckets.size-1 && @buckets[b].empty?
+        j+=1
+        b = (b+1) % @buckets.size
+        btop += @width
+      end
+      cur_bucket = @buckets[b]
+      if cur_bucket.size > 0 && tn < cur_bucket.last.time_next && cur_bucket.last.time_next < btop
+        #info("CQ push: ts #{tn} < cur_bucket next ts #{cur_bucket.last.time_next} (btop at #{btop}). update bucket from #{@last_bucket} to #{i}") if DEVS.logger
+        @last_bucket = i.to_i
+        @last_priority = bucket.last.time_next
+        @bucket_top = (((@last_priority / @width) + 1).to_i * @width + (0.5 * @width)).to_f
       end
 
       @size += 1
 
-      info("CQ added #{tn} at bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && @resize_enabled
+      #info("CQ added #{tn} at bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && @resize_enabled
 
       # double the calendar size if needed
-      info("CQ double calendar size. #{@buckets.size} to #{@buckets.size * 2} buckets. threshold=#{@expand_threshold}") if @size > @expand_threshold && DEVS.logger && @resize_enabled
+      #info("CQ double calendar size. #{@buckets.size} to #{@buckets.size * 2} buckets. threshold=#{@expand_threshold}") if @size > @expand_threshold && DEVS.logger && @resize_enabled
       resize(2 * @buckets.size) if @size > @expand_threshold
 
       self
@@ -91,10 +98,9 @@ module DEVS
       end
 
       # halve calendar size if needed
-      info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger
+      #info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger
       resize(@buckets.size / 2) if @size < @shrink_threshold
-      warn("CQ failed to delete #{tn}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && item.equal?(nil)
-      info("CQ deleted #{tn} from bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && item
+      #info("CQ deleted #{tn} from bucket #{i.to_i}: #{obj.inspect}(model: #{obj.model.name})") if DEVS.logger && item
 
       item
     end
@@ -102,43 +108,49 @@ module DEVS
     def peek
       return nil if @size == 0
 
-      i = @last_bucket
-      while i < @buckets.size
-        bucket = @buckets[i]
+      last_bucket = @last_bucket
+      last_priority = @last_priority
+      bucket_top = @bucket_top
 
-        if bucket.size > 0 && bucket.last.time_next < @bucket_top
-          # found item to dequeue
-          item = bucket.last
-          @last_bucket = i
+      while true
+        i = last_bucket
+        while i < @buckets.size
+          bucket = @buckets[i]
 
-          return item
-        else
-          # prepare to check next bucket or else go to a direct search
+          if bucket.size > 0 && bucket.last.time_next < bucket_top
+            # found item to dequeue
+            item = bucket.last
+            last_bucket = i
+            last_priority = item.time_next
+
+            return item
+          else
+            # prepare to check next bucket or else go to a direct search
+            i += 1
+            i = 0 if i == @buckets.size
+            bucket_top += @width
+
+            break if i == last_bucket # go to direct search
+          end
+        end
+
+        # directly search for minimum priority event
+        lowest = Float::INFINITY
+        i = tmp = 0
+        while i < @buckets.size
+          bucket = @buckets[i]
+          if bucket.size > 0 && bucket.last.time_next < lowest
+            lowest = bucket.last.time_next
+            tmp = i
+          end
           i += 1
-          i = 0 if i == @buckets.size
-          @bucket_top += @width
-
-          break if i == @last_bucket # go to direct search
         end
-      end
+        last_bucket = tmp
+        last_priority = lowest
+        bucket_top = (((lowest / @width) + 1).to_i * @width + (0.5 * @width)).to_f
 
-      warn("CQ#peek direct search") if DEVS.logger
-      # directly search for minimum priority event
-      lowest = Float::INFINITY
-      i = tmp = 0
-      while i < @buckets.size
-        bucket = @buckets[i]
-        if bucket.size > 0 && bucket.last.time_next < lowest
-          lowest = bucket.last.time_next
-          tmp = i
-        end
-        i += 1
+        # resume search at min bucket
       end
-      warn("CQ#peek found lowest: #{lowest}") if DEVS.logger
-      @last_bucket = tmp
-      @last_priority = lowest
-      @bucket_top = (((lowest / @width) + 1).to_i * @width + (0.5 * @width)).to_f
-      peek # resume search at min bucket
     end
 
     def pop
@@ -156,10 +168,10 @@ module DEVS
           @size -= 1
 
           # halve calendar size if needed
-          info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger && @resize_enabled
+          #info("CQ halve calendar size. #{@buckets.size} to #{@buckets.size / 2} buckets. threshold=#{@shrink_threshold}") if @size < @shrink_threshold && DEVS.logger && @resize_enabled
           resize(@buckets.size / 2) if @size < @shrink_threshold
 
-          info("CQ pop #{item.time_next}: #{item.inspect}(model: #{item.model.name})") if DEVS.logger && @resize_enabled
+          #info("CQ pop #{item.time_next}: #{item.inspect}(model: #{item.model.name})") if DEVS.logger && @resize_enabled
 
           return item
         else
@@ -172,9 +184,8 @@ module DEVS
         end
       end
 
-      warn("CQ#pop direct search") if DEVS.logger
       # directly search for minimum priority event
-      lowest = DEVS::INFINITY
+      lowest = Float::INFINITY
       i = tmp = 0
       while i < @buckets.size
         bucket = @buckets[i]
@@ -184,7 +195,6 @@ module DEVS
         end
         i += 1
       end
-      warn("CQ#pop found lowest: #{lowest}") if DEVS.logger
       @last_bucket = tmp
       @last_priority = lowest
       @bucket_top = (((lowest / @width) + 1).to_i * @width + (0.5 * @width)).to_f
@@ -192,7 +202,6 @@ module DEVS
     end
 
     private
-
     # Initializes a bucket array within
     def local_init(bucket_count, bucket_width, start_priority)
       @width = bucket_width
@@ -229,7 +238,6 @@ module DEVS
       bucket_width = new_width # find new bucket width
       local_init(new_size, bucket_width, @last_priority)
 
-      info("CQ resize: begin transfer") if DEVS.logger
       i = 0
       while i < @cached_buckets.size
         bucket = @cached_buckets[i]
@@ -239,7 +247,6 @@ module DEVS
         end
         i += 1
       end
-      info("CQ resize: transfer complete") if DEVS.logger
     end
 
     # Calculates the width to use for buckets
