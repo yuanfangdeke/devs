@@ -30,6 +30,7 @@ module DEVS
         end
 
         debug "\tinternal transition: #{model}" if DEVS.logger
+        @transition_count[:internal] += 1
         model.internal_transition
 
         @time_last = model.time = time
@@ -47,6 +48,7 @@ module DEVS
       #   {Coordinator#time_next}
       def handle_input(time, payload, port)
         if @time_last <= time && time <= @time_next
+          @transition_count[:external] += 1
           model.elapsed = time - @time_last
           debug "\texternal transition: #{model}" if DEVS.logger
           model.external_transition([Message.new(payload, port)])

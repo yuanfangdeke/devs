@@ -23,19 +23,6 @@ module DEVS
       "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}, components=#{@children.count}>"
     end
 
-    def stats
-      stats = Hash.new { |h, k| h[k] = Hash.new(0) }
-      stats[model.name] = super
-      children.each { |child|
-        if child.kind_of?(Coordinator)
-          stats.update(child.stats)
-        elsif child.kind_of?(Simulator)
-          stats[child.model.name] = child.stats
-        end
-      }
-      stats
-    end
-
     # Append a child to {#children} list, ensuring that the child now has
     # self as parent.
     #

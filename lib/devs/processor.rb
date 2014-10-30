@@ -27,7 +27,6 @@ module DEVS
       @model.processor = self
       @time_next = 0
       @time_last = 0
-      @events_count = Hash.new(0)
     end
 
     # The comparison operator. Compares two processors given their #time_next
@@ -44,12 +43,6 @@ module DEVS
 
     def inspect
       "<#{self.class}: tn=#{@time_next}, tl=#{@time_last}>"
-    end
-
-    def stats
-      stats = @events_count.dup
-      stats[:total] = stats.values.reduce(&:+) || 0
-      stats
     end
 
     # Ensure the given {Message} is an input {Port} and belongs to {#model}.

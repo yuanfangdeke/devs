@@ -19,13 +19,16 @@ module DEVS
         if time == @time_next
           if bag.empty?
             debug "\tinternal transition: #{@model}" if DEVS.logger
+            @transition_count[:internal] += 1
             @model.internal_transition
           else
             debug "\tconfluent transition: #{@model}" if DEVS.logger
+            @transition_count[:confluent] += 1
             @model.confluent_transition(bag)
           end
         elsif synced && !bag.empty?
           debug "\texternal transition: #{@model}" if DEVS.logger
+          @transition_count[:external] += 1
           @model.elapsed = time - @time_last
           @model.external_transition(bag)
         elsif !synced
