@@ -137,12 +137,24 @@ module DEVS
       end
     end
 
-    # Returns the number of messages per model along with the total
+    # Returns the number of transitions per model along with the total
     #
     # @return [Hash<Symbol, Fixnum>]
-    def stats
+    def transition_stats
       if done?
-        @stats ||= (stats = @processor.stats
+        @transition_stats ||= (
+          stats = {}
+          hierarchy = @processor.children.dup
+          i = 0
+          while i < hierarchy.size
+            child = hierarchy[i]
+            if child.model.coupled?
+              hierarchy.concat(child.children)
+            else
+              stats[child.model.name] = child.transition_stats
+            end
+            i+=1
+          end
           total = Hash.new(0)
           stats.values.each { |h| h.each { |k, v| total[k] += v }}
           stats[:TOTAL] = total
@@ -220,8 +232,8 @@ module DEVS
 
       if DEVS.logger
         info "*** Simulation ended at #{final_time} after #{elapsed_secs} secs."
-        debug "* Events stats : {"
-        stats.each { |k, v| debug "    #{k} => #{v}" }
+        debug "* Transition stats : {"
+        transition_stats.each { |k, v| debug "    #{k} => #{v}" }
         debug "* }"
         debug "* Running post simulation hook"
       end
