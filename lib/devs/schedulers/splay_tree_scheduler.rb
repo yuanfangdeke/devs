@@ -19,7 +19,7 @@ module DEVS
 
     def imminent(time)
       a = []
-      a << @tree.pop_min while @tree.size > 0 && @tree.find_min.time_next == time
+      a << @tree.pop while @tree.size > 0 && @tree.find_min.time_next == time
       a
     end
 

@@ -1,18 +1,22 @@
 module DEVS
   class SplayTree
     class Node
-      attr_accessor :value, :left, :right
-      def initialize(v, l=nil, r=nil)
+      attr_accessor :value, :left, :right, :parent
+      def initialize(v, l=nil, r=nil, p=nil)
         @value = v
         @left = l
         @right = r
+        @parent = p
+      end
+
+      def key
+        @value.time_next if @value
       end
     end
 
     attr_reader :size
 
     def initialize(elements = nil)
-      @header = Node.new(nil)
       @size = 0
       if elements
         i = 0
@@ -24,125 +28,180 @@ module DEVS
     end
 
     def empty?
-      @root == nil
+      @size == 0
     end
 
     def <<(obj)
-      @size += 1
-      if @root
-        splay(obj)
-        tn = obj.time_next
-        if tn == @root.value.time_next
-          @root.value = obj
+      z = @root
+      p = nil
+      tn = obj.time_next
+
+      while z
+        p = z
+        if z.key < tn
+          z = z.right
         else
-          n = Node.new(obj)
-          if tn < @root.value.time_next
-            n.left = @root.left
-            n.right = @root
-            @root.left = nil
-          else
-            n.right = @root.right
-            n.left = @root
-            @root.right = nil
-          end
-          @root = n
+          z = z.left
         end
-      else
-        @root = Node.new(obj)
       end
+
+      z = Node.new(obj)
+      z.parent = p
+
+      if p == nil
+        @root = z
+      elsif p.key < z.key
+        p.right = z
+      else
+        p.left = z
+      end
+
+      splay(z)
+      @size += 1
+    end
+    alias_method :push, :<<
+
+    def find(obj)
+      z = @root
+      tn = obj.time_next
+      while z
+        if z.key < tn
+          z = z.right
+        elsif tn < z.key
+          z = z.left
+        else
+          return z
+        end
+      end
+      nil
     end
 
     def delete(obj)
-      splay(obj)
-      tn = obj.time_next
+      z = obj.is_a?(Node) ? obj : find(obj)
+      return nil unless z
 
-      if tn != @root.value.time_next
-        raise "#{tn} not found in tree"
-      end
+      splay(z)
 
-      @size -= 1
-      unless @root.left
-        @root = @root.right
+      if z.left == nil
+        replace(z, z.right)
+      elsif z.right == nil
+        replace(z, z.left)
       else
-        x = @root.right
-        @root = @root.left
-        splay(obj)
-        @root.right = x
+        y = subtree_min(z.right)
+        if y.parent != z
+          replace(y, y.right)
+          y.right = z.right
+          y.right.parent = y
+        end
+        replace(z, y)
+        y.left = z.left
+        y.left.parent = y
       end
+      @size -= 1
+      z.value
     end
-
-    # def find_max
-    #   if @root
-    #     x = @root
-    #     x = x.right while x.right
-    #     splay(x.value)
-    #     x.value
-    #   else
-    #     nil
-    #   end
-    # end
 
     def find_min
-      if @root
-        x = @root
-        x = x.left while x.left
-        splay(x.value)
-        x.value
-      else
-        nil
-      end
+      return nil if @size == 0
+      subtree_min(@root).value
+    end
+    alias_method :peek, :find_min
+
+    def find_max
+      return nil if @size == 0
+      subtree_max(@root).value
     end
 
-    def pop_min
-      if @root
-        x = @root
-        x = x.left while x.left
-        delete(x.value)
-      else
-        nil
-      end
+    def pop
+      return nil if @size == 0
+      delete(subtree_min(@root))
     end
 
-    def splay(obj)
-      l = r = @header
-      t = @root
-      @header.left = @header.right = nil
-      tn = obj.time_next
+    private
 
-      while true
-        if tn < t.value.time_next
-          break unless t.left
-          if tn < t.left.value.time_next
-            y = t.left
-            t.left = y.right
-            y.right = t
-            t = y
-            break unless t.left
+    def left_rotate(x)
+      y = x.right
+      if y
+        x.right = y.left
+        y.left.parent = x if y.left
+        y.parent = x.parent
+      end
+
+      if x.parent == nil
+        @root = y
+      elsif x == x.parent.left
+        x.parent.left = y
+      else
+        x.parent.right = y
+      end
+
+      y.left = x if y
+      x.parent = y
+    end
+
+    def right_rotate(x)
+      y = x.left
+      if y
+        x.left = y.right
+        y.right.parent = x if y.right
+        y.parent = x.parent
+      end
+
+      if x.parent == nil
+        @root = y
+      elsif x == x.parent.left
+        x.parent.left = y
+      else
+        x.parent.right = y
+      end
+
+      y.right = x if y
+      x.parent = y
+    end
+
+    def splay(x)
+      while x.parent
+        if x.parent.parent == nil
+          if x.parent.left == x
+            right_rotate(x.parent)
+          else
+            left_rotate(x.parent)
           end
-          r.left = t
-          r = t
-          t = t.left
-        elsif tn > t.value.time_next
-          break unless t.right
-          if tn > t.right.value.time_next
-            y = t.right
-            t.right = y.left
-            y.left = t
-            t = y
-            break unless t.right
-          end
-          l.right = t
-          l = t
-          t = t.right
+        elsif x.parent.left == x && x.parent.parent.left == x.parent
+          right_rotate(x.parent.parent)
+          right_rotate(x.parent)
+        elsif x.parent.right == x && x.parent.parent.right == x.parent
+          left_rotate(x.parent.parent)
+          left_rotate(x.parent)
+        elsif x.parent.left == x && x.parent.parent.right == x.parent
+          right_rotate(x.parent)
+          left_rotate(x.parent)
         else
-          break
+          left_rotate(x.parent)
+          right_rotate(x.parent)
         end
-        l.right = t.left
-        r.left = t.right
-        t.left = @header.right
-        t.right = @header.left
-        @root = t
       end
+    end
+
+    def replace(u, v)
+      if u.parent == nil
+        @root = v
+      elsif u == u.parent.left
+        u.parent.left = v
+      else
+        u.parent.right = v
+      end
+      v.parent = u.parent if v
+    end
+
+    def subtree_min(u)
+      u = u.left while u.left
+      u
+    end
+
+    def subtree_max(u)
+      u = u.right while u.right
+      u
     end
   end
 end
