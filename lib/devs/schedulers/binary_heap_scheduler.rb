@@ -47,14 +47,20 @@ module DEVS
     private :index
 
     def cancel(processor)
-      i = @que.size - 1
+      tn = processor.time_next
       elmt = nil
-      while i >= 0
-        if @que[i] == processor
-          elmt = @que.delete_at(i)
-          break
+      if @que.last.time_next - @que.first.time_next == 0
+        i = @que.index(processor)
+        elmt = @que.delete_at(i) unless i == nil
+      else
+        i = binary_index(@que, processor)
+        while i >= 0 && @que[i].time_next == tn
+          if @que[i].equal?(processor)
+            elmt = @que.delete_at(i)
+            break
+          end
+          i -= 1
         end
-        i -= 1
       end
       elmt
     end
@@ -147,14 +153,9 @@ module DEVS
     def reheap(k)
       return self if size <= 1
 
-      que = @que.dup
-
-      v = que.delete_at(k)
-      i = binary_index(que, v)
-
-      que.insert(i, v)
-
-      @que = que
+      v = @que.delete_at(k)
+      i = binary_index(@que, v)
+      @que.insert(i, v)
 
       return self
     end
@@ -167,14 +168,12 @@ module DEVS
         idx  = lower + (upper - lower) / 2
         comp = que[idx].time_next <=> target.time_next
 
-        case comp
-        when 0, nil
+        if comp == 0
           return idx
-        when 1, true
+        elsif comp > 0
           lower = idx + 1
-        when -1, false
-          upper = idx - 1
         else
+          upper = idx - 1
         end
       end
       lower
