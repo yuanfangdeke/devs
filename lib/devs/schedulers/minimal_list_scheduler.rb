@@ -13,10 +13,12 @@ module DEVS
 
     def cancel(processor)
       index = @ary.index(processor)
+      elmt = nil
       unless index.nil?
-        @ary.delete_at(index)
+        elmt = @ary.delete_at(index)
         reschedule! if processor.time_next == @min
       end
+      elmt
     end
 
     def reschedule!
