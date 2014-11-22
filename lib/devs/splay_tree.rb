@@ -8,10 +8,6 @@ module DEVS
         @right = r
         @parent = p
       end
-
-      def key
-        @value.time_next if @value
-      end
     end
 
     attr_reader :size
@@ -38,7 +34,7 @@ module DEVS
 
       while z
         p = z
-        if z.key < tn
+        if z.value.time_next < tn
           z = z.right
         else
           z = z.left
@@ -50,7 +46,7 @@ module DEVS
 
       if p == nil
         @root = z
-      elsif p.key < z.key
+      elsif p.value.time_next < z.value.time_next
         p.right = z
       else
         p.left = z
@@ -65,9 +61,9 @@ module DEVS
       z = @root
       tn = obj.time_next
       while z
-        if z.key < tn
+        if z.value.time_next < tn
           z = z.right
-        elsif z.key > tn
+        elsif z.value.time_next > tn
           z = z.left
         else
           if z.value.equal?(obj)
