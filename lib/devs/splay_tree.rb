@@ -67,10 +67,14 @@ module DEVS
       while z
         if z.key < tn
           z = z.right
-        elsif tn < z.key
+        elsif z.key > tn
           z = z.left
         else
-          return z
+          if z.value.equal?(obj)
+            return z
+          else
+            return search_tree(obj)
+          end
         end
       end
       nil
@@ -118,6 +122,25 @@ module DEVS
     end
 
     private
+
+    def search_tree(obj)
+      ary = []
+      return @root if @root.value.equal?(obj)
+      ary << @root.left if @root.left
+      ary << @root.right if @root.right
+
+      i = 0
+      while i < ary.size
+        x = ary[i]
+        if x.value.equal?(obj)
+          return x
+        else
+          ary << x.left if x.left
+          ary << x.right if x.right
+        end
+        i += 1
+      end
+    end
 
     def left_rotate(x)
       y = x.right
