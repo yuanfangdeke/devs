@@ -71,7 +71,7 @@ module DEVS
 
     def direct_connect!
       rm = @model
-      folded = rm.children.dup
+      folded = rm.children
       unfolded = []
       sub_ic = []
       i = 0
@@ -95,7 +95,7 @@ module DEVS
       unfolded.each { |m| rm << m; rm.processor << m.processor }
       adjust_couplings!(rm, rm.internal_couplings + sub_ic)
 
-      rm.children.dup.each do |m|
+      rm.children.each do |m|
         if m.coupled?
           rm.remove_child(m)
           rm.processor.remove_child(m.processor)

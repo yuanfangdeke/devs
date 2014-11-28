@@ -28,13 +28,15 @@ module DEVS
     #
     # @param name [String, Symbol] the name of the model
     def initialize(name = nil)
-      @name = name.to_sym unless name.nil?
+      @name = name.to_sym unless name == nil
       @input_ports = []
       @output_ports = []
     end
 
     def name=(name)
-      @name = name.to_sym unless name.nil?
+      name = name.to_sym
+      @parent.rename_child(name, @name) if @parent && @name
+      @name = name
     end
 
     # Returns a boolean indicating if <tt>self</tt> is an atomic model

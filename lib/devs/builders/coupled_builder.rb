@@ -46,20 +46,16 @@ module DEVS
     end
 
     def plug_port(port, type, opts)
-      blk = Proc.new do |id|
-        child, child_port = id.split('@')
-
+      list = opts.has_key?(:with_children) ? opts[:with_children] : [opts[:with_child]]
+      i = 0
+      while i < list.size
+        child, child_port = list[i].split('@')
         if type == :input
           @model.add_external_input_coupling(child.to_sym, port.to_sym, child_port.to_sym)
         elsif type == :output
           @model.add_external_output_coupling(child.to_sym, port.to_sym, child_port.to_sym)
         end
-      end
-
-      if opts.has_key?(:with_children)
-        opts[:with_children].each { |id| blk.(id) }
-      else
-        blk.(opts[:with_child])
+        i+=1
       end
     end
     private :plug_port

@@ -8,10 +8,10 @@ module DEVS
       else
         klass.new(*args)
       end
+      @model.name = name if name
       parent.model << @model
       @processor = Simulator.new(@model)
       parent.processor << @processor
-      @model.name = name if name
       instance_eval(&block) if block
     end
 

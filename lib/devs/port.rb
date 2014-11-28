@@ -33,14 +33,12 @@ module DEVS
     # @raise [ArgumentError] if the specified type is unknown
     def initialize(host, type, name)
       type = type.downcase.to_sym unless type.nil?
-      if Port.types.include?(type)
-        @type = type
-      else
-        raise ArgumentError, "type attribute must be either of #{Port.types}"
+      if type != :input && type != :output
+        raise(ArgumentError, "type attribute must be either of #{Port.types}")
       end
+      @type = type
       @name = name.to_sym
       @host = host
-
       @outgoing = nil
     end
 
