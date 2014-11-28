@@ -51,8 +51,8 @@ module DEVS
     def initialize(name = nil)
       super(name)
       CoupledModel.counter += 1
-      @name = "#{self.class.name || 'Anonymous'}#{CoupledModel.counter}"
       @children = []
+      @name = "#{self.class.name || 'Anonymous'}#{CoupledModel.counter}" unless @name
       @internal_couplings = Hash.new { |h, k| h[k] = [] }
       @input_couplings = Hash.new { |h, k| h[k] = [] }
       @output_couplings = Hash.new { |h, k| h[k] = [] }

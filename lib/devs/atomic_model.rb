@@ -116,7 +116,7 @@ module DEVS
     def initialize(name = nil)
       super(name)
       AtomicModel.counter += 1
-      @name = "#{self.class.name || 'Anonymous'}#{AtomicModel.counter}"
+      @name = "#{self.class.name || 'Anonymous'}#{AtomicModel.counter}" unless @name
 
       @elapsed = 0.0
       @sigma = INFINITY
