@@ -51,8 +51,8 @@ module DEVS
     def initialize(name = nil)
       super(name)
       CoupledModel.counter += 1
-      @children = []
       @name = "#{self.class.name || 'Anonymous'}#{CoupledModel.counter}" unless @name
+      @children = {}
       @internal_couplings = Hash.new { |h, k| h[k] = [] }
       @input_couplings = Hash.new { |h, k| h[k] = [] }
       @output_couplings = Hash.new { |h, k| h[k] = [] }
@@ -116,7 +116,7 @@ module DEVS
     # @param child [Model] the new child
     # @return [Model] the added child
     def <<(child)
-      @children << child
+      @children[child.name] = child
       child.parent = self
       child
     end
@@ -127,16 +127,20 @@ module DEVS
     # @param child [Model] the child to remove
     # @return [Model] the deleted child
     def remove_child(child)
-      @children.delete(child)
+      @children.delete(child.name)
       child.parent = nil
       child
+    end
+
+    def rename_child(new_name, old_name)
+      @children[new_name] = @children.delete(old_name)
     end
 
     # Returns the children names
     #
     # @return [Array<String, Symbol>] the children names
     def children_names
-      @children.map { |child| child.name }
+      @children.keys
     end
 
     # Find the component {Model} identified by the given <tt>name</tt>
@@ -144,7 +148,7 @@ module DEVS
     # @param name [String, Symbol] the component name
     # @return [Model] the matching component, nil otherwise
     def [](name)
-      @children.find { |model| model.name == name.to_sym }
+      @children[name.to_sym]
     end
     alias_method :find_child_by_name, :[]
 
@@ -159,7 +163,7 @@ module DEVS
     #   @return [Enumerator<Model>]
     def each
       return @children.enum_for(:each) unless block_given?
-      @children.each { |child| yield(child) }
+      @children.each_value { |child| yield(child) }
     end
 
     # Calls <tt>block</tt> once for each external input coupling (EIC) in
@@ -225,7 +229,7 @@ module DEVS
 
         coupling = Coupling.new(input_port, child_port, :eic)
         ary = @input_couplings[input_port]
-        ary << coupling unless ary.include?(coupling)
+        ary << coupling #unless ary.include?(coupling)
       end
     end
     alias_method :add_external_input, :add_external_input_coupling
@@ -250,7 +254,7 @@ module DEVS
 
         coupling = Coupling.new(child_port, output_port, :eoc)
         ary = @output_couplings[child_port]
-        ary << coupling unless ary.include?(coupling)
+        ary << coupling #unless ary.include?(coupling)
       end
     end
     alias_method :add_external_output, :add_external_output_coupling
@@ -279,7 +283,7 @@ module DEVS
 
       coupling = Coupling.new(output_port, input_port, :ic)
       ary = @internal_couplings[output_port]
-      ary << coupling unless ary.include?(coupling)
+      ary << coupling #unless ary.include?(coupling)
     end
 
     # Deletes a coupling from {#couplings}.
@@ -356,9 +360,7 @@ module DEVS
     end
 
     def ensure_child(child)
-      if !child.is_a?(Model)
-        child = self[child]
-      end
+      child = self[child] unless child.is_a?(Model)
       raise NoSuchChildError, "the child argument cannot be nil" if child.nil?
       child
     end
