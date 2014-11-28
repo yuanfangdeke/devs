@@ -139,9 +139,9 @@ module DEVS
     # Returns the children names
     #
     # @return [Array<String, Symbol>] the children names
-    def children_names
-      @children.keys
-    end
+    def children_names; @children.keys; end
+
+    def children; @children.values; end
 
     # Find the component {Model} identified by the given <tt>name</tt>
     #
@@ -228,8 +228,7 @@ module DEVS
         child_port = child.find_or_create_input_port_if_necessary(child_port)
 
         coupling = Coupling.new(input_port, child_port, :eic)
-        ary = @input_couplings[input_port]
-        ary << coupling #unless ary.include?(coupling)
+        @input_couplings[input_port] << coupling
       end
     end
     alias_method :add_external_input, :add_external_input_coupling
@@ -253,8 +252,7 @@ module DEVS
         child_port = child.find_or_create_output_port_if_necessary(child_port)
 
         coupling = Coupling.new(child_port, output_port, :eoc)
-        ary = @output_couplings[child_port]
-        ary << coupling #unless ary.include?(coupling)
+        @output_couplings[child_port] << coupling
       end
     end
     alias_method :add_external_output, :add_external_output_coupling
@@ -282,8 +280,7 @@ module DEVS
       input_port = b.find_or_create_input_port_if_necessary(input_port)
 
       coupling = Coupling.new(output_port, input_port, :ic)
-      ary = @internal_couplings[output_port]
-      ary << coupling #unless ary.include?(coupling)
+      @internal_couplings[output_port] << coupling
     end
 
     # Deletes a coupling from {#couplings}.
