@@ -73,7 +73,9 @@ module DEVS
         couplings = []
         i = 0
         while i < ary.size
-          couplings << ary[i] if coupling.port_source == port
+          #couplings << ary[i] if coupling.port_source == port
+          #  the above "coupling" is not defined here.
+          couplings << ary[i] if ary[i].port_source == port
           i += 1
         end
         couplings
